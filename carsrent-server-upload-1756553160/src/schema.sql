@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS agencies (
   phone TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
 CREATE TABLE IF NOT EXISTS cars (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   agency_id INTEGER NOT NULL,
@@ -27,6 +28,7 @@ CREATE TABLE IF NOT EXISTS cars (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE CASCADE
 );
+
 CREATE TABLE IF NOT EXISTS availability (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   car_id INTEGER NOT NULL,
@@ -34,6 +36,8 @@ CREATE TABLE IF NOT EXISTS availability (
   end_date TEXT NOT NULL,
   FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
 );
+
+-- ⬇️ Email is now OPTIONAL (nullable); Phone is REQUIRED (NOT NULL)
 CREATE TABLE IF NOT EXISTS bookings (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   car_id INTEGER NOT NULL,
@@ -41,8 +45,8 @@ CREATE TABLE IF NOT EXISTS bookings (
   end_date TEXT NOT NULL,
   total_price REAL NOT NULL,
   customer_name TEXT NOT NULL,
-  customer_email TEXT NOT NULL,
-  customer_phone TEXT,
+  customer_email TEXT,             -- optional
+  customer_phone TEXT NOT NULL,    -- required
   status TEXT NOT NULL DEFAULT 'pending',
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
