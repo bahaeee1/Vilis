@@ -55,7 +55,7 @@ const CarSchema = z.object({
   seats: z.number().int().optional(),
   doors: z.number().int().optional(),
   trunk_liters: z.number().optional(),
-  fuel_type: z.string().optional(),
+  fuel_type: z.enum(['diesel','petrol','hybrid','electric']).optional(),
   options: z.string().optional(),
   daily_price: z.number().positive(),
   location: z.string().min(2),
