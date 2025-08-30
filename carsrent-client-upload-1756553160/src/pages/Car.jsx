@@ -11,13 +11,12 @@ export default function Car() {
   const { id } = useParams();
   const [car, setCar] = useState(null);
 
-  // dates are required again
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
   const [customer_name, setCustomerName] = useState('');
-  const [customer_email, setCustomerEmail] = useState('');
-  const [customer_phone, setCustomerPhone] = useState('');
+  const [customer_email, setCustomerEmail] = useState(''); // optional
+  const [customer_phone, setCustomerPhone] = useState(''); // REQUIRED
   const [msg, setMsg] = useState(null);
   const [err, setErr] = useState(null);
 
@@ -25,15 +24,21 @@ export default function Car() {
 
   const book = async () => {
     setErr(null); setMsg(null);
+    if (!customer_phone || customer_phone.trim().length < 6) {
+      setErr('Phone is required (min 6 chars).');
+      return;
+    }
     try {
-      const r = await createBooking({
+      const payload = {
         car_id: Number(id),
         start_date: startDate,
         end_date: endDate,
         customer_name,
-        customer_email,
         customer_phone
-      });
+      };
+      if (customer_email && customer_email.trim() !== '') payload.customer_email = customer_email;
+
+      const r = await createBooking(payload);
       setMsg(
         `Booking created. Contact ${r.agency_name || 'the agency'} at ${r.agency_phone || 'N/A'}.\n` +
         `Dates: ${startDate} → ${endDate}\n` +
@@ -79,8 +84,8 @@ export default function Car() {
       <h3>Your details</h3>
       <div className="row">
         <div className="col-4"><label>Name</label><input value={customer_name} onChange={e => setCustomerName(e.target.value)} /></div>
-        <div className="col-4"><label>Email</label><input value={customer_email} onChange={e => setCustomerEmail(e.target.value)} /></div>
-        <div className="col-4"><label>Phone (optional)</label><input value={customer_phone} onChange={e => setCustomerPhone(e.target.value)} /></div>
+        <div className="col-4"><label>Email (optional)</label><input value={customer_email} onChange={e => setCustomerEmail(e.target.value)} /></div>
+        <div className="col-4"><label>Phone *</label><input value={customer_phone} onChange={e => setCustomerPhone(e.target.value)} required /></div>
       </div>
       <div style={{ marginTop: 12 }}><button className="btn" onClick={book}>Book</button></div>
 
