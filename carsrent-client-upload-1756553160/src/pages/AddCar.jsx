@@ -12,7 +12,7 @@ export default function AddCar() {
     options: '', daily_price: '', location: '', image_url: '', description: ''
   });
   const [err, setErr] = useState(null);
-  const onChange = e => setForm({...form, [e.target.name]: e.target.value});
+  const onChange = e => setForm({ ...form, [e.target.name]: e.target.value });
 
   const onSubmit = async () => {
     setErr(null);
@@ -25,8 +25,9 @@ export default function AddCar() {
         trunk_liters: form.trunk_liters ? Number(form.trunk_liters) : undefined,
         daily_price: Number(form.daily_price)
       };
-      const car = await addCar(payload);
-      nav(`/agency/availability/${car.id}`);
+      await addCar(payload);
+      // go somewhere that exists (no availability page anymore)
+      nav('/agency/bookings');
     } catch (e) {
       const message = e?.error?.message || e?.error || e?.message || JSON.stringify(e);
       setErr(message);
