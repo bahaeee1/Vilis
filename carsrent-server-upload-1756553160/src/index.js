@@ -62,14 +62,14 @@ const CarSchema = z.object({
   image_url: z.string().url().optional(),
   description: z.string().optional()
 });
-// dates REQUIRED again (but we won't enforce availability)
+// ⬇️ Phone REQUIRED, Email OPTIONAL
 const BookingSchema = z.object({
   car_id: z.number().int().positive(),
   start_date: z.string(),
   end_date: z.string(),
   customer_name: z.string().min(2),
-  customer_email: z.string().email(),
-  customer_phone: z.string().optional()
+  customer_email: z.string().email().optional(),
+  customer_phone: z.string().min(6)
 }).refine(d => isISO(d.start_date) && isISO(d.end_date) && datesOK(d.start_date, d.end_date), {
   message: 'Invalid date range'
 });
@@ -143,7 +143,7 @@ app.post('/api/cars', auth, (req,res)=>{
   res.status(201).json(selectCarById.get(info.lastInsertRowid));
 });
 
-// (Optional: keep availability endpoints; they are not used by booking now)
+// (Availability endpoints can remain; booking won't enforce them)
 app.post('/api/cars/:id/availability', auth, (req,res)=>{
   const id = Number(req.params.id);
   const car = selectCarById.get(id);
@@ -187,7 +187,7 @@ app.get('/api/cars', (req,res)=>{
   res.json(db.prepare(sql).all(...params));
 });
 
-// --------- BOOKINGS: accept dates but DO NOT check availability ----------
+// --------- BOOKINGS (email optional, phone required; no availability checks) ----------
 app.post('/api/bookings', (req,res)=>{
   const p = BookingSchema.safeParse(req.body);
   if(!p.success) return res.status(400).json({ error: p.error.flatten() });
@@ -204,7 +204,7 @@ app.post('/api/bookings', (req,res)=>{
 
   const info = insertBooking.run(
     car_id, start_date, end_date, total_price,
-    customer_name, customer_email, customer_phone || null
+    customer_name, (customer_email || null), customer_phone
   );
 
   const contact = db.prepare(`
