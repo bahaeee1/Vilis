@@ -6,7 +6,6 @@ import Car from './pages/Car.jsx';
 import AgencyRegister from './pages/AgencyRegister.jsx';
 import AgencyLogin from './pages/AgencyLogin.jsx';
 import AddCar from './pages/AddCar.jsx';
-import AddAvailability from './pages/AddAvailability.jsx';
 import Bookings from './pages/Bookings.jsx';
 import { getToken, clearToken } from './api.js';
 
@@ -31,13 +30,12 @@ function Shell({ children }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div className="brand">Car Rental (MVP)</div>
           <nav>
-            <NavLink to="/">Search</NavLink>
-            {' '}
+            <NavLink to="/">Search</NavLink>{' '}
             {hasToken ? (
               <>
                 <NavLink to="/agency/add-car">Add Car</NavLink>{' '}
                 <NavLink to="/agency/bookings">Bookings</NavLink>{' '}
-                <button className="btn secondary" onClick={logout} style={{ marginLeft: 8 }}>Logout</button>
+                <button className="btn" onClick={logout} style={{ marginLeft: 8 }}>Logout</button>
               </>
             ) : (
               <>
@@ -62,7 +60,6 @@ createRoot(document.getElementById('root')).render(
         <Route path="/agency/register" element={<AgencyRegister />} />
         <Route path="/agency/login" element={<AgencyLogin />} />
         <Route path="/agency/add-car" element={<AddCar />} />
-        <Route path="/agency/availability/:id" element={<AddAvailability />} />
         <Route path="/agency/bookings" element={<Bookings />} />
       </Routes>
     </Shell>
