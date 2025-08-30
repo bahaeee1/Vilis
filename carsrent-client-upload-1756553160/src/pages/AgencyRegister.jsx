@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerAgency, setToken } from '../api.js';
+import { MOROCCAN_CITIES } from '../constants.js';
 
 export default function AgencyRegister() {
   const [name, setName] = useState('');
@@ -16,7 +17,7 @@ export default function AgencyRegister() {
     try {
       const res = await registerAgency({ name, email, password, location, phone });
       setToken(res.token);         // auto-login
-      nav('/agency/add-car');      // go to add car
+      nav('/agency/add-car');      // next step
     } catch (e) {
       const message = e?.error?.message || e?.error || e?.message || JSON.stringify(e);
       setErr(message);
@@ -28,7 +29,13 @@ export default function AgencyRegister() {
       <h2>Agency Register</h2>
       <div className="row">
         <div className="col-6"><label>Name</label><input value={name} onChange={e=>setName(e.target.value)} /></div>
-        <div className="col-6"><label>Location</label><input value={location} onChange={e=>setLocation(e.target.value)} /></div>
+        <div className="col-6">
+          <label>Location</label>
+          <select value={location} onChange={e=>setLocation(e.target.value)}>
+            <option value="">Select city…</option>
+            {MOROCCAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
       </div>
       <div className="row">
         <div className="col-6"><label>Email</label><input value={email} onChange={e=>setEmail(e.target.value)} /></div>
