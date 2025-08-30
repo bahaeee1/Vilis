@@ -1,44 +1,50 @@
+import React, { useState } from 'react';
+import { searchCars } from '../api.js';
+import { useNavigate } from 'react-router-dom';
+import { MOROCCAN_CITIES } from '../constants.js';
 
-import React, { useState } from 'react'
-import { searchCars } from '../api.js'
-import { useNavigate } from 'react-router-dom'
-
-function SpecsLine({c}){
-  const tags = []
-  if (c.year) tags.push(c.year)
-  if (c.transmission) tags.push(c.transmission)
-  if (c.seats) tags.push(c.seats + ' seats')
-  if (c.doors) tags.push(c.doors + ' doors')
-  if (c.trunk_liters) tags.push(c.trunk_liters + 'L trunk')
-  if (c.fuel_type) tags.push(c.fuel_type)
-  return <div className="muted">{tags.join(' · ')}</div>
+function SpecsLine({ c }) {
+  const tags = [];
+  if (c.year) tags.push(c.year);
+  if (c.transmission) tags.push(c.transmission);
+  if (c.seats) tags.push(c.seats + ' seats');
+  if (c.doors) tags.push(c.doors + ' doors');
+  if (c.trunk_liters) tags.push(c.trunk_liters + 'L trunk');
+  if (c.fuel_type) tags.push(c.fuel_type);
+  return <div className="muted">{tags.join(' · ')}</div>;
 }
 
-export default function Search(){
-  const [location,setLocation] = useState('')
-  const [minPrice,setMinPrice] = useState('')
-  const [maxPrice,setMaxPrice] = useState('')
-  const [startDate,setStartDate] = useState('')
-  const [endDate,setEndDate] = useState('')
-  const [cars,setCars] = useState([])
-  const [error,setError] = useState(null)
-  const nav = useNavigate()
+export default function Search() {
+  const [location, setLocation] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [cars, setCars] = useState([]);
+  const [error, setError] = useState(null);
+  const nav = useNavigate();
 
   const run = async () => {
-    setError(null)
-    try { setCars(await searchCars({ location, minPrice, maxPrice, startDate, endDate })) }
-    catch(e){ setError(e.error || 'Search failed') }
-  }
+    setError(null);
+    const q = {};
+    if (location) q.location = location;
+    if (minPrice) q.minPrice = minPrice;
+    if (maxPrice) q.maxPrice = maxPrice;
+    try { setCars(await searchCars(q)); }
+    catch (e) { setError(e.error || 'Search failed'); }
+  };
 
   return (
     <div className="card">
       <h2>Find a car</h2>
       <div className="row">
-        <div className="col-4"><label>Location</label><input value={location} onChange={e=>setLocation(e.target.value)} /></div>
+        <div className="col-4">
+          <label>Location</label>
+          <select value={location} onChange={(e)=>setLocation(e.target.value)}>
+            <option value="">Anywhere</option>
+            {MOROCCAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
         <div className="col-2"><label>Min/day</label><input type="number" value={minPrice} onChange={e=>setMinPrice(e.target.value)} /></div>
         <div className="col-2"><label>Max/day</label><input type="number" value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} /></div>
-        <div className="col-2"><label>Start</label><input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)} /></div>
-        <div className="col-2"><label>End</label><input type="date" value={endDate} onChange={e=>setEndDate(e.target.value)} /></div>
       </div>
       <div style={{marginTop:12}}><button className="btn" onClick={run}>Search</button></div>
       {error && <div className="error" style={{marginTop:8}}>{String(error)}</div>}
@@ -58,5 +64,5 @@ export default function Search(){
         ))}
       </div>
     </div>
-  )
+  );
 }
