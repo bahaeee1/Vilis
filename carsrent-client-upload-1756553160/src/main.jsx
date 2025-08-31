@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
+
+import './theme.css'; // ⬅️ new modern theme
+
 import Search from './pages/Search.jsx';
 import Car from './pages/Car.jsx';
 import AgencyRegister from './pages/AgencyRegister.jsx';
@@ -27,7 +30,7 @@ function Shell({ children }) {
     <>
       <header>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div className="brand">Car Rental (MVP)</div>
+          <div className="brand">Vilis</div>
           <nav>
             <NavLink to="/">Search</NavLink>{' '}
             {hasToken ? (
@@ -35,7 +38,7 @@ function Shell({ children }) {
                 <NavLink to="/agency/my-cars">My Cars</NavLink>{' '}
                 <NavLink to="/agency/add-car">Add Car</NavLink>{' '}
                 <NavLink to="/agency/bookings">Bookings</NavLink>{' '}
-                <button className="btn" onClick={logout} style={{ marginLeft: 8 }}>Logout</button>
+                <button className="btn" onClick={logout}>Logout</button>
               </>
             ) : (
               <>
