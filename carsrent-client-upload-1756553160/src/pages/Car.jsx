@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCar, createBooking } from '../api.js';
+import { useI18n } from '../i18n.js';
 
 function Spec({ label, value }) {
   if (value === null || value === undefined || value === '') return null;
@@ -10,6 +11,7 @@ function Spec({ label, value }) {
 export default function Car() {
   const { id } = useParams();
   const nav = useNavigate();
+  const { t } = useI18n();
   const [car, setCar] = useState(null);
 
   const [startDate, setStartDate] = useState('');
@@ -51,7 +53,7 @@ export default function Car() {
     }
   };
 
-  if (!car) return <div className="card">Loading car...</div>;
+  if (!car) return <div className="card">{t('car.loading')}</div>;
 
   const agencyId = car.agency_id ?? car.agencyId;
 
@@ -61,25 +63,25 @@ export default function Car() {
       <img style={{ width:'100%', maxHeight:360, objectFit:'cover', borderRadius:12 }}
            src={car.image_url || `https://picsum.photos/seed/${car.id}/1200/600`} alt={car.title} />
       <p className="muted">{car.brand} {car.model} · {car.location}</p>
-      <p><b>{car.daily_price} / day</b></p>
+      <p><b>{car.daily_price}{t('car.price_per_day')}</b></p>
 
-      <h3>Agency contact</h3>
+      <h3>{t('car.agency_contact')}</h3>
       <p>
         <span
           style={{ textDecoration: 'underline', cursor: 'pointer' }}
           onClick={() => nav('/agency/' + agencyId)}
-          title="View this agency's catalog"
+          title={t('car.view_agency_catalog')}
         >
           <b>{car.agency_name || 'Agency'}</b>
         </span>
         <br/>
-        Tel: <a href={`tel:${car.agency_phone || ''}`}>{car.agency_phone || '—'}</a>
+        {t('tel')}: <a href={`tel:${car.agency_phone || ''}`}>{car.agency_phone || '—'}</a>
       </p>
       <button className="btn secondary" onClick={() => nav('/agency/' + agencyId)}>
-        View agency catalog
+        {t('car.view_agency_catalog')}
       </button>
 
-      <h3 style={{marginTop:16}}>Specifications</h3>
+      <h3 style={{marginTop:16}}>{t('car.specs')}</h3>
       <ul className="specs">
         <Spec label="Year" value={car.year} />
         <Spec label="Transmission" value={car.transmission} />
@@ -90,19 +92,19 @@ export default function Car() {
       </ul>
       {car.options && <p className="muted">Options: {car.options}</p>}
 
-      <h3>Choose your dates</h3>
+      <h3>{t('car.choose_dates')}</h3>
       <div className="row">
-        <div className="col-3"><label>Start</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} /></div>
-        <div className="col-3"><label>End</label><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} /></div>
+        <div className="col-3"><label>{t('car.start')}</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} /></div>
+        <div className="col-3"><label>{t('car.end')}</label><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} /></div>
       </div>
 
-      <h3>Your details</h3>
+      <h3>{t('car.your_details')}</h3>
       <div className="row">
-        <div className="col-4"><label>Name</label><input value={customer_name} onChange={e => setCustomerName(e.target.value)} /></div>
-        <div className="col-4"><label>Email (optional)</label><input value={customer_email} onChange={e => setCustomerEmail(e.target.value)} /></div>
-        <div className="col-4"><label>Phone *</label><input value={customer_phone} onChange={e => setCustomerPhone(e.target.value)} required /></div>
+        <div className="col-4"><label>{t('car.name')}</label><input value={customer_name} onChange={e => setCustomerName(e.target.value)} /></div>
+        <div className="col-4"><label>{t('car.email_optional')}</label><input value={customer_email} onChange={e => setCustomerEmail(e.target.value)} /></div>
+        <div className="col-4"><label>{t('car.phone_required')}</label><input value={customer_phone} onChange={e => setCustomerPhone(e.target.value)} required /></div>
       </div>
-      <div style={{ marginTop: 12 }}><button className="btn" onClick={book}>Book</button></div>
+      <div style={{ marginTop: 12 }}><button className="btn" onClick={book}>{t('car.book')}</button></div>
 
       {msg && <div className="success" style={{ marginTop: 8, whiteSpace: 'pre-line' }}>{msg}</div>}
       {err && <div className="error" style={{ marginTop: 8 }}>{String(err)}</div>}
