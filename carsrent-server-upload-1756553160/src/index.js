@@ -55,6 +55,7 @@ const CarSchema = z.object({
   seats: z.number().int().optional(),
   doors: z.number().int().optional(),
   trunk_liters: z.number().optional(),
+  // only the 4 fuel values
   fuel_type: z.enum(['diesel','petrol','hybrid','electric']).optional(),
   options: z.string().optional(),
   daily_price: z.number().positive(),
@@ -62,7 +63,7 @@ const CarSchema = z.object({
   image_url: z.string().url().optional(),
   description: z.string().optional()
 });
-// ⬇️ Phone REQUIRED, Email OPTIONAL
+// Phone REQUIRED, Email OPTIONAL; dates kept; no availability check later
 const BookingSchema = z.object({
   car_id: z.number().int().positive(),
   start_date: z.string(),
@@ -77,6 +78,7 @@ const BookingSchema = z.object({
 // ------- statements -------
 const insertAgency = db.prepare(`INSERT INTO agencies (name,email,password_hash,location,phone) VALUES (?,?,?,?,?)`);
 const getAgencyByEmail = db.prepare(`SELECT * FROM agencies WHERE email = ?`);
+const selectAgencyPublic = db.prepare(`SELECT id,name,location,phone,email FROM agencies WHERE id = ?`);
 
 const insertCar = db.prepare(`
   INSERT INTO cars (agency_id,title,brand,model,year,transmission,seats,doors,trunk_liters,fuel_type,options,daily_price,location,image_url,description)
@@ -87,6 +89,9 @@ const selectCarWithAgency = db.prepare(`
   SELECT c.*, ag.name AS agency_name, ag.phone AS agency_phone
   FROM cars c JOIN agencies ag ON ag.id = c.agency_id
   WHERE c.id = ?
+`);
+const selectCarsByAgency = db.prepare(`
+  SELECT * FROM cars WHERE agency_id = ? ORDER BY created_at DESC
 `);
 
 const insertAvail = db.prepare(`INSERT INTO availability (car_id,start_date,end_date) VALUES (?,?,?)`);
@@ -137,10 +142,25 @@ app.post('/api/cars', auth, (req,res)=>{
   const info = insertCar.run(
     req.user.id,
     d.title, d.brand || null, d.model || null,
-    d.year || null, d.transmission || null, d.seats || null, d.doors || null, d.trunk_liters || null, d.fuel_type || null, d.options || null,
+    d.year || null, d.transmission || null, d.seats || null, d.doors || null, d.trunk_liters || null,
+    d.fuel_type || null, d.options || null,
     d.daily_price, d.location, d.image_url || null, d.description || null
   );
   res.status(201).json(selectCarById.get(info.lastInsertRowid));
+});
+
+// Agency stock (private)
+app.get('/api/agency/me/cars', auth, (req,res)=>{
+  res.json(selectCarsByAgency.all(req.user.id));
+});
+
+// Public agency catalog
+app.get('/api/agency/:id/cars', (req,res)=>{
+  const id = Number(req.params.id);
+  const agency = selectAgencyPublic.get(id);
+  if(!agency) return res.status(404).json({ error:'Agency not found' });
+  const cars = selectCarsByAgency.all(id);
+  res.json({ agency, cars });
 });
 
 // (Availability endpoints can remain; booking won't enforce them)
