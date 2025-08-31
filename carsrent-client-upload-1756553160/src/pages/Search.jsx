@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { searchCars } from '../api.js';
 import { useNavigate } from 'react-router-dom';
 import { MOROCCAN_CITIES } from '../constants.js';
+import { useI18n } from '../i18n.js';
 
 function SpecsLine({ c }) {
   const tags = [];
@@ -15,6 +16,7 @@ function SpecsLine({ c }) {
 }
 
 export default function Search() {
+  const { t } = useI18n();
   const [location, setLocation] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
@@ -34,19 +36,19 @@ export default function Search() {
 
   return (
     <div className="card">
-      <h2>Find a car</h2>
+      <h2>{t('search.title')}</h2>
       <div className="row">
         <div className="col-4">
-          <label>Location</label>
+          <label>{t('filter.location')}</label>
           <select value={location} onChange={(e)=>setLocation(e.target.value)}>
-            <option value="">Anywhere</option>
+            <option value="">{t('filter.anywhere')}</option>
             {MOROCCAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
-        <div className="col-2"><label>Min/day</label><input type="number" value={minPrice} onChange={e=>setMinPrice(e.target.value)} /></div>
-        <div className="col-2"><label>Max/day</label><input type="number" value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} /></div>
+        <div className="col-2"><label>{t('filter.min_per_day')}</label><input type="number" value={minPrice} onChange={e=>setMinPrice(e.target.value)} /></div>
+        <div className="col-2"><label>{t('filter.max_per_day')}</label><input type="number" value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} /></div>
       </div>
-      <div style={{marginTop:12}}><button className="btn" onClick={run}>Search</button></div>
+      <div style={{marginTop:12}}><button className="btn" onClick={run}>{t('btn.search')}</button></div>
       {error && <div className="error" style={{marginTop:8}}>{String(error)}</div>}
       <div className="grid" style={{marginTop:16}}>
         {cars.map(c => (
@@ -54,28 +56,24 @@ export default function Search() {
             <img src={c.image_url || 'https://picsum.photos/seed/'+c.id+'/600/400'} alt={c.title} />
             <div className="body">
               <div style={{fontWeight:700}}>{c.title}</div>
-
-              {/* Agency line: name is clickable -> agency catalog */}
               <div className="muted">
-                Agency:{' '}
+                {t('agency')}: {' '}
                 <span
                   style={{ textDecoration: 'underline', cursor: 'pointer' }}
                   onClick={() => nav('/agency/' + (c.agency_id ?? c.agencyId))}
-                  title="View this agency's catalog"
+                  title={t('btn.agency_catalog')}
                 >
                   <b>{c.agency_name || '—'}</b>
                 </span>
-                {' · Tel: '}<b>{c.agency_phone || '—'}</b>
+                {' · '}{t('tel')}: <b>{c.agency_phone || '—'}</b>
               </div>
-
               <SpecsLine c={c} />
-              <div style={{margin:'6px 0'}}><b>{c.daily_price} / day</b> · {c.location}</div>
-
+              <div style={{margin:'6px 0'}}><b>{c.daily_price}{t('car.price_per_day')}</b> · {c.location}</div>
               <div style={{display:'flex', gap:8, marginTop:8}}>
-                <button className="btn" onClick={()=>nav('/car/'+c.id)}>View</button>
+                <button className="btn" onClick={()=>nav('/car/'+c.id)}>{t('btn.view')}</button>
                 {(c.agency_id ?? c.agencyId) && (
                   <button className="btn secondary" onClick={()=>nav('/agency/'+(c.agency_id ?? c.agencyId))}>
-                    Agency catalog
+                    {t('btn.agency_catalog')}
                   </button>
                 )}
               </div>
