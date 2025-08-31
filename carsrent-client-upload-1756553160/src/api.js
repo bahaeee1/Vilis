@@ -23,12 +23,14 @@ export async function getCar(id) {
   if (!r.ok) await throwNiceError(r);
   return r.json();
 }
+export async function getAgencyCatalog(agencyId) {
+  const r = await fetch(`${API_BASE}/api/agency/${agencyId}/cars`);
+  if (!r.ok) await throwNiceError(r);
+  return r.json(); // { agency, cars }
+}
 export async function createBooking(payload) {
-  // payload: { car_id, start_date, end_date, customer_name, customer_email, customer_phone? }
   const r = await fetch(`${API_BASE}/api/bookings`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
   });
   if (!r.ok) await throwNiceError(r);
   return r.json();
@@ -37,18 +39,14 @@ export async function createBooking(payload) {
 // ---- agency auth ----
 export async function registerAgency(payload) {
   const r = await fetch(`${API_BASE}/api/agency/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
   });
   if (!r.ok) await throwNiceError(r);
   return r.json();
 }
 export async function loginAgency(payload) {
   const r = await fetch(`${API_BASE}/api/agency/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
   });
   if (!r.ok) await throwNiceError(r);
   return r.json();
@@ -57,17 +55,18 @@ export async function loginAgency(payload) {
 // ---- agency actions (need token) ----
 export async function addCar(payload) {
   const r = await fetch(`${API_BASE}/api/cars`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body: JSON.stringify(payload)
+    method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify(payload)
   });
   if (!r.ok) await throwNiceError(r);
   return r.json();
 }
 export async function getMyBookings() {
-  const r = await fetch(`${API_BASE}/api/agency/me/bookings`, {
-    headers: { ...authHeaders() }
-  });
+  const r = await fetch(`${API_BASE}/api/agency/me/bookings`, { headers: { ...authHeaders() } });
+  if (!r.ok) await throwNiceError(r);
+  return r.json();
+}
+export async function getMyCars() {
+  const r = await fetch(`${API_BASE}/api/agency/me/cars`, { headers: { ...authHeaders() } });
   if (!r.ok) await throwNiceError(r);
   return r.json();
 }
