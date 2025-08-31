@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 
 import './theme.css';
-import { I18nProvider, useI18n } from './i18n.js';
+import { I18nProvider, useI18n } from './i18n.jsx';
 
 import Search from './pages/Search.jsx';
 import Car from './pages/Car.jsx';
