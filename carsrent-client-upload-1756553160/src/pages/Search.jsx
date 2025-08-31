@@ -54,15 +54,29 @@ export default function Search() {
             <img src={c.image_url || 'https://picsum.photos/seed/'+c.id+'/600/400'} alt={c.title} />
             <div className="body">
               <div style={{fontWeight:700}}>{c.title}</div>
+
+              {/* Agency line: name is clickable -> agency catalog */}
               <div className="muted">
-                Agency: <b>{c.agency_name || '—'}</b> · Tel: <b>{c.agency_phone || '—'}</b>
+                Agency:{' '}
+                <span
+                  style={{ textDecoration: 'underline', cursor: 'pointer' }}
+                  onClick={() => nav('/agency/' + (c.agency_id ?? c.agencyId))}
+                  title="View this agency's catalog"
+                >
+                  <b>{c.agency_name || '—'}</b>
+                </span>
+                {' · Tel: '}<b>{c.agency_phone || '—'}</b>
               </div>
+
               <SpecsLine c={c} />
               <div style={{margin:'6px 0'}}><b>{c.daily_price} / day</b> · {c.location}</div>
+
               <div style={{display:'flex', gap:8, marginTop:8}}>
                 <button className="btn" onClick={()=>nav('/car/'+c.id)}>View</button>
-                {c.agency_id && (
-                  <button className="btn secondary" onClick={()=>nav('/agency/'+c.agency_id)}>Agency catalog</button>
+                {(c.agency_id ?? c.agencyId) && (
+                  <button className="btn secondary" onClick={()=>nav('/agency/'+(c.agency_id ?? c.agencyId))}>
+                    Agency catalog
+                  </button>
                 )}
               </div>
             </div>
