@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getCar, createBooking } from '../api.js';
 
 function Spec({ label, value }) {
@@ -9,6 +9,7 @@ function Spec({ label, value }) {
 
 export default function Car() {
   const { id } = useParams();
+  const nav = useNavigate();
   const [car, setCar] = useState(null);
 
   const [startDate, setStartDate] = useState('');
@@ -16,7 +17,7 @@ export default function Car() {
 
   const [customer_name, setCustomerName] = useState('');
   const [customer_email, setCustomerEmail] = useState(''); // optional
-  const [customer_phone, setCustomerPhone] = useState(''); // REQUIRED
+  const [customer_phone, setCustomerPhone] = useState(''); // required
   const [msg, setMsg] = useState(null);
   const [err, setErr] = useState(null);
 
@@ -52,6 +53,8 @@ export default function Car() {
 
   if (!car) return <div className="card">Loading car...</div>;
 
+  const agencyId = car.agency_id ?? car.agencyId;
+
   return (
     <div className="card">
       <h2>{car.title}</h2>
@@ -61,10 +64,22 @@ export default function Car() {
       <p><b>{car.daily_price} / day</b></p>
 
       <h3>Agency contact</h3>
-      <p><b>{car.agency_name || 'Agency'}</b><br/>
-         Tel: <a href={`tel:${car.agency_phone || ''}`}>{car.agency_phone || '—'}</a></p>
+      <p>
+        <span
+          style={{ textDecoration: 'underline', cursor: 'pointer' }}
+          onClick={() => nav('/agency/' + agencyId)}
+          title="View this agency's catalog"
+        >
+          <b>{car.agency_name || 'Agency'}</b>
+        </span>
+        <br/>
+        Tel: <a href={`tel:${car.agency_phone || ''}`}>{car.agency_phone || '—'}</a>
+      </p>
+      <button className="btn secondary" onClick={() => nav('/agency/' + agencyId)}>
+        View agency catalog
+      </button>
 
-      <h3>Specifications</h3>
+      <h3 style={{marginTop:16}}>Specifications</h3>
       <ul className="specs">
         <Spec label="Year" value={car.year} />
         <Spec label="Transmission" value={car.transmission} />
