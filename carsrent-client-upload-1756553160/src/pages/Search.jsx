@@ -54,11 +54,17 @@ export default function Search() {
             <img src={c.image_url || 'https://picsum.photos/seed/'+c.id+'/600/400'} alt={c.title} />
             <div className="body">
               <div style={{fontWeight:700}}>{c.title}</div>
-              <div className="muted">Agency: <b>{c.agency_name || '—'}</b></div>
-              <div className="muted">Tel: <b>{c.agency_phone || '—'}</b></div>
+              <div className="muted">
+                Agency: <b>{c.agency_name || '—'}</b> · Tel: <b>{c.agency_phone || '—'}</b>
+              </div>
               <SpecsLine c={c} />
               <div style={{margin:'6px 0'}}><b>{c.daily_price} / day</b> · {c.location}</div>
-              <button className="btn" style={{marginTop:8}} onClick={()=>nav('/car/'+c.id)}>View</button>
+              <div style={{display:'flex', gap:8, marginTop:8}}>
+                <button className="btn" onClick={()=>nav('/car/'+c.id)}>View</button>
+                {c.agency_id && (
+                  <button className="btn secondary" onClick={()=>nav('/agency/'+c.agency_id)}>Agency catalog</button>
+                )}
+              </div>
             </div>
           </div>
         ))}
