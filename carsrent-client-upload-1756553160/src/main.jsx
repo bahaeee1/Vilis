@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 
-import './theme.css'; // ⬅️ new modern theme
+import './theme.css';
+import { I18nProvider, useI18n } from './i18n.js';
 
 import Search from './pages/Search.jsx';
 import Car from './pages/Car.jsx';
@@ -14,9 +15,28 @@ import AgencyCars from './pages/AgencyCars.jsx';
 import AgencyCatalog from './pages/AgencyCatalog.jsx';
 import { getToken, clearToken } from './api.js';
 
+function LangSwitch() {
+  const { lang, setLang } = useI18n();
+  return (
+    <select
+      value={lang}
+      onChange={(e)=>setLang(e.target.value)}
+      style={{
+        background: '#0f1420', color: 'var(--text)', border: '1px solid #2a3146',
+        borderRadius: 10, padding: '8px 10px', marginLeft: 10
+      }}
+      aria-label="Language"
+    >
+      <option value="en">EN</option>
+      <option value="fr">FR</option>
+    </select>
+  );
+}
+
 function Shell({ children }) {
   const [hasToken, setHasToken] = useState(!!getToken());
   const nav = useNavigate();
+  const { t } = useI18n();
 
   useEffect(() => {
     const onUpdate = () => setHasToken(!!getToken());
@@ -30,22 +50,23 @@ function Shell({ children }) {
     <>
       <header>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div className="brand">Vilis</div>
+          <div className="brand">{t('brand')}</div>
           <nav>
-            <NavLink to="/">Search</NavLink>{' '}
+            <NavLink to="/">{t('nav.search')}</NavLink>{' '}
             {hasToken ? (
               <>
-                <NavLink to="/agency/my-cars">My Cars</NavLink>{' '}
-                <NavLink to="/agency/add-car">Add Car</NavLink>{' '}
-                <NavLink to="/agency/bookings">Bookings</NavLink>{' '}
-                <button className="btn" onClick={logout}>Logout</button>
+                <NavLink to="/agency/my-cars">{t('nav.my_cars')}</NavLink>{' '}
+                <NavLink to="/agency/add-car">{t('nav.add_car')}</NavLink>{' '}
+                <NavLink to="/agency/bookings">{t('nav.bookings')}</NavLink>{' '}
+                <button className="btn" onClick={logout}>{t('nav.logout')}</button>
               </>
             ) : (
               <>
-                <NavLink to="/agency/register">Register</NavLink>{' '}
-                <NavLink to="/agency/login">Login</NavLink>
+                <NavLink to="/agency/register">{t('nav.register')}</NavLink>{' '}
+                <NavLink to="/agency/login">{t('nav.login')}</NavLink>
               </>
             )}
+            <LangSwitch />
           </nav>
         </div>
       </header>
@@ -55,18 +76,20 @@ function Shell({ children }) {
 }
 
 createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
-    <Shell>
-      <Routes>
-        <Route path="/" element={<Search />} />
-        <Route path="/car/:id" element={<Car />} />
-        <Route path="/agency/register" element={<AgencyRegister />} />
-        <Route path="/agency/login" element={<AgencyLogin />} />
-        <Route path="/agency/add-car" element={<AddCar />} />
-        <Route path="/agency/bookings" element={<Bookings />} />
-        <Route path="/agency/my-cars" element={<AgencyCars />} />
-        <Route path="/agency/:id" element={<AgencyCatalog />} />
-      </Routes>
-    </Shell>
-  </BrowserRouter>
+  <I18nProvider>
+    <BrowserRouter>
+      <Shell>
+        <Routes>
+          <Route path="/" element={<Search />} />
+          <Route path="/car/:id" element={<Car />} />
+          <Route path="/agency/register" element={<AgencyRegister />} />
+          <Route path="/agency/login" element={<AgencyLogin />} />
+          <Route path="/agency/add-car" element={<AddCar />} />
+          <Route path="/agency/bookings" element={<Bookings />} />
+          <Route path="/agency/my-cars" element={<AgencyCars />} />
+          <Route path="/agency/:id" element={<AgencyCatalog />} />
+        </Routes>
+      </Shell>
+    </BrowserRouter>
+  </I18nProvider>
 );
