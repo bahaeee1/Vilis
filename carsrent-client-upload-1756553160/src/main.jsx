@@ -7,6 +7,8 @@ import AgencyRegister from './pages/AgencyRegister.jsx';
 import AgencyLogin from './pages/AgencyLogin.jsx';
 import AddCar from './pages/AddCar.jsx';
 import Bookings from './pages/Bookings.jsx';
+import AgencyCars from './pages/AgencyCars.jsx';
+import AgencyCatalog from './pages/AgencyCatalog.jsx';
 import { getToken, clearToken } from './api.js';
 
 function Shell({ children }) {
@@ -19,10 +21,7 @@ function Shell({ children }) {
     return () => window.removeEventListener('tokenUpdated', onUpdate);
   }, []);
 
-  const logout = () => {
-    clearToken();
-    nav('/');
-  };
+  const logout = () => { clearToken(); nav('/'); };
 
   return (
     <>
@@ -33,6 +32,7 @@ function Shell({ children }) {
             <NavLink to="/">Search</NavLink>{' '}
             {hasToken ? (
               <>
+                <NavLink to="/agency/my-cars">My Cars</NavLink>{' '}
                 <NavLink to="/agency/add-car">Add Car</NavLink>{' '}
                 <NavLink to="/agency/bookings">Bookings</NavLink>{' '}
                 <button className="btn" onClick={logout} style={{ marginLeft: 8 }}>Logout</button>
@@ -61,6 +61,8 @@ createRoot(document.getElementById('root')).render(
         <Route path="/agency/login" element={<AgencyLogin />} />
         <Route path="/agency/add-car" element={<AddCar />} />
         <Route path="/agency/bookings" element={<Bookings />} />
+        <Route path="/agency/my-cars" element={<AgencyCars />} />
+        <Route path="/agency/:id" element={<AgencyCatalog />} />
       </Routes>
     </Shell>
   </BrowserRouter>
