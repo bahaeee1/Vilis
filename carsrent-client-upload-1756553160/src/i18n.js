@@ -141,7 +141,7 @@ export function I18nProvider({ children }) {
     [lang]
   );
   const value = useMemo(() => ({ lang, setLang, t }), [lang, t]);
-  return <I18nCtx.Provider value={value}>{children}</I18nCtx.Provider>;
+  return React.createElement(I18nCtx.Provider, { value }, children);
 }
 
 export function useI18n() {
