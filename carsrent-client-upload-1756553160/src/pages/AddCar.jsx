@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addCar, getToken } from '../api.js';
 import { MOROCCAN_CITIES, FUEL_TYPES } from '../constants.js';
+import { useI18n } from '../i18n.js';
 
 export default function AddCar() {
+  const { t } = useI18n();
   if (!getToken()) return <div className="card">Please login first.</div>;
 
   const nav = useNavigate();
@@ -11,9 +13,9 @@ export default function AddCar() {
     title: '', brand: '', model: '', year: '',
     transmission: 'automatic',
     seats: '', doors: '', trunk_liters: '',
-    fuel_type: '',              // now a dropdown
+    fuel_type: '',
     options: '', daily_price: '',
-    location: '',               // now a dropdown
+    location: '',
     image_url: '', description: ''
   });
   const [err, setErr] = useState(null);
@@ -40,60 +42,60 @@ export default function AddCar() {
 
   return (
     <div className="card">
-      <h2>Add Car</h2>
+      <h2>{t('acar.title')}</h2>
       <div className="row">
         <div className="col-6"><label>Title</label><input name="title" value={form.title} onChange={onChange} /></div>
-        <div className="col-3"><label>Brand</label><input name="brand" value={form.brand} onChange={onChange} /></div>
-        <div className="col-3"><label>Model</label><input name="model" value={form.model} onChange={onChange} /></div>
+        <div className="col-3"><label>{t('acar.brand')}</label><input name="brand" value={form.brand} onChange={onChange} /></div>
+        <div className="col-3"><label>{t('acar.model')}</label><input name="model" value={form.model} onChange={onChange} /></div>
 
-        <div className="col-3"><label>Year</label><input name="year" type="number" value={form.year} onChange={onChange} /></div>
+        <div className="col-3"><label>{t('acar.year')}</label><input name="year" type="number" value={form.year} onChange={onChange} /></div>
         <div className="col-3">
-          <label>Transmission</label>
+          <label>{t('acar.transmission')}</label>
           <select name="transmission" value={form.transmission} onChange={onChange}>
-            <option value="automatic">automatic</option>
-            <option value="manual">manual</option>
+            <option value="automatic">{t('acar.automatic')}</option>
+            <option value="manual">{t('acar.manual')}</option>
           </select>
         </div>
-        <div className="col-3"><label>Seats</label><input name="seats" type="number" value={form.seats} onChange={onChange} /></div>
-        <div className="col-3"><label>Doors</label><input name="doors" type="number" value={form.doors} onChange={onChange} /></div>
+        <div className="col-3"><label>{t('acar.seats')}</label><input name="seats" type="number" value={form.seats} onChange={onChange} /></div>
+        <div className="col-3"><label>{t('acar.doors')}</label><input name="doors" type="number" value={form.doors} onChange={onChange} /></div>
 
-        <div className="col-3"><label>Trunk (L)</label><input name="trunk_liters" type="number" value={form.trunk_liters} onChange={onChange} /></div>
+        <div className="col-3"><label>{t('acar.trunk')}</label><input name="trunk_liters" type="number" value={form.trunk_liters} onChange={onChange} /></div>
 
         <div className="col-3">
-          <label>Fuel</label>
+          <label>{t('acar.fuel')}</label>
           <select name="fuel_type" value={form.fuel_type} onChange={onChange}>
-            <option value="">Select fuel…</option>
+            <option value="">{t('select.fuel')}</option>
             {FUEL_TYPES.map(f => <option key={f} value={f}>{f}</option>)}
           </select>
         </div>
 
-        <div className="col-6"><label>Options</label>
+        <div className="col-6"><label>{t('acar.options')}</label>
           <input name="options" value={form.options} onChange={onChange} placeholder="GPS, Bluetooth..." />
         </div>
 
-        <div className="col-3"><label>Price/day</label>
+        <div className="col-3"><label>{t('acar.price_day')}</label>
           <input name="daily_price" type="number" value={form.daily_price} onChange={onChange} />
         </div>
 
         <div className="col-3">
-          <label>Location</label>
+          <label>{t('acar.location')}</label>
           <select name="location" value={form.location} onChange={onChange}>
-            <option value="">Select city…</option>
+            <option value="">{t('select.city')}</option>
             {MOROCCAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
 
-        <div className="col-6"><label>Photo URL</label>
+        <div className="col-6"><label>{t('acar.photo')}</label>
           <input name="image_url" value={form.image_url} onChange={onChange} placeholder="https://..." />
         </div>
 
-        <div className="col-12"><label>Description</label>
+        <div className="col-12"><label>{t('acar.description')}</label>
           <textarea name="description" value={form.description} onChange={onChange} />
         </div>
       </div>
 
       <div style={{ marginTop: 12 }}>
-        <button className="btn" onClick={onSubmit}>Save car</button>
+        <button className="btn" onClick={onSubmit}>{t('acar.save')}</button>
       </div>
       {err && <div className="error" style={{ marginTop: 8 }}>{String(err)}</div>}
     </div>
