@@ -52,6 +52,22 @@ CREATE TABLE IF NOT EXISTS bookings (
   customer_phone TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  // --- lightweight migrations for old DBs ---
+try {
+  // Add agencies.verified if it doesn't exist (SQLite allows ADD COLUMN; no data loss)
+  db.prepare(`ALTER TABLE agencies ADD COLUMN verified INTEGER DEFAULT 0`).run();
+} catch (e) {
+  // ignore if the column already exists
+}
+try {
+  // Make sure existing rows have a value
+  db.prepare(`UPDATE agencies SET verified = 0 WHERE verified IS NULL`).run();
+} catch (e) {
+  // ignore
+}
+
 );
 `);
 
