@@ -14,6 +14,8 @@ import Bookings from './pages/Bookings.jsx';
 import AgencyCars from './pages/AgencyCars.jsx';
 import AgencyCatalog from './pages/AgencyCatalog.jsx';
 import { getToken, clearToken } from './api.js';
+import Terms from './pages/Terms.jsx';
+import Privacy from './pages/Privacy.jsx';
 
 function LangSwitch() {
   const { lang, setLang } = useI18n();
@@ -88,8 +90,14 @@ createRoot(document.getElementById('root')).render(
           <Route path="/agency/bookings" element={<Bookings />} />
           <Route path="/agency/my-cars" element={<AgencyCars />} />
           <Route path="/agency/:id" element={<AgencyCatalog />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </Shell>
     </BrowserRouter>
   </I18nProvider>
 );
+<footer style={{maxWidth:'1100px',margin:'40px auto',padding:'0 20px',color:'var(--muted)'}}>
+  <a href="/terms" style={{color:'var(--muted)',marginRight:12}}>Terms</a>
+  <a href="/privacy" style={{color:'var(--muted)'}}>Privacy</a>
+</footer>
