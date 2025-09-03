@@ -1,14 +1,18 @@
+// server/src/db.js
 import Database from 'better-sqlite3';
 import dotenv from 'dotenv';
+
 dotenv.config();
 
 const DB_FILE = process.env.DB_FILE || './local.sqlite';
+
+// Open DB and set sane pragmas
 const db = new Database(DB_FILE);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
-/* Minimal schema bootstrap (idempotent) */
-db.exec(`
+// ---- Base schema (idempotent) ----
+const schema = `
 CREATE TABLE IF NOT EXISTS agencies (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
@@ -24,13 +28,19 @@ CREATE TABLE IF NOT EXISTS cars (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   agency_id INTEGER NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
-  brand TEXT, model TEXT, year INTEGER,
-  transmission TEXT, seats INTEGER, doors INTEGER, trunk_liters REAL,
+  brand TEXT,
+  model TEXT,
+  year INTEGER,
+  transmission TEXT,
+  seats INTEGER,
+  doors INTEGER,
+  trunk_liters REAL,
   fuel_type TEXT,
   options TEXT,
   daily_price REAL NOT NULL,
   location TEXT NOT NULL,
-  image_url TEXT, description TEXT,
+  image_url TEXT,
+  description TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -52,23 +62,20 @@ CREATE TABLE IF NOT EXISTS bookings (
   customer_phone TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
-
-  // --- lightweight migrations for old DBs ---
-try {
-  // Add agencies.verified if it doesn't exist (SQLite allows ADD COLUMN; no data loss)
-  db.prepare(`ALTER TABLE agencies ADD COLUMN verified INTEGER DEFAULT 0`).run();
-} catch (e) {
-  // ignore if the column already exists
-}
-try {
-  // Make sure existing rows have a value
-  db.prepare(`UPDATE agencies SET verified = 0 WHERE verified IS NULL`).run();
-} catch (e) {
-  // ignore
-}
-
 );
-`);
+`;
+db.exec(schema);
+
+// ---- Lightweight migrations for existing DB files ----
+function ensureColumn(table, col, ddl) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+  if (!cols.some(c => c.name === col)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+  }
+}
+
+// Add agencies.verified if the DB was created before it existed
+ensureColumn('agencies', 'verified', 'verified INTEGER DEFAULT 0');
+db.prepare(`UPDATE agencies SET verified = 0 WHERE verified IS NULL`).run();
 
 export default db;
