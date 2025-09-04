@@ -1,86 +1,111 @@
-import React, { useState } from 'react';
-import { searchCars } from '../api.js';
-import { useNavigate } from 'react-router-dom';
-import { MOROCCAN_CITIES } from '../constants.js';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { searchCars } from '../api';
 import { useI18n } from '../i18n.jsx';
 
-function SpecsLine({ c }) {
-  const tags = [];
-  if (c.year) tags.push(c.year);
-  if (c.transmission) tags.push(c.transmission);
-  if (c.seats) tags.push(c.seats + ' seats');
-  if (c.doors) tags.push(c.doors + ' doors');
-  if (c.trunk_liters) tags.push(c.trunk_liters + 'L trunk');
-  if (c.fuel_type) tags.push(c.fuel_type);
-  return <div className="muted">{tags.join(' · ')}</div>;
-}
+const CITIES = [
+  'Anywhere','Casablanca','Rabat','Marrakesh','Tangier','Agadir','Fes','Kenitra','Tetouan','Oujda',
+  'Safi','El Jadida','Mohammedia','Beni Mellal','Nador','Laayoune','Dakhla','Essaouira','Meknes'
+];
 
 export default function Search() {
   const { t } = useI18n();
-  const [location, setLocation] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+  const [location, setLocation] = useState('Anywhere');
+  const [min, setMin] = useState('');
+  const [max, setMax] = useState('');
   const [cars, setCars] = useState([]);
-  const [error, setError] = useState(null);
-  const nav = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
 
   const run = async () => {
-    setError(null);
-    const q = {};
-    if (location) q.location = location;
-    if (minPrice) q.minPrice = minPrice;
-    if (maxPrice) q.maxPrice = maxPrice;
-    try { setCars(await searchCars(q)); }
-    catch (e) { setError(e.error || 'Search failed'); }
+    setBusy(true); setErr('');
+    try {
+      const params = {};
+      if (location && location !== 'Anywhere') params.location = location;
+      if (min) params.minPrice = min;
+      if (max) params.maxPrice = max;
+      setCars(await searchCars(params));
+    } catch (e) {
+      setErr(e?.error || 'Error');
+    } finally {
+      setBusy(false);
+    }
   };
 
+  useEffect(() => { run(); /* initial */ }, []);
+
   return (
-    <div className="card">
-      <h2>{t('search.title')}</h2>
-      <div className="row">
-        <div className="col-4">
-          <label>{t('filter.location')}</label>
-          <select value={location} onChange={(e)=>setLocation(e.target.value)}>
-            <option value="">{t('filter.anywhere')}</option>
-            {MOROCCAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
+    <>
+      <div className="card">
+        <h2 style={{marginTop:0}}>{t('search.title')}</h2>
+        <div className="row">
+          <div className="col-12">
+            <label>{t('filter.location')}</label>
+            <select value={location} onChange={e=>setLocation(e.target.value)}>
+              {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+
+          <div className="col-6">
+            <label>{t('filter.min_per_day')}</label>
+            <input inputMode="numeric" placeholder="e.g. 200" value={min} onChange={e=>setMin(e.target.value)} />
+          </div>
+          <div className="col-6">
+            <label>{t('filter.max_per_day')}</label>
+            <input inputMode="numeric" placeholder="e.g. 500" value={max} onChange={e=>setMax(e.target.value)} />
+          </div>
+
+          <div className="col-12">
+            <button className="btn" onClick={run} disabled={busy}>{t('btn.search')}</button>
+          </div>
         </div>
-        <div className="col-2"><label>{t('filter.min_per_day')}</label><input type="number" value={minPrice} onChange={e=>setMinPrice(e.target.value)} /></div>
-        <div className="col-2"><label>{t('filter.max_per_day')}</label><input type="number" value={maxPrice} onChange={e=>setMaxPrice(e.target.value)} /></div>
       </div>
-      <div style={{marginTop:12}}><button className="btn" onClick={run}>{t('btn.search')}</button></div>
-      {error && <div className="error" style={{marginTop:8}}>{String(error)}</div>}
-      <div className="grid" style={{marginTop:16}}>
+
+      {err && <div className="error">{String(err)}</div>}
+
+      <div className="cards">
         {cars.map(c => (
           <div key={c.id} className="car">
-            <img src={c.image_url || 'https://picsum.photos/seed/'+c.id+'/600/400'} alt={c.title} />
+            {c.image_url && <img src={c.image_url} alt={c.title} />}
             <div className="body">
-              <div style={{fontWeight:700}}>{c.title}</div>
-              <div className="muted">
-                {t('agency')}: {' '}
-                <span
-                  style={{ textDecoration: 'underline', cursor: 'pointer' }}
-                  onClick={() => nav('/agency/' + (c.agency_id ?? c.agencyId))}
-                  title={t('btn.agency_catalog')}
-                >
-                  <b>{c.agency_name || '—'}</b>
-                </span>
-                {' · '}{t('tel')}: <b>{c.agency_phone || '—'}</b>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'start',gap:8}}>
+                <div>
+                  <strong>{c.title}</strong>
+                  <div className="muted" style={{marginTop:4}}>
+                    {t('agency')}: <span style={{fontWeight:600}}>{c.agency_name || ''}</span>
+                    {c.agency_phone ? <> · {t('tel')}: {c.agency_phone}</> : null}
+                  </div>
+                </div>
+                <div style={{textAlign:'right',whiteSpace:'nowrap',fontWeight:800}}>
+                  {c.daily_price} MAD<span className="muted">{t('car.price_per_day')}</span>
+                </div>
               </div>
-              <SpecsLine c={c} />
-              <div style={{margin:'6px 0'}}><b>{c.daily_price}{t('car.price_per_day')}</b> · {c.location}</div>
-              <div style={{display:'flex', gap:8, marginTop:8}}>
-                <button className="btn" onClick={()=>nav('/car/'+c.id)}>{t('btn.view')}</button>
-                {(c.agency_id ?? c.agencyId) && (
-                  <button className="btn secondary" onClick={()=>nav('/agency/'+(c.agency_id ?? c.agencyId))}>
+
+              <div className="muted" style={{marginTop:6}}>
+                {(c.year ? `${c.year} · ` : '')}
+                {(c.transmission ? `${c.transmission} · ` : '')}
+                {(c.seats ? `${c.seats} seats · ` : '')}
+                {(c.doors ? `${c.doors} doors · ` : '')}
+                {(c.trunk_liters ? `${c.trunk_liters}L trunk · ` : '')}
+                {(c.fuel_type || '').toLowerCase()}
+              </div>
+
+              <div style={{display:'flex',gap:8,marginTop:10}}>
+                <Link className="btn" to={`/car/${c.id}`}>{t('btn.view')}</Link>
+                {c.agency_id && (
+                  <Link className="btn secondary" to={`/agency/${c.agency_id}/cars`}>
                     {t('btn.agency_catalog')}
-                  </button>
+                  </Link>
                 )}
               </div>
             </div>
           </div>
         ))}
       </div>
-    </div>
+
+      {(!busy && cars.length === 0) && (
+        <div className="muted" style={{marginTop:8}}>No cars found.</div>
+      )}
+    </>
   );
 }
