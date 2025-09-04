@@ -21,38 +21,71 @@ function Navbar() {
   const { t, lang, setLang } = useI18n();
   const nav = useNavigate();
   const token = getToken();
+
   useEffect(() => {
     const onTok = () => nav(0);
     window.addEventListener('tokenUpdated', onTok);
     return () => window.removeEventListener('tokenUpdated', onTok);
   }, [nav]);
+
   return (
-    <header>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}>
+    <header className="topnav">
+      <div className="wrap">
         <div className="brand">Vilis</div>
-        <nav style={{gap:10}}>
-          <div className="nav-links">
-            <NavLink to="/">{t('nav.search')}</NavLink>
-            {!token && <NavLink to="/agency/register">{t('nav.register')}</NavLink>}
-            {!token && <NavLink to="/agency/login">{t('nav.login')}</NavLink>}
-            {token && <NavLink to="/agency/cars">{t('nav.my_cars')}</NavLink>}
-            {token && <NavLink to="/agency/add-car">{t('nav.add_car')}</NavLink>}
-            {token && <NavLink to="/agency/bookings">{t('nav.bookings')}</NavLink>}
-            {token && <NavLink to="/agency/account">{t('ui.account')}</NavLink>}
-            {token && <a onClick={() => { clearToken(); nav('/'); }} style={{cursor:'pointer'}}>{t('nav.logout')}</a>}
-          </div>
-          <select className="lang" value={lang} onChange={e=>setLang(e.target.value)}>
+
+        <nav className="nav-tabs">
+          <NavLink end to="/" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+            {t('nav.search')}
+          </NavLink>
+
+          {!token && (
+            <>
+              <NavLink to="/agency/register" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+                {t('nav.register')}
+              </NavLink>
+              <NavLink to="/agency/login" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+                {t('nav.login')}
+              </NavLink>
+            </>
+          )}
+
+          {token && (
+            <>
+              <NavLink to="/agency/cars" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+                {t('nav.my_cars')}
+              </NavLink>
+              <NavLink to="/agency/add-car" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+                {t('nav.add_car')}
+              </NavLink>
+              <NavLink to="/agency/bookings" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+                {t('nav.bookings')}
+              </NavLink>
+              <NavLink to="/agency/account" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+                {t('ui.account')}
+              </NavLink>
+              <button className="tab ghost" onClick={() => { clearToken(); nav('/'); }}>
+                {t('nav.logout')}
+              </button>
+            </>
+          )}
+        </nav>
+
+        <div className="nav-right">
+          <select className="lang small" value={lang} onChange={e=>setLang(e.target.value)}>
             <option value="en">EN</option>
             <option value="fr">FR</option>
           </select>
-        </nav>
+        </div>
       </div>
     </header>
   );
 }
 
 function App() {
-  useEffect(() => { fetch(`${API_BASE}/api/health`, { mode:'cors' }).catch(()=>{}); }, []);
+  useEffect(() => {
+    // warm up Render free instance to avoid first-call CORS
+    fetch(`${API_BASE}/api/health`, { mode: 'cors' }).catch(() => {});
+  }, []);
   return (
     <>
       <Navbar />
@@ -70,9 +103,10 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </main>
-      <footer style={{maxWidth:'1100px',margin:'40px auto',padding:'0 20px',color:'var(--muted)'}}>
-        <a href="/terms" style={{color:'var(--muted)',marginRight:12}}>Terms</a>
-        <a href="/privacy" style={{color:'var(--muted)'}}>Privacy</a>
+
+      <footer className="site-footer">
+        <NavLink to="/terms">Terms</NavLink>
+        <NavLink to="/privacy">Privacy</NavLink>
       </footer>
     </>
   );
