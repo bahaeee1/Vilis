@@ -6,21 +6,20 @@ import { useI18n } from '../i18n.jsx';
 export default function Account() {
   const { t } = useI18n();
   const nav = useNavigate();
-  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
 
-  const submit = async (e) => {
-    e.preventDefault();
-    if (!confirm(t('ui.confirm_delete_account'))) return;
-    setBusy(true); setMsg('');
+  const doDelete = async () => {
+    if (!confirm('Delete your agency account? This removes your cars and bookings.')) return;
+    setBusy(true); setErr(''); setMsg('');
     try {
-      await deleteMyAccount({ password });
+      await deleteMyAccount();
       clearToken();
-      setMsg(t('ui.account_deleted'));
-      setTimeout(() => nav('/'), 1200);
+      setMsg('Account deleted. Redirecting…');
+      nav('/');
     } catch (e) {
-      setMsg(e?.error || 'Error');
+      setErr(e?.error || 'Error');
     } finally {
       setBusy(false);
     }
@@ -29,17 +28,17 @@ export default function Account() {
   return (
     <div className="card">
       <h2 style={{marginTop:0}}>{t('ui.account')}</h2>
-      <div className="muted" style={{marginBottom:12}}>{t('ui.danger_zone')}</div>
-      <form onSubmit={submit} className="row">
-        <div className="col-6">
-          <label>{t('areg.password')}</label>
-          <input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required />
-        </div>
-        <div className="col-12">
-          <button className="btn" disabled={busy}>{t('ui.delete_account_btn')}</button>
-        </div>
-      </form>
-      {msg && <div style={{marginTop:12}} className="error">{msg}</div>}
+      <p className="muted">Manage your agency account.</p>
+
+      {msg && <div style={{marginTop:10,color:'#1cc77e'}}>{msg}</div>}
+      {err && <div className="error" style={{marginTop:10}}>{String(err)}</div>}
+
+      <div style={{marginTop:16, display:'flex', gap:8, flexWrap:'wrap'}}>
+        <button className="btn secondary" style={{borderColor:'#e35b66', color:'#ffb3ba'}}
+                onClick={doDelete} disabled={busy}>
+          {t('btn.delete') || 'Delete'}
+        </button>
+      </div>
     </div>
   );
 }
