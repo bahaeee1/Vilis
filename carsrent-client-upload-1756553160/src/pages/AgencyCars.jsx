@@ -10,14 +10,9 @@ export default function AgencyCars() {
 
   const load = async () => {
     setErr('');
-    try {
-      const list = await getMyCars();
-      setCars(list);
-    } catch (e) {
-      setErr(e?.error || 'Error');
-    }
+    try { setCars(await getMyCars()); }
+    catch (e) { setErr(e?.error || 'Error'); }
   };
-
   useEffect(() => { load(); }, []);
 
   const onDelete = async (id) => {
@@ -25,12 +20,10 @@ export default function AgencyCars() {
     setBusy(true);
     try {
       await deleteCar(id);
-      setCars(cars.filter(c => c.id !== id));
+      setCars(prev => prev.filter(c => c.id !== id));
     } catch (e) {
       alert(e?.error || 'Delete failed');
-    } finally {
-      setBusy(false);
-    }
+    } finally { setBusy(false); }
   };
 
   return (
@@ -44,19 +37,17 @@ export default function AgencyCars() {
             <div className="body">
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                 <strong>{c.title}</strong>
-                <button className="btn secondary" disabled={busy} onClick={()=>onDelete(c.id)}>
+                <button className="btn secondary" disabled={busy} onClick={() => onDelete(c.id)}>
                   {t('ui.delete')}
                 </button>
               </div>
               <div className="muted" style={{marginTop:6}}>
-                {c.brand || ''} {c.model || ''} • {c.location} • {c.daily_price} MAD/{t('car.price_per_day').replace(' / day','').replace(' / jour','')}
+                {(c.brand || '')} {(c.model || '')} • {c.location} • {c.daily_price} MAD
               </div>
             </div>
           </div>
         ))}
-        {cars.length === 0 && (
-          <div className="muted" style={{padding:'8px 2px'}}>{t('ui.no_cars')}</div>
-        )}
+        {cars.length === 0 && <div className="muted" style={{padding:'8px 2px'}}>{t('ui.no_cars')}</div>}
       </div>
     </div>
   );
