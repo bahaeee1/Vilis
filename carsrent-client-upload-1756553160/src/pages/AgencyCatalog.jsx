@@ -1,43 +1,82 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getAgencyCatalog } from '../api.js';
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { getAgencyCatalog } from '../api';
+import { useI18n } from '../i18n.jsx';
 
 export default function AgencyCatalog() {
+  const { t } = useI18n();
   const { id } = useParams();
-  const nav = useNavigate();
-  const [data, setData] = useState(null);
-  const [err, setErr] = useState(null);
+  const [agency, setAgency] = useState(null);
+  const [cars, setCars] = useState([]);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     (async () => {
-      try { setData(await getAgencyCatalog(id)); }
-      catch (e) { setErr(e.error || 'Failed to load'); }
+      setBusy(true); setErr('');
+      try {
+        const data = await getAgencyCatalog(id);
+        setAgency(data.agency);
+        setCars(data.cars || []);
+      } catch (e) {
+        setErr(e?.error || 'Error');
+      } finally {
+        setBusy(false);
+      }
     })();
   }, [id]);
 
-  if (err) return <div className="card">{String(err)}</div>;
-  if (!data) return <div className="card">Loading…</div>;
-
-  const { agency, cars } = data;
-
   return (
-    <div className="card">
-      <h2>{agency.name} — Catalog</h2>
-      <p className="muted">{agency.location} · Tel: {agency.phone}</p>
-      <div className="grid" style={{marginTop:16}}>
+    <>
+      <div className="card">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <h2 style={{margin:0}}>
+            {agency ? agency.name : t('btn.agency_catalog')}
+          </h2>
+          <Link to="/" className="btn secondary">← {t('nav.search')}</Link>
+        </div>
+
+        {agency && (
+          <div className="muted" style={{marginTop:8}}>
+            {agency.location ? `${agency.location} · ` : ''}
+            {t('tel')}: {agency.phone}
+            {agency.email ? <> · {agency.email}</> : null}
+          </div>
+        )}
+
+        {err && <div className="error" style={{marginTop:12}}>{String(err)}</div>}
+      </div>
+
+      <div className="cards">
         {cars.map(c => (
           <div key={c.id} className="car">
-            <img src={c.image_url || 'https://picsum.photos/seed/'+c.id+'/600/400'} alt={c.title} />
+            {c.image_url && <img src={c.image_url} alt={c.title} />}
             <div className="body">
-              <div style={{fontWeight:700}}>{c.title}</div>
-              <div className="muted">{c.brand} {c.model} · {c.location}</div>
-              <div><b>{c.daily_price}</b> / day</div>
-              <button className="btn" style={{marginTop:8}} onClick={()=>nav('/car/'+c.id)}>View</button>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'start',gap:8}}>
+                <strong>{c.title}</strong>
+                <div style={{textAlign:'right',whiteSpace:'nowrap',fontWeight:800}}>
+                  {c.daily_price} MAD<span className="muted"> {t('car.price_per_day')}</span>
+                </div>
+              </div>
+              <div className="muted" style={{marginTop:6}}>
+                {(c.year ? `${c.year} · ` : '')}
+                {(c.transmission ? `${c.transmission} · ` : '')}
+                {(c.seats ? `${c.seats} seats · ` : '')}
+                {(c.doors ? `${c.doors} doors · ` : '')}
+                {(c.trunk_liters ? `${c.trunk_liters}L trunk · ` : '')}
+                {(c.fuel_type || '').toLowerCase()}
+              </div>
+              <div style={{marginTop:10}}>
+                <Link className="btn" to={`/car/${c.id}`}>{t('btn.view')}</Link>
+              </div>
             </div>
           </div>
         ))}
-        {cars.length === 0 && <div>This agency has no cars listed yet.</div>}
       </div>
-    </div>
+
+      {(!busy && cars.length === 0) && (
+        <div className="muted" style={{marginTop:8}}>No cars yet.</div>
+      )}
+    </>
   );
 }
