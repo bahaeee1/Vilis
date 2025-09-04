@@ -29,6 +29,24 @@ function requireAuth(req, res, next) {
   }
 }
 
+// Delete my agency account (and related data)
+app.delete('/api/agency/me', requireAuth, (req, res) => {
+  const id = req.agencyId;
+
+  // Delete bookings related to this agency or its cars
+  db.prepare(`DELETE FROM bookings WHERE agency_id = ?`).run(id);
+  db.prepare(`DELETE FROM bookings WHERE car_id IN (SELECT id FROM cars WHERE agency_id = ?)`).run(id);
+
+  // Delete cars
+  db.prepare(`DELETE FROM cars WHERE agency_id = ?`).run(id);
+
+  // Delete the agency
+  db.prepare(`DELETE FROM agencies WHERE id = ?`).run(id);
+
+  res.json({ ok: true });
+});
+
+
 // --- health ---
 app.get('/api/health', (req,res) => res.json({ ok: true }));
 
