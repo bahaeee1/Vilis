@@ -13,17 +13,43 @@ const en = {
     bookings: 'Bookings',
     logout: 'Logout'
   },
-  ui: {
-    account: 'Account'
-  },
-  search: {
-    title: 'Find a car'
-  },
-  filter: {
+  ui: { account: 'Account' },
+  search: { title: 'Find a car' },
+  filter: { location: 'Location', min_per_day: 'Min/day', max_per_day: 'Max/day' },
+  select: { city: 'select city' },
+
+  // Agency register form (areg.*)
+  areg: {
+    title: 'Agency Register',
+    name: 'Name',
     location: 'Location',
-    min_per_day: 'Min/day',
-    max_per_day: 'Max/day'
+    email: 'Email (optional)',
+    phone: 'Phone',
+    password: 'Password',
+    create: 'Create account'
   },
+
+  // Agency login (alogin.*)
+  alogin: {
+    title: 'Agency Login',
+    email: 'Email',
+    password: 'Password',
+    login: 'Login'
+  },
+
+  // Add car (addcar.*)
+  addcar: {
+    title: 'Add Car',
+    create: 'Add car'
+  },
+
+  // My cars (mycars.*)
+  mycars: {
+    title: 'My Cars',
+    delete: 'Delete',
+    confirm_delete: 'Delete this car?'
+  },
+
   btn: {
     search: 'Search',
     view: 'View',
@@ -33,15 +59,17 @@ const en = {
     delete: 'Delete',
     save: 'Save',
     create: 'Create',
-    login: 'Login'
+    login: 'Login',
   },
-  car: {
-    price_per_day: '/day'
-  },
+
+  car: { price_per_day: '/day' },
   tel: 'Tel',
+
   bookings: {
     help: 'Approve, decline, or delete booking requests.'
   },
+
+  // Generic form labels (in case some pages use these)
   forms: {
     name: 'Name',
     email: 'Email (optional)',
@@ -61,10 +89,12 @@ const en = {
     end_date: 'End date',
     message: 'Message (optional)'
   },
+
   values: {
     transmission: { manual: 'manual', automatic: 'automatic' },
     fuel: { diesel: 'diesel', petrol: 'petrol', hybrid: 'hybrid', electric: 'electric' }
   },
+
   misc: {
     no_cars: 'No cars found.',
     no_bookings: 'No bookings yet.',
@@ -82,17 +112,39 @@ const fr = {
     bookings: 'Réservations',
     logout: 'Déconnexion'
   },
-  ui: {
-    account: 'Compte'
-  },
-  search: {
-    title: 'Trouver une voiture'
-  },
-  filter: {
+  ui: { account: 'Compte' },
+  search: { title: 'Trouver une voiture' },
+  filter: { location: 'Ville', min_per_day: 'Min/jour', max_per_day: 'Max/jour' },
+  select: { city: 'sélectionner la ville' },
+
+  areg: {
+    title: "Inscription d'agence",
+    name: 'Nom',
     location: 'Ville',
-    min_per_day: 'Min/jour',
-    max_per_day: 'Max/jour'
+    email: 'Email (optionnel)',
+    phone: 'Téléphone',
+    password: 'Mot de passe',
+    create: 'Créer le compte'
   },
+
+  alogin: {
+    title: 'Connexion agence',
+    email: 'Email',
+    password: 'Mot de passe',
+    login: 'Connexion'
+  },
+
+  addcar: {
+    title: 'Ajouter une voiture',
+    create: 'Ajouter'
+  },
+
+  mycars: {
+    title: 'Mes voitures',
+    delete: 'Supprimer',
+    confirm_delete: 'Supprimer cette voiture ?'
+  },
+
   btn: {
     search: 'Rechercher',
     view: 'Voir',
@@ -102,15 +154,16 @@ const fr = {
     delete: 'Supprimer',
     save: 'Enregistrer',
     create: 'Créer',
-    login: 'Connexion'
+    login: 'Connexion',
   },
-  car: {
-    price_per_day: '/jour'
-  },
+
+  car: { price_per_day: '/jour' },
   tel: 'Tél',
+
   bookings: {
     help: 'Approuvez, refusez ou supprimez des demandes de réservation.'
   },
+
   forms: {
     name: 'Nom',
     email: 'Email (optionnel)',
@@ -130,10 +183,12 @@ const fr = {
     end_date: 'Date fin',
     message: 'Message (optionnel)'
   },
+
   values: {
     transmission: { manual: 'manuelle', automatic: 'automatique' },
     fuel: { diesel: 'diesel', petrol: 'essence', hybrid: 'hybride', electric: 'électrique' }
   },
+
   misc: {
     no_cars: 'Aucun véhicule trouvé.',
     no_bookings: 'Aucune réservation.',
@@ -174,7 +229,6 @@ export function I18nProvider({ children }) {
     return (key) => {
       const v = getNested(dict, key);
       if (v == null) {
-        // fallback to EN, then key
         const v2 = getNested(DICTS.en, key);
         return v2 == null ? key : v2;
       }
@@ -183,10 +237,7 @@ export function I18nProvider({ children }) {
   }, [lang]);
 
   const value = useMemo(() => ({ lang, setLang, t }), [lang, t]);
-
   return <I18nCtx.Provider value={value}>{children}</I18nCtx.Provider>;
 }
 
-export function useI18n() {
-  return useContext(I18nCtx);
-}
+export function useI18n() { return useContext(I18nCtx); }
