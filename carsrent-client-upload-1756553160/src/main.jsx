@@ -13,6 +13,7 @@ import AgencyLogin from './pages/AgencyLogin.jsx';
 import AddCar from './pages/AddCar.jsx';
 import Bookings from './pages/Bookings.jsx';
 import AgencyCars from './pages/AgencyCars.jsx';
+import AgencyCatalog from './pages/AgencyCatalog.jsx';   // <-- NEW
 import Account from './pages/Account.jsx';
 import Terms from './pages/Terms.jsx';
 import Privacy from './pages/Privacy.jsx';
@@ -83,7 +84,6 @@ function Navbar() {
 
 function App() {
   useEffect(() => {
-    // warm up Render free instance to avoid first-call CORS
     fetch(`${API_BASE}/api/health`, { mode: 'cors' }).catch(() => {});
   }, []);
   return (
@@ -98,6 +98,7 @@ function App() {
           <Route path="/agency/add-car" element={<AddCar />} />
           <Route path="/agency/bookings" element={<Bookings />} />
           <Route path="/agency/cars" element={<AgencyCars />} />
+          <Route path="/agency/:id/cars" element={<AgencyCatalog />} /> {/* <-- NEW */}
           <Route path="/agency/account" element={<Account />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
