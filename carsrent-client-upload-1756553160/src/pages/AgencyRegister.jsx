@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerAgency, setToken } from '../api.js';
 import { MOROCCAN_CITIES } from '../constants.js';
-import { useI18n } from '../i18n.js';
+import { useI18n } from '../i18n.jsx';
 
 export default function AgencyRegister() {
   const { t } = useI18n();
