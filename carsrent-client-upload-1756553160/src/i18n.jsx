@@ -1,76 +1,192 @@
-import React, { createContext, useContext, useMemo, useState, useEffect } from 'react';
+// client/src/i18n.jsx
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-const I18nCtx = createContext(null);
+const LS_KEY = 'vilis_lang';
 
-const DICT = {
-  en: {
-    brand: 'Vilis',
-    'nav.search': 'Search', 'nav.register': 'Register', 'nav.login': 'Login',
-    'nav.my_cars': 'My Cars', 'nav.add_car': 'Add Car', 'nav.bookings': 'Bookings', 'nav.logout': 'Logout',
-    'search.title': 'Find a car', 'filter.location': 'Location', 'filter.anywhere': 'Anywhere',
-    'filter.min_per_day': 'Min/day', 'filter.max_per_day': 'Max/day', 'btn.search': 'Search',
-    'agency': 'Agency', 'tel': 'Tel', 'btn.view': 'View', 'btn.agency_catalog': 'Agency catalog',
-    'car.loading': 'Loading car...', 'car.price_per_day': ' / day', 'car.agency_contact': 'Agency contact',
-    'car.view_agency_catalog': 'View agency catalog', 'car.specs': 'Specifications',
-    'car.choose_dates': 'Choose your dates', 'car.start': 'Start', 'car.end': 'End',
-    'car.your_details': 'Your details', 'car.name': 'Name', 'car.email_optional': 'Email (optional)',
-    'car.phone_required': 'Phone *', 'car.book': 'Book',
-    'areg.title': 'Agency Register', 'areg.name': 'Name', 'areg.location': 'Location', 'areg.email': 'Email',
-    'areg.password': 'Password', 'areg.phone': 'Phone', 'areg.create': 'Create account',
-    'acar.title': 'Add Car', 'acar.brand': 'Brand', 'acar.model': 'Model', 'acar.year': 'Year',
-    'acar.transmission': 'Transmission', 'acar.automatic': 'automatic', 'acar.manual': 'manual',
-    'acar.seats': 'Seats', 'acar.doors': 'Doors', 'acar.trunk': 'Trunk (L)', 'acar.fuel': 'Fuel',
-    'acar.options': 'Options', 'acar.price_day': 'Price/day', 'acar.location': 'Location',
-    'acar.photo': 'Photo URL', 'acar.description': 'Description', 'acar.save': 'Save car',
-    'select.city': 'Select city…', 'select.fuel': 'Select fuel…',
-    /* new ui keys */
-    'ui.delete': 'Delete', 'ui.no_cars': 'No cars yet.',
-    'ui.confirm_delete_car': 'Delete this car? This cannot be undone.',
-    'ui.account': 'Account', 'ui.danger_zone': 'Danger zone: permanently delete your agency account and all cars/bookings.',
-    'ui.delete_account_btn': 'Delete my account',
-    'ui.confirm_delete_account': 'Are you sure? This will permanently delete your account and all cars/bookings.',
-    'ui.account_deleted': 'Account deleted. Redirecting…'
+const en = {
+  nav: {
+    search: 'Search',
+    register: 'Register',
+    login: 'Login',
+    my_cars: 'My Cars',
+    add_car: 'Add Car',
+    bookings: 'Bookings',
+    logout: 'Logout'
   },
-  fr: {
-    brand: 'Vilis',
-    'nav.search': 'Recherche', 'nav.register': "S'inscrire", 'nav.login': 'Se connecter',
-    'nav.my_cars': 'Mes voitures', 'nav.add_car': 'Ajouter une voiture', 'nav.bookings': 'Réservations', 'nav.logout': 'Déconnexion',
-    'search.title': 'Trouver une voiture', 'filter.location': 'Ville', 'filter.anywhere': 'Partout',
-    'filter.min_per_day': 'Min/jour', 'filter.max_per_day': 'Max/jour', 'btn.search': 'Rechercher',
-    'agency': 'Agence', 'tel': 'Tél', 'btn.view': 'Voir', 'btn.agency_catalog': "Catalogue de l'agence",
-    'car.loading': 'Chargement de la voiture…', 'car.price_per_day': ' / jour', 'car.agency_contact': "Contact de l'agence",
-    'car.view_agency_catalog': "Voir le catalogue de l'agence", 'car.specs': 'Caractéristiques',
-    'car.choose_dates': 'Choisissez vos dates', 'car.start': 'Début', 'car.end': 'Fin',
-    'car.your_details': 'Vos coordonnées', 'car.name': 'Nom', 'car.email_optional': 'Email (facultatif)',
-    'car.phone_required': 'Téléphone *', 'car.book': 'Réserver',
-    'areg.title': "Inscription d'agence", 'areg.name': 'Nom', 'areg.location': 'Ville', 'areg.email': 'Email',
-    'areg.password': 'Mot de passe', 'areg.phone': 'Téléphone', 'areg.create': 'Créer le compte',
-    'acar.title': 'Ajouter une voiture', 'acar.brand': 'Marque', 'acar.model': 'Modèle', 'acar.year': 'Année',
-    'acar.transmission': 'Transmission', 'acar.automatic': 'automatique', 'acar.manual': 'manuelle',
-    'acar.seats': 'Places', 'acar.doors': 'Portes', 'acar.trunk': 'Coffre (L)', 'acar.fuel': 'Carburant',
-    'acar.options': 'Options', 'acar.price_day': 'Prix/jour', 'acar.location': 'Ville',
-    'acar.photo': 'URL de la photo', 'acar.description': 'Description', 'acar.save': 'Enregistrer',
-    'select.city': 'Choisir une ville…', 'select.fuel': 'Choisir un carburant…',
-    /* new ui keys */
-    'ui.delete': 'Supprimer', 'ui.no_cars': 'Aucune voiture.',
-    'ui.confirm_delete_car': 'Supprimer cette voiture ? Action irréversible.',
-    'ui.account': 'Compte', 'ui.danger_zone': 'Zone de danger : supprimez définitivement votre compte agence et toutes les voitures/réservations.',
-    'ui.delete_account_btn': 'Supprimer mon compte',
-    'ui.confirm_delete_account': 'Êtes-vous sûr ? Votre compte et toutes les voitures/réservations seront supprimés.',
-    'ui.account_deleted': 'Compte supprimé. Redirection…'
+  ui: {
+    account: 'Account'
+  },
+  search: {
+    title: 'Find a car'
+  },
+  filter: {
+    location: 'Location',
+    min_per_day: 'Min/day',
+    max_per_day: 'Max/day'
+  },
+  btn: {
+    search: 'Search',
+    view: 'View',
+    agency_catalog: 'Agency catalog',
+    approve: 'Approve',
+    decline: 'Decline',
+    delete: 'Delete',
+    save: 'Save',
+    create: 'Create',
+    login: 'Login'
+  },
+  car: {
+    price_per_day: '/day'
+  },
+  tel: 'Tel',
+  bookings: {
+    help: 'Approve, decline, or delete booking requests.'
+  },
+  forms: {
+    name: 'Name',
+    email: 'Email (optional)',
+    phone: 'Phone',
+    password: 'Password',
+    location: 'Location',
+    title: 'Title',
+    image_url: 'Photo URL (optional)',
+    daily_price: 'Price / day (MAD)',
+    year: 'Year',
+    transmission: 'Transmission',
+    seats: 'Seats',
+    doors: 'Doors',
+    trunk_liters: 'Trunk (L)',
+    fuel_type: 'Fuel',
+    start_date: 'Start date',
+    end_date: 'End date',
+    message: 'Message (optional)'
+  },
+  values: {
+    transmission: { manual: 'manual', automatic: 'automatic' },
+    fuel: { diesel: 'diesel', petrol: 'petrol', hybrid: 'hybrid', electric: 'electric' }
+  },
+  misc: {
+    no_cars: 'No cars found.',
+    no_bookings: 'No bookings yet.',
+    back: 'Back'
   }
 };
 
+const fr = {
+  nav: {
+    search: 'Rechercher',
+    register: "S'inscrire",
+    login: 'Se connecter',
+    my_cars: 'Mes voitures',
+    add_car: 'Ajouter une voiture',
+    bookings: 'Réservations',
+    logout: 'Déconnexion'
+  },
+  ui: {
+    account: 'Compte'
+  },
+  search: {
+    title: 'Trouver une voiture'
+  },
+  filter: {
+    location: 'Ville',
+    min_per_day: 'Min/jour',
+    max_per_day: 'Max/jour'
+  },
+  btn: {
+    search: 'Rechercher',
+    view: 'Voir',
+    agency_catalog: "Catalogue d'agence",
+    approve: 'Approuver',
+    decline: 'Refuser',
+    delete: 'Supprimer',
+    save: 'Enregistrer',
+    create: 'Créer',
+    login: 'Connexion'
+  },
+  car: {
+    price_per_day: '/jour'
+  },
+  tel: 'Tél',
+  bookings: {
+    help: 'Approuvez, refusez ou supprimez des demandes de réservation.'
+  },
+  forms: {
+    name: 'Nom',
+    email: 'Email (optionnel)',
+    phone: 'Téléphone',
+    password: 'Mot de passe',
+    location: 'Ville',
+    title: 'Titre',
+    image_url: 'URL de la photo (optionnel)',
+    daily_price: 'Prix / jour (MAD)',
+    year: 'Année',
+    transmission: 'Boîte',
+    seats: 'Places',
+    doors: 'Portes',
+    trunk_liters: 'Coffre (L)',
+    fuel_type: 'Carburant',
+    start_date: 'Date début',
+    end_date: 'Date fin',
+    message: 'Message (optionnel)'
+  },
+  values: {
+    transmission: { manual: 'manuelle', automatic: 'automatique' },
+    fuel: { diesel: 'diesel', petrol: 'essence', hybrid: 'hybride', electric: 'électrique' }
+  },
+  misc: {
+    no_cars: 'Aucun véhicule trouvé.',
+    no_bookings: 'Aucune réservation.',
+    back: 'Retour'
+  }
+};
+
+const DICTS = { en, fr };
+
+function getNested(obj, path) {
+  return path.split('.').reduce((acc, k) => (acc && acc[k] != null ? acc[k] : undefined), obj);
+}
+
+const I18nCtx = createContext({
+  lang: 'en',
+  setLang: () => {},
+  t: (key) => key
+});
+
 export function I18nProvider({ children }) {
-  const [lang, setLang] = useState(() => localStorage.getItem('lang') || 'en');
-  useEffect(() => { localStorage.setItem('lang', lang); }, [lang]);
-  const t = useMemo(() => (key) => (DICT[lang]?.[key]) ?? (DICT.en[key] ?? key), [lang]);
+  const [lang, setLangState] = useState(() => localStorage.getItem(LS_KEY) || 'en');
+
+  useEffect(() => {
+    if (!DICTS[lang]) {
+      setLangState('en');
+      localStorage.setItem(LS_KEY, 'en');
+    }
+  }, [lang]);
+
+  const setLang = (v) => {
+    const val = DICTS[v] ? v : 'en';
+    setLangState(val);
+    localStorage.setItem(LS_KEY, val);
+  };
+
+  const t = useMemo(() => {
+    const dict = DICTS[lang] || DICTS.en;
+    return (key) => {
+      const v = getNested(dict, key);
+      if (v == null) {
+        // fallback to EN, then key
+        const v2 = getNested(DICTS.en, key);
+        return v2 == null ? key : v2;
+      }
+      return v;
+    };
+  }, [lang]);
+
   const value = useMemo(() => ({ lang, setLang, t }), [lang, t]);
+
   return <I18nCtx.Provider value={value}>{children}</I18nCtx.Provider>;
 }
 
 export function useI18n() {
-  const ctx = useContext(I18nCtx);
-  if (!ctx) return { lang: 'en', setLang: () => {}, t: (k) => DICT.en[k] ?? k };
-  return ctx;
+  return useContext(I18nCtx);
 }
