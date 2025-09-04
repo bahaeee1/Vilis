@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { searchCars } from '../api.js';
 import { useNavigate } from 'react-router-dom';
 import { MOROCCAN_CITIES } from '../constants.js';
-import { useI18n } from '../i18n.js';
+import { useI18n } from '../i18n.jsx';
 
 function SpecsLine({ c }) {
   const tags = [];
