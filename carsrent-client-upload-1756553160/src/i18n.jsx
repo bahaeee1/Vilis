@@ -196,6 +196,16 @@ const fr = {
   }
 };
 
+// --- aliases so both "addcar" and "addCar" (and friends) work ---
+en.addCar = en.addcar;
+en.aReg = en.areg;
+en.aLogin = en.alogin;
+
+fr.addCar = fr.addcar;
+fr.aReg = fr.areg;
+fr.aLogin = fr.alogin;
+
+
 const DICTS = { en, fr };
 
 function getNested(obj, path) {
