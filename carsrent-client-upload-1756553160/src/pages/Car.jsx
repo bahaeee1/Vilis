@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getCar, createBooking } from '../api.js';
-import { useI18n } from '../i18n.js';
+import { useI18n } from '../i18n.jsx';
 
 function Spec({ label, value }) {
   if (value === null || value === undefined || value === '') return null;
