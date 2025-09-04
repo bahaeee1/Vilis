@@ -14,6 +14,8 @@ import AddCar from './pages/AddCar.jsx';
 import Bookings from './pages/Bookings.jsx';
 import AgencyCars from './pages/AgencyCars.jsx';
 import Account from './pages/Account.jsx';
+import Terms from './pages/Terms.jsx';
+import Privacy from './pages/Privacy.jsx';
 
 function Navbar() {
   const { t, lang, setLang } = useI18n();
@@ -64,6 +66,8 @@ function App() {
           <Route path="/agency/bookings" element={<Bookings />} />
           <Route path="/agency/cars" element={<AgencyCars />} />
           <Route path="/agency/account" element={<Account />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
         </Routes>
       </main>
       <footer style={{maxWidth:'1100px',margin:'40px auto',padding:'0 20px',color:'var(--muted)'}}>
