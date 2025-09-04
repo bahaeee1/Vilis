@@ -1,81 +1,62 @@
 // server/src/db.js
 import Database from 'better-sqlite3';
-import dotenv from 'dotenv';
+const db = new Database(process.env.SQLITE_FILE || 'data.sqlite');
 
-dotenv.config();
-
-const DB_FILE = process.env.DB_FILE || './local.sqlite';
-
-// Open DB and set sane pragmas
-const db = new Database(DB_FILE);
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
-
-// ---- Base schema (idempotent) ----
-const schema = `
+// Schema (idempotent)
+db.exec(`
 CREATE TABLE IF NOT EXISTS agencies (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
-  email TEXT UNIQUE NOT NULL,
+  email TEXT UNIQUE,
   password_hash TEXT NOT NULL,
-  location TEXT NOT NULL,
-  phone TEXT NOT NULL,
-  verified INTEGER DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  location TEXT,
+  phone TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
 );
 
 CREATE TABLE IF NOT EXISTS cars (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  agency_id INTEGER NOT NULL REFERENCES agencies(id) ON DELETE CASCADE,
+  agency_id INTEGER NOT NULL,
   title TEXT NOT NULL,
-  brand TEXT,
-  model TEXT,
+  daily_price INTEGER NOT NULL,
+  image_url TEXT,
   year INTEGER,
   transmission TEXT,
   seats INTEGER,
   doors INTEGER,
-  trunk_liters REAL,
+  trunk_liters INTEGER,
   fuel_type TEXT,
-  options TEXT,
-  daily_price REAL NOT NULL,
-  location TEXT NOT NULL,
-  image_url TEXT,
-  description TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS availability (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  car_id INTEGER NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
-  start_date TEXT NOT NULL,
-  end_date TEXT NOT NULL
+  created_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (agency_id) REFERENCES agencies(id)
 );
 
 CREATE TABLE IF NOT EXISTS bookings (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  car_id INTEGER NOT NULL REFERENCES cars(id) ON DELETE CASCADE,
-  start_date TEXT NOT NULL,
-  end_date TEXT NOT NULL,
-  total_price REAL NOT NULL,
+  car_id INTEGER NOT NULL,
+  agency_id INTEGER NOT NULL,
   customer_name TEXT NOT NULL,
-  customer_email TEXT,
   customer_phone TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'pending',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  customer_email TEXT,
+  start_date TEXT,
+  end_date TEXT,
+  message TEXT,
+  status TEXT DEFAULT 'pending',
+  created_at TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (car_id) REFERENCES cars(id),
+  FOREIGN KEY (agency_id) REFERENCES agencies(id)
 );
-`;
-db.exec(schema);
 
-// ---- Lightweight migrations for existing DB files ----
-function ensureColumn(table, col, ddl) {
-  const cols = db.prepare(`PRAGMA table_info(${table})`).all();
-  if (!cols.some(c => c.name === col)) {
-    db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+CREATE INDEX IF NOT EXISTS idx_cars_agency ON cars(agency_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_agency ON bookings(agency_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_car ON bookings(car_id);
+`);
+
+// Safety: try adding status column if an old DB exists without it
+try {
+  const cols = db.prepare(`PRAGMA table_info(bookings)`).all();
+  if (!cols.find(c => c.name === 'status')) {
+    db.exec(`ALTER TABLE bookings ADD COLUMN status TEXT DEFAULT 'pending'`);
   }
-}
-
-// Add agencies.verified if the DB was created before it existed
-ensureColumn('agencies', 'verified', 'verified INTEGER DEFAULT 0');
-db.prepare(`UPDATE agencies SET verified = 0 WHERE verified IS NULL`).run();
+} catch { /* ignore */ }
 
 export default db;
