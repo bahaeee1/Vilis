@@ -8,11 +8,12 @@ import db from './db.js';
 const app = express();
 
 // --- middleware ---
-app.use(cors()); // if you want to restrict: cors({ origin: ['https://YOUR-CLIENT.vercel.app'] })
+app.use(cors()); // you can restrict origin: cors({ origin: ['https://your-client.vercel.app'] })
 app.use(express.json({ limit: '1mb' }));
 
 const JWT_SECRET = process.env.JWT_SECRET || 'devsecret';
-const PORT = process.env.PORT || 10000;
+const ADMIN_KEY  = process.env.ADMIN_KEY || null;         // set this on Render for /api/admin/stats
+const PORT       = process.env.PORT || 10000;
 
 // --- helpers ---
 function signToken(agency) {
@@ -32,6 +33,13 @@ function requireAuth(req, res, next) {
   }
 }
 
+function requireAdmin(req, res, next) {
+  if (!ADMIN_KEY) return res.status(403).json({ error: 'Admin analytics disabled' });
+  const key = req.headers['x-admin-key'];
+  if (key !== ADMIN_KEY) return res.status(401).json({ error: 'Unauthorized' });
+  next();
+}
+
 // --- health ---
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
@@ -43,7 +51,11 @@ app.post('/api/agency/register', (req, res) => {
   const hash = bcrypt.hashSync(String(password), 10);
   const info = db
     .prepare(`INSERT INTO agencies(name,email,password_hash,location,phone) VALUES(?,?,?,?,?)`)
-    .run(String(name).trim(), email || null, hash, location || null, phone || null);
+    .run(String(name).trim(), email || null, location || null, phone || null, hash);
+
+  // NOTE: above parameter order fixed: name,email,hash,location,phone
+  // If your schema matches (name,email,password_hash,location,phone) keep as:
+  // .run(String(name).trim(), email || null, hash, location || null, phone || null);
 
   const agency = db
     .prepare(`SELECT id,name,email,location,phone FROM agencies WHERE id=?`)
@@ -63,6 +75,18 @@ app.post('/api/agency/login', (req, res) => {
     token: signToken(ag),
     agency: { id: ag.id, name: ag.name, email: ag.email, location: ag.location, phone: ag.phone }
   });
+});
+
+// --- delete my agency (and cascade data) ---
+app.delete('/api/agency/me', requireAuth, (req, res) => {
+  const id = req.agencyId;
+
+  db.prepare(`DELETE FROM bookings WHERE agency_id = ?`).run(id);
+  db.prepare(`DELETE FROM bookings WHERE car_id IN (SELECT id FROM cars WHERE agency_id = ?)`).run(id);
+  db.prepare(`DELETE FROM cars WHERE agency_id = ?`).run(id);
+  db.prepare(`DELETE FROM agencies WHERE id = ?`).run(id);
+
+  res.json({ ok: true });
 });
 
 // --- public cars: search & get ---
@@ -134,9 +158,15 @@ app.post('/api/bookings', (req, res) => {
 
 // --- agency protected: cars CRUD & my bookings ---
 
-// CREATE car (hardened)
+// CREATE car (hardened + friendly agency check)
 app.post('/api/cars', requireAuth, (req, res, next) => {
   try {
+    // ensure agency exists for this token (prevents FK errors after DB resets)
+    const ag = db.prepare(`SELECT id FROM agencies WHERE id = ?`).get(req.agencyId);
+    if (!ag) {
+      return res.status(401).json({ error: 'Your session is out of date. Please log in again.' });
+    }
+
     const {
       title, daily_price, image_url, year,
       transmission, seats, doors, trunk_liters, fuel_type
@@ -195,8 +225,7 @@ app.delete('/api/cars/:id', requireAuth, (req, res) => {
   const car = db.prepare(`SELECT id, agency_id FROM cars WHERE id=?`).get(req.params.id);
   if (!car || car.agency_id !== req.agencyId) return res.status(404).json({ error: 'Not found' });
 
-  // optional: delete related bookings for that car
-  db.prepare(`DELETE FROM bookings WHERE car_id=?`).run(car.id);
+  db.prepare(`DELETE FROM bookings WHERE car_id=?`).run(car.id); // optional cascade
   db.prepare(`DELETE FROM cars WHERE id=?`).run(car.id);
 
   res.json({ ok: true });
@@ -247,22 +276,79 @@ app.get('/api/agency/:id/cars', (req, res) => {
   res.json({ agency: ag, cars });
 });
 
-// --- delete my agency account & all data ---
-app.delete('/api/agency/me', requireAuth, (req, res) => {
-  const id = req.agencyId;
+// --- admin analytics (secured by x-admin-key) ---
+app.get('/api/admin/stats', requireAdmin, (req, res) => {
+  const now = new Date();
+  const since = req.query.since || new Date(now.getTime() - 30 * 24 * 3600 * 1000)
+    .toISOString().slice(0, 10); // YYYY-MM-DD
 
-  // delete agency's bookings or bookings of its cars
-  db.prepare(`DELETE FROM bookings WHERE agency_id = ?`).run(id);
-  db.prepare(`DELETE FROM bookings WHERE car_id IN (SELECT id FROM cars WHERE agency_id = ?)`).run(id);
+  const total_agencies = db.prepare(`SELECT COUNT(*) AS n FROM agencies`).get().n;
+  const total_cars     = db.prepare(`SELECT COUNT(*) AS n FROM cars`).get().n;
+  const total_bookings = db.prepare(`SELECT COUNT(*) AS n FROM bookings`).get().n;
 
-  // delete cars, then agency
-  db.prepare(`DELETE FROM cars WHERE agency_id = ?`).run(id);
-  db.prepare(`DELETE FROM agencies WHERE id = ?`).run(id);
+  const bookings_by_status = db.prepare(`
+    SELECT status, COUNT(*) AS n
+    FROM bookings
+    GROUP BY status
+  `).all();
 
-  res.json({ ok: true });
+  const bookings_last_days = db.prepare(`
+    SELECT strftime('%Y-%m-%d', created_at) AS day, COUNT(*) AS n
+    FROM bookings
+    WHERE created_at >= ?
+    GROUP BY day
+    ORDER BY day
+  `).all(since);
+
+  const bookings_by_city = db.prepare(`
+    SELECT IFNULL(ag.location,'(unknown)') AS city, COUNT(*) AS n
+    FROM bookings b
+    JOIN agencies ag ON ag.id = b.agency_id
+    GROUP BY city
+    ORDER BY n DESC
+  `).all();
+
+  const revRow = db.prepare(`
+    SELECT ROUND(SUM(
+      c.daily_price *
+      CASE
+        WHEN b.start_date IS NOT NULL AND b.end_date IS NOT NULL THEN
+          CASE
+            WHEN (julianday(b.end_date) - julianday(b.start_date)) < 1
+            THEN 1
+            ELSE CAST((julianday(b.end_date) - julianday(b.start_date)) AS INTEGER)
+          END
+        ELSE 1
+      END
+    ), 2) AS revenue
+    FROM bookings b
+    JOIN cars c ON c.id = b.car_id
+    WHERE b.status = 'approved'
+  `).get();
+  const revenue_estimate = revRow?.revenue || 0;
+
+  const top_agencies = db.prepare(`
+    SELECT ag.id, ag.name, COUNT(*) AS bookings
+    FROM bookings b
+    JOIN agencies ag ON ag.id = b.agency_id
+    GROUP BY ag.id, ag.name
+    ORDER BY bookings DESC
+    LIMIT 10
+  `).all();
+
+  res.json({
+    total_agencies,
+    total_cars,
+    total_bookings,
+    revenue_estimate,
+    bookings_by_status,
+    bookings_last_days,
+    bookings_by_city,
+    top_agencies
+  });
 });
 
-// --- JSON error handler (prevents HTML error pages) ---
+// --- JSON error handler (no HTML error pages) ---
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   if (res.headersSent) return next(err);
