@@ -23,7 +23,7 @@ const en = {
     title: 'Agency Register',
     name: 'Name',
     location: 'Location',
-    email: 'Email (optional)',
+    email: 'Email',
     phone: 'Phone',
     password: 'Password',
     create: 'Create account'
@@ -121,7 +121,7 @@ const fr = {
     title: "Inscription d'agence",
     name: 'Nom',
     location: 'Ville',
-    email: 'Email (optionnel)',
+    email: 'Email',
     phone: 'Téléphone',
     password: 'Mot de passe',
     create: 'Créer le compte'
