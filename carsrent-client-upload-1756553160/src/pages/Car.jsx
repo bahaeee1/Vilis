@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+// client/src/pages/Car.jsx
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getCar, createBooking } from '../api.js';
 import { useI18n } from '../i18n.jsx';
@@ -9,18 +10,17 @@ export default function Car() {
 
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // booking form state
-  const [customer_name, setCustomerName] = useState('');
-  const [customer_phone, setCustomerPhone] = useState('');
-  const [customer_email, setCustomerEmail] = useState('');
-  const [start_date, setStartDate] = useState('');
-  const [end_date, setEndDate] = useState('');
-  const [message, setMessage] = useState('');
-
-  const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState('');
   const [ok, setOk] = useState('');
+
+  // booking form
+  const [customer_name, setCustomerName]   = useState('');
+  const [customer_phone, setCustomerPhone] = useState('');
+  const [customer_email, setCustomerEmail] = useState('');
+  const [start_date, setStartDate]         = useState('');
+  const [end_date, setEndDate]             = useState('');
+  const [message, setMessage]              = useState('');
+  const [submitting, setSubmitting]        = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -35,6 +35,18 @@ export default function Car() {
       }
     })();
   }, [id]);
+
+  const specs = useMemo(() => {
+    if (!car) return [];
+    return [
+      car.year && { label: String(car.year) },
+      car.transmission && { label: car.transmission },
+      car.seats && { label: `${car.seats} ${lang === 'fr' ? 'places' : 'seats'}` },
+      car.doors && { label: `${car.doors} ${lang === 'fr' ? 'portes' : 'doors'}` },
+      car.trunk_liters && { label: `${car.trunk_liters}L ${lang === 'fr' ? 'coffre' : 'trunk'}` },
+      car.fuel_type && { label: car.fuel_type }
+    ].filter(Boolean);
+  }, [car, lang]);
 
   async function submit(e) {
     e.preventDefault();
@@ -58,13 +70,8 @@ export default function Car() {
         message: message.trim() || null
       });
       setOk(lang === 'fr' ? 'Demande envoyée !' : 'Request sent!');
-      // reset form
-      setCustomerName('');
-      setCustomerPhone('');
-      setCustomerEmail('');
-      setStartDate('');
-      setEndDate('');
-      setMessage('');
+      setCustomerName(''); setCustomerPhone(''); setCustomerEmail('');
+      setStartDate(''); setEndDate(''); setMessage('');
     } catch (e) {
       setErr(e?.error || 'Error');
     } finally {
@@ -72,50 +79,65 @@ export default function Car() {
     }
   }
 
-  if (loading) return <div className="container py-8 text-muted-foreground">Loading...</div>;
-  if (!car) return <div className="container py-8 text-destructive">{err || 'Not found'}</div>;
+  if (loading) return <div className="container py-10 text-muted-foreground">Loading…</div>;
+  if (!car)     return <div className="container py-10 text-destructive">{err || 'Not found'}</div>;
 
   return (
     <div className="container py-8 space-y-8">
-      {/* Car header */}
-      <div className="grid md:grid-cols-2 gap-6">
+      {/* Top: image + key info */}
+      <div className="grid lg:grid-cols-2 gap-8">
         <div className="card p-0 overflow-hidden">
           {car.image_url ? (
-            <img src={car.image_url} alt={car.title} className="w-full h-64 object-cover" />
+            <img src={car.image_url} alt={car.title} className="w-full h-72 object-cover" />
           ) : (
-            <div className="h-64 flex items-center justify-center text-muted-foreground">
-              (no image)
-            </div>
+            <div className="h-72 flex items-center justify-center text-muted-foreground">(no image)</div>
           )}
         </div>
 
-        <div className="card space-y-3">
-          <h1 className="text-2xl font-semibold">{car.title}</h1>
-          <div className="text-xl font-medium">
-            {car.daily_price} MAD <span className="text-muted-foreground">{t('car.price_per_day')}</span>
+        <div className="card space-y-4">
+          <h1 className="text-3xl font-bold">{car.title}</h1>
+
+          <div className="flex items-baseline gap-2">
+            <div className="text-2xl font-semibold">{car.daily_price} MAD</div>
+            <div className="text-muted-foreground">{t('car.price_per_day')}</div>
           </div>
 
-          <div className="text-sm text-muted-foreground">
-            {car.year ? <span className="mr-3">{car.year}</span> : null}
-            {car.transmission ? <span className="mr-3">{car.transmission}</span> : null}
-            {car.seats ? <span className="mr-3">{car.seats} seats</span> : null}
-            {car.doors ? <span className="mr-3">{car.doors} doors</span> : null}
-            {car.trunk_liters ? <span className="mr-3">{car.trunk_liters}L trunk</span> : null}
-            {car.fuel_type ? <span className="mr-3">{car.fuel_type}</span> : null}
-          </div>
+          {/* Spec chips */}
+          {specs.length > 0 && (
+            <ul className="flex flex-wrap gap-2">
+              {specs.map((s, i) => (
+                <li key={i} className="badge">{s.label}</li>
+              ))}
+            </ul>
+          )}
 
-          <div className="pt-2">
-            <div className="font-medium">
+          {/* Agency block */}
+          <div className="mt-2 space-y-2">
+            <div className="text-lg font-medium">
               {car.agency_name}{' '}
-              <span className="text-muted-foreground">• {car.location || '—'}</span>
+              <span className="text-muted-foreground">
+                • {car.location || (lang === 'fr' ? 'Ville inconnue' : 'Unknown city')}
+              </span>
             </div>
-            {car.agency_phone ? (
-              <div className="text-sm">
-                {t('tel')}: <a className="link" href={`tel:${car.agency_phone}`}>{car.agency_phone}</a>
+
+            {car.agency_phone && (
+              <div className="flex items-center gap-3">
+                <a className="btn btn-ghost btn-sm" href={`tel:${car.agency_phone}`}>
+                  {t('tel')}: {car.agency_phone}
+                </a>
+                <a
+                  className="btn btn-ghost btn-sm"
+                  target="_blank"
+                  rel="noreferrer"
+                  href={`https://wa.me/${car.agency_phone.replace(/\D/g,'')}`}
+                >
+                  WhatsApp
+                </a>
               </div>
-            ) : null}
-            <div className="pt-2">
-              <Link to={`/agency/${car.agency_id}`} className="btn btn-ghost btn-sm">
+            )}
+
+            <div>
+              <Link to={`/agency/${car.agency_id}`} className="btn btn-sm">
                 {t('btn.agency_catalog')}
               </Link>
             </div>
@@ -123,80 +145,55 @@ export default function Car() {
         </div>
       </div>
 
-      {/* Booking form */}
+      {/* Booking card */}
       <div className="card">
-        <h2 className="text-lg font-semibold mb-4">
+        <h2 className="text-xl font-semibold mb-4">
           {lang === 'fr' ? 'Demande de réservation' : 'Booking request'}
         </h2>
 
         <form onSubmit={submit} className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="label">{t('forms.name')}</label>
-            <input
-              className="input"
-              value={customer_name}
-              onChange={(e) => setCustomerName(e.target.value)}
-              placeholder={t('forms.name')}
-              required
-            />
+            <input className="input" value={customer_name}
+              onChange={(e) => setCustomerName(e.target.value)} placeholder={t('forms.name')} required />
           </div>
+
           <div>
             <label className="label">{t('forms.phone')}</label>
-            <input
-              className="input"
-              value={customer_phone}
-              onChange={(e) => setCustomerPhone(e.target.value)}
-              placeholder="+212..."
-              required
-            />
+            <input className="input" value={customer_phone}
+              onChange={(e) => setCustomerPhone(e.target.value)} placeholder="+212…" required />
           </div>
+
           <div>
             <label className="label">{t('forms.email')}</label>
-            <input
-              className="input"
-              type="email"
-              value={customer_email}
-              onChange={(e) => setCustomerEmail(e.target.value)}
-              placeholder="name@email.com"
-            />
+            <input className="input" type="email" value={customer_email}
+              onChange={(e) => setCustomerEmail(e.target.value)} placeholder="name@email.com" />
           </div>
+
           <div>
             <label className="label">{t('forms.start_date')}</label>
-            <input
-              className="input"
-              type="date"
-              value={start_date}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
+            <input className="input" type="date" value={start_date}
+              onChange={(e) => setStartDate(e.target.value)} />
           </div>
+
           <div>
             <label className="label">{t('forms.end_date')}</label>
-            <input
-              className="input"
-              type="date"
-              value={end_date}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+            <input className="input" type="date" value={end_date}
+              onChange={(e) => setEndDate(e.target.value)} />
           </div>
+
           <div className="md:col-span-2">
             <label className="label">{t('forms.message')}</label>
-            <textarea
-              className="textarea"
-              rows={3}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder={t('forms.message')}
-            />
+            <textarea className="textarea" rows={3} value={message}
+              onChange={(e) => setMessage(e.target.value)} placeholder={t('forms.message')} />
           </div>
 
           {err ? <div className="md:col-span-2 text-destructive">{err}</div> : null}
-          {ok ? <div className="md:col-span-2 text-green-500">{ok}</div> : null}
+          {ok  ? <div className="md:col-span-2 text-green-500">{ok}</div> : null}
 
           <div className="md:col-span-2">
             <button className="btn" disabled={submitting}>
-              {submitting
-                ? (lang === 'fr' ? 'Envoi...' : 'Sending...')
-                : (lang === 'fr' ? 'Envoyer la demande' : 'Send request')}
+              {submitting ? (lang === 'fr' ? 'Envoi…' : 'Sending…') : (lang === 'fr' ? 'Envoyer la demande' : 'Send request')}
             </button>
           </div>
         </form>
