@@ -1,113 +1,210 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getCar, createBooking } from '../api.js';
 import { useI18n } from '../i18n.jsx';
 
-function Spec({ label, value }) {
-  if (value === null || value === undefined || value === '') return null;
-  return <li><b>{label}:</b> {value}</li>;
-}
-
 export default function Car() {
   const { id } = useParams();
-  const nav = useNavigate();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+
   const [car, setCar] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-
+  // booking form state
   const [customer_name, setCustomerName] = useState('');
-  const [customer_email, setCustomerEmail] = useState(''); // optional
-  const [customer_phone, setCustomerPhone] = useState(''); // required
-  const [msg, setMsg] = useState(null);
-  const [err, setErr] = useState(null);
+  const [customer_phone, setCustomerPhone] = useState('');
+  const [customer_email, setCustomerEmail] = useState('');
+  const [start_date, setStartDate] = useState('');
+  const [end_date, setEndDate] = useState('');
+  const [message, setMessage] = useState('');
 
-  useEffect(() => { (async () => { try { setCar(await getCar(id)); } catch {} })(); }, [id]);
+  const [submitting, setSubmitting] = useState(false);
+  const [err, setErr] = useState('');
+  const [ok, setOk] = useState('');
 
-  const book = async () => {
-    setErr(null); setMsg(null);
-    if (!customer_phone || customer_phone.trim().length < 6) {
-      setErr('Phone is required (min 6 chars).');
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await getCar(id);
+        setCar(data);
+      } catch (e) {
+        setErr(e?.error || 'Error');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id]);
+
+  async function submit(e) {
+    e.preventDefault();
+    setErr('');
+    setOk('');
+
+    if (!customer_name.trim() || !customer_phone.trim()) {
+      setErr(lang === 'fr' ? 'Nom et téléphone sont obligatoires.' : 'Name and phone are required.');
       return;
     }
+
     try {
-      const payload = {
+      setSubmitting(true);
+      await createBooking({
         car_id: Number(id),
-        start_date: startDate,
-        end_date: endDate,
-        customer_name,
-        customer_phone
-      };
-      if (customer_email && customer_email.trim() !== '') payload.customer_email = customer_email;
-
-      const r = await createBooking(payload);
-      setMsg(
-        `Booking created. Contact ${r.agency_name || 'the agency'} at ${r.agency_phone || 'N/A'}.\n` +
-        `Dates: ${startDate} → ${endDate}\n` +
-        `Total price: ${r.total_price}. Status: ${r.status}.`
-      );
+        customer_name: customer_name.trim(),
+        customer_phone: customer_phone.trim(),
+        customer_email: customer_email.trim() || null,
+        start_date: start_date || null,
+        end_date: end_date || null,
+        message: message.trim() || null
+      });
+      setOk(lang === 'fr' ? 'Demande envoyée !' : 'Request sent!');
+      // reset form
+      setCustomerName('');
+      setCustomerPhone('');
+      setCustomerEmail('');
+      setStartDate('');
+      setEndDate('');
+      setMessage('');
     } catch (e) {
-      const message = e?.error?.message || e?.error || e?.message || JSON.stringify(e);
-      setErr(message);
+      setErr(e?.error || 'Error');
+    } finally {
+      setSubmitting(false);
     }
-  };
+  }
 
-  if (!car) return <div className="card">{t('car.loading')}</div>;
-
-  const agencyId = car.agency_id ?? car.agencyId;
+  if (loading) return <div className="container py-8 text-muted-foreground">Loading...</div>;
+  if (!car) return <div className="container py-8 text-destructive">{err || 'Not found'}</div>;
 
   return (
-    <div className="card">
-      <h2>{car.title}</h2>
-      <img style={{ width:'100%', maxHeight:360, objectFit:'cover', borderRadius:12 }}
-           src={car.image_url || `https://picsum.photos/seed/${car.id}/1200/600`} alt={car.title} />
-      <p className="muted">{car.brand} {car.model} · {car.location}</p>
-      <p><b>{car.daily_price}{t('car.price_per_day')}</b></p>
+    <div className="container py-8 space-y-8">
+      {/* Car header */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="card p-0 overflow-hidden">
+          {car.image_url ? (
+            <img src={car.image_url} alt={car.title} className="w-full h-64 object-cover" />
+          ) : (
+            <div className="h-64 flex items-center justify-center text-muted-foreground">
+              (no image)
+            </div>
+          )}
+        </div>
 
-      <h3>{t('car.agency_contact')}</h3>
-      <p>
-        <span
-          style={{ textDecoration: 'underline', cursor: 'pointer' }}
-          onClick={() => nav('/agency/' + agencyId)}
-          title={t('car.view_agency_catalog')}
-        >
-          <b>{car.agency_name || 'Agency'}</b>
-        </span>
-        <br/>
-        {t('tel')}: <a href={`tel:${car.agency_phone || ''}`}>{car.agency_phone || '—'}</a>
-      </p>
-      <button className="btn secondary" onClick={() => nav('/agency/' + agencyId)}>
-        {t('car.view_agency_catalog')}
-      </button>
+        <div className="card space-y-3">
+          <h1 className="text-2xl font-semibold">{car.title}</h1>
+          <div className="text-xl font-medium">
+            {car.daily_price} MAD <span className="text-muted-foreground">{t('car.price_per_day')}</span>
+          </div>
 
-      <h3 style={{marginTop:16}}>{t('car.specs')}</h3>
-      <ul className="specs">
-        <Spec label="Year" value={car.year} />
-        <Spec label="Transmission" value={car.transmission} />
-        <Spec label="Seats" value={car.seats} />
-        <Spec label="Doors" value={car.doors} />
-        <Spec label="Trunk volume (L)" value={car.trunk_liters} />
-        <Spec label="Fuel type" value={car.fuel_type} />
-      </ul>
-      {car.options && <p className="muted">Options: {car.options}</p>}
+          <div className="text-sm text-muted-foreground">
+            {car.year ? <span className="mr-3">{car.year}</span> : null}
+            {car.transmission ? <span className="mr-3">{car.transmission}</span> : null}
+            {car.seats ? <span className="mr-3">{car.seats} seats</span> : null}
+            {car.doors ? <span className="mr-3">{car.doors} doors</span> : null}
+            {car.trunk_liters ? <span className="mr-3">{car.trunk_liters}L trunk</span> : null}
+            {car.fuel_type ? <span className="mr-3">{car.fuel_type}</span> : null}
+          </div>
 
-      <h3>{t('car.choose_dates')}</h3>
-      <div className="row">
-        <div className="col-3"><label>{t('car.start')}</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} /></div>
-        <div className="col-3"><label>{t('car.end')}</label><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} /></div>
+          <div className="pt-2">
+            <div className="font-medium">
+              {car.agency_name}{' '}
+              <span className="text-muted-foreground">• {car.location || '—'}</span>
+            </div>
+            {car.agency_phone ? (
+              <div className="text-sm">
+                {t('tel')}: <a className="link" href={`tel:${car.agency_phone}`}>{car.agency_phone}</a>
+              </div>
+            ) : null}
+            <div className="pt-2">
+              <Link to={`/agency/${car.agency_id}`} className="btn btn-ghost btn-sm">
+                {t('btn.agency_catalog')}
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <h3>{t('car.your_details')}</h3>
-      <div className="row">
-        <div className="col-4"><label>{t('car.name')}</label><input value={customer_name} onChange={e => setCustomerName(e.target.value)} /></div>
-        <div className="col-4"><label>{t('car.email_optional')}</label><input value={customer_email} onChange={e => setCustomerEmail(e.target.value)} /></div>
-        <div className="col-4"><label>{t('car.phone_required')}</label><input value={customer_phone} onChange={e => setCustomerPhone(e.target.value)} required /></div>
-      </div>
-      <div style={{ marginTop: 12 }}><button className="btn" onClick={book}>{t('car.book')}</button></div>
+      {/* Booking form */}
+      <div className="card">
+        <h2 className="text-lg font-semibold mb-4">
+          {lang === 'fr' ? 'Demande de réservation' : 'Booking request'}
+        </h2>
 
-      {msg && <div className="success" style={{ marginTop: 8, whiteSpace: 'pre-line' }}>{msg}</div>}
-      {err && <div className="error" style={{ marginTop: 8 }}>{String(err)}</div>}
+        <form onSubmit={submit} className="grid md:grid-cols-2 gap-4">
+          <div>
+            <label className="label">{t('forms.name')}</label>
+            <input
+              className="input"
+              value={customer_name}
+              onChange={(e) => setCustomerName(e.target.value)}
+              placeholder={t('forms.name')}
+              required
+            />
+          </div>
+          <div>
+            <label className="label">{t('forms.phone')}</label>
+            <input
+              className="input"
+              value={customer_phone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              placeholder="+212..."
+              required
+            />
+          </div>
+          <div>
+            <label className="label">{t('forms.email')}</label>
+            <input
+              className="input"
+              type="email"
+              value={customer_email}
+              onChange={(e) => setCustomerEmail(e.target.value)}
+              placeholder="name@email.com"
+            />
+          </div>
+          <div>
+            <label className="label">{t('forms.start_date')}</label>
+            <input
+              className="input"
+              type="date"
+              value={start_date}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="label">{t('forms.end_date')}</label>
+            <input
+              className="input"
+              type="date"
+              value={end_date}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="label">{t('forms.message')}</label>
+            <textarea
+              className="textarea"
+              rows={3}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder={t('forms.message')}
+            />
+          </div>
+
+          {err ? <div className="md:col-span-2 text-destructive">{err}</div> : null}
+          {ok ? <div className="md:col-span-2 text-green-500">{ok}</div> : null}
+
+          <div className="md:col-span-2">
+            <button className="btn" disabled={submitting}>
+              {submitting
+                ? (lang === 'fr' ? 'Envoi...' : 'Sending...')
+                : (lang === 'fr' ? 'Envoyer la demande' : 'Send request')}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div>
+        <Link to="/" className="link">{t('misc.back')}</Link>
+      </div>
     </div>
   );
 }
