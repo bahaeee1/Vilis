@@ -6,9 +6,7 @@ import { useI18n } from '../i18n.jsx';
 
 function normalizePhone(raw) {
   if (!raw) return { display: '', digits: '' };
-  // If it looks like a token (very long / contains slashes/letters), just extract digits.
   const digits = raw.replace(/[^\d+]/g, '');
-  // Pretty display: add spaces every 2–3 digits (simple, locale-agnostic)
   const display = digits.replace(/(\+?\d{1,3})(\d{2,3})(\d{2,3})(\d{2,3})?(\d{2,3})?/,
     (_, a, b, c, d = '', e = '') => [a, b, c, d, e].filter(Boolean).join(' ')
   );
@@ -24,7 +22,6 @@ export default function Car() {
   const [err, setErr] = useState('');
   const [ok, setOk] = useState('');
 
-  // booking form
   const [customer_name, setCustomerName]   = useState('');
   const [customer_phone, setCustomerPhone] = useState('');
   const [customer_email, setCustomerEmail] = useState('');
@@ -64,13 +61,24 @@ export default function Car() {
     [car?.agency_phone]
   );
 
+  function looksLikeEmail(v) {
+    return /\S+@\S+\.\S+/.test(String(v));
+  }
+
   async function submit(e) {
     e.preventDefault();
     setErr('');
     setOk('');
 
     if (!customer_name.trim() || !customer_phone.trim()) {
-      setErr(lang === 'fr' ? 'Nom et téléphone sont obligatoires.' : 'Name and phone are required.');
+      setErr(lang === 'fr'
+        ? 'Nom et téléphone sont obligatoires.'
+        : 'Name and phone are required.'
+      );
+      return;
+    }
+    if (customer_email && !looksLikeEmail(customer_email)) {
+      setErr(lang === 'fr' ? 'Email invalide.' : 'Invalid email.');
       return;
     }
 
@@ -80,7 +88,7 @@ export default function Car() {
         car_id: Number(id),
         customer_name: customer_name.trim(),
         customer_phone: customer_phone.trim(),
-        customer_email: customer_email.trim() || null,
+        customer_email: customer_email.trim() || null,  // optional
         start_date: start_date || null,
         end_date: end_date || null,
         message: message.trim() || null
@@ -100,7 +108,6 @@ export default function Car() {
 
   return (
     <div className="container py-8 space-y-8">
-      {/* Top: image + key info */}
       <div className="grid lg:grid-cols-2 gap-8">
         <div className="card p-0 overflow-hidden">
           {car.image_url ? (
@@ -118,12 +125,10 @@ export default function Car() {
             <div className="text-muted-foreground">{t('car.price_per_day')}</div>
           </div>
 
-          {/* Spec bullets (less cramped) */}
           <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
             {specs.map((s, i) => <li key={i}>{s.label}</li>)}
           </ul>
 
-          {/* Agency block */}
           <div className="mt-2 space-y-2">
             <div className="text-lg font-medium">
               {car.agency_name}{' '}
@@ -135,19 +140,12 @@ export default function Car() {
             {phone.display ? (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm text-muted-foreground select-none">{t('tel')}:</span>
-                <a
-                  className="btn btn-ghost btn-sm max-w-xs truncate"
-                  title={phone.display}
-                  href={`tel:${phone.digits}`}
-                >
+                <a className="btn btn-ghost btn-sm max-w-xs truncate" title={phone.display} href={`tel:${phone.digits}`}>
                   {phone.display}
                 </a>
                 {phone.digits && (
-                  <a
-                    className="btn btn-ghost btn-sm"
-                    target="_blank" rel="noreferrer"
-                    href={`https://wa.me/${phone.digits.replace(/[^\d]/g, '')}`}
-                  >
+                  <a className="btn btn-ghost btn-sm" target="_blank" rel="noreferrer"
+                     href={`https://wa.me/${phone.digits.replace(/[^\d]/g, '')}`}>
                     WhatsApp
                   </a>
                 )}
@@ -167,7 +165,6 @@ export default function Car() {
         </div>
       </div>
 
-      {/* Booking card */}
       <div className="card">
         <h2 className="text-xl font-semibold mb-4">
           {lang === 'fr' ? 'Demande de réservation' : 'Booking request'}
