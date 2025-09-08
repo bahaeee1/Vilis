@@ -1,8 +1,19 @@
 // client/src/pages/Car.jsx
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getCar, createBooking } from '../api.js';
 import { useI18n } from '../i18n.jsx';
+
+function normalizePhone(raw) {
+  if (!raw) return { display: '', digits: '' };
+  // If it looks like a token (very long / contains slashes/letters), just extract digits.
+  const digits = raw.replace(/[^\d+]/g, '');
+  // Pretty display: add spaces every 2–3 digits (simple, locale-agnostic)
+  const display = digits.replace(/(\+?\d{1,3})(\d{2,3})(\d{2,3})(\d{2,3})?(\d{2,3})?/,
+    (_, a, b, c, d = '', e = '') => [a, b, c, d, e].filter(Boolean).join(' ')
+  );
+  return { display: display || digits, digits };
+}
 
 export default function Car() {
   const { id } = useParams();
@@ -47,6 +58,11 @@ export default function Car() {
       car.fuel_type && { label: car.fuel_type }
     ].filter(Boolean);
   }, [car, lang]);
+
+  const phone = useMemo(
+    () => normalizePhone(car?.agency_phone || ''),
+    [car?.agency_phone]
+  );
 
   async function submit(e) {
     e.preventDefault();
@@ -102,14 +118,10 @@ export default function Car() {
             <div className="text-muted-foreground">{t('car.price_per_day')}</div>
           </div>
 
-          {/* Spec chips */}
-          {specs.length > 0 && (
-            <ul className="flex flex-wrap gap-2">
-              {specs.map((s, i) => (
-                <li key={i} className="badge">{s.label}</li>
-              ))}
-            </ul>
-          )}
+          {/* Spec bullets (less cramped) */}
+          <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+            {specs.map((s, i) => <li key={i}>{s.label}</li>)}
+          </ul>
 
           {/* Agency block */}
           <div className="mt-2 space-y-2">
@@ -120,19 +132,29 @@ export default function Car() {
               </span>
             </div>
 
-            {car.agency_phone && (
-              <div className="flex items-center gap-3">
-                <a className="btn btn-ghost btn-sm" href={`tel:${car.agency_phone}`}>
-                  {t('tel')}: {car.agency_phone}
-                </a>
+            {phone.display ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-muted-foreground select-none">{t('tel')}:</span>
                 <a
-                  className="btn btn-ghost btn-sm"
-                  target="_blank"
-                  rel="noreferrer"
-                  href={`https://wa.me/${car.agency_phone.replace(/\D/g,'')}`}
+                  className="btn btn-ghost btn-sm max-w-xs truncate"
+                  title={phone.display}
+                  href={`tel:${phone.digits}`}
                 >
-                  WhatsApp
+                  {phone.display}
                 </a>
+                {phone.digits && (
+                  <a
+                    className="btn btn-ghost btn-sm"
+                    target="_blank" rel="noreferrer"
+                    href={`https://wa.me/${phone.digits.replace(/[^\d]/g, '')}`}
+                  >
+                    WhatsApp
+                  </a>
+                )}
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground">
+                {lang === 'fr' ? 'Téléphone non fourni' : 'Phone not provided'}
               </div>
             )}
 
