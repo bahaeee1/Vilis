@@ -99,7 +99,11 @@ const en = {
     no_cars: 'No cars found.',
     no_bookings: 'No bookings yet.',
     back: 'Back'
-  }
+  },
+
+  // inside en.forms
+category: 'Category',
+
 };
 
 const fr = {
@@ -193,7 +197,9 @@ const fr = {
     no_cars: 'Aucun véhicule trouvé.',
     no_bookings: 'Aucune réservation.',
     back: 'Retour'
-  }
+  },
+
+  category: 'Catégorie',
 };
 
 // --- aliases so both "addcar" and "addCar" (and friends) work ---
