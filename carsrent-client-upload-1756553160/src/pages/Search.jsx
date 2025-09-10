@@ -7,12 +7,29 @@ import { Link } from 'react-router-dom';
 const CITIES = ['Anywhere','Casablanca','Rabat','Marrakesh','Tangier','Agadir','Fes','Kenitra','Tetouan','Oujda', 'Safi','El Jadida','Mohammedia','Beni Mellal','Nador','Laayoune','Dakhla','Essaouira','Meknes'];
 const CATEGORIES = ['Any','sedan','suv','hatchback','pickup','van','convertible','coupe','wagon','crossover'];
 
+// Small helper to render an input with a suffix (e.g., MAD)
+function InputWithSuffix({ value, onChange, placeholder, suffix = 'MAD' }) {
+  return (
+    <div className="input-suffix">
+      <input
+        className="input"
+        type="number"
+        inputMode="numeric"
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+      />
+      <span className="suffix">{suffix}</span>
+    </div>
+  );
+}
+
 export default function Search() {
   const { t } = useI18n();
   const [location, setLocation] = useState('Anywhere');
   const [minPrice, setMin] = useState('');
   const [maxPrice, setMax] = useState('');
-  const [category, setCategory] = useState('Any'); // NEW
+  const [category, setCategory] = useState('Any');
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +39,7 @@ export default function Search() {
     if (location && location !== 'Anywhere') params.location = location;
     if (minPrice) params.minPrice = minPrice;
     if (maxPrice) params.maxPrice = maxPrice;
-    if (category && category !== 'Any') params.category = category; // NEW
+    if (category && category !== 'Any') params.category = category;
     try {
       const data = await searchCars(params);
       setCars(data);
@@ -31,7 +48,7 @@ export default function Search() {
     }
   }
 
-  useEffect(() => { run(); /* initial */ }, []);
+  useEffect(() => { run(); }, []);
 
   return (
     <div className="container">
@@ -48,15 +65,24 @@ export default function Search() {
 
           <div>
             <label className="label">{t('filter.min_per_day')}</label>
-            <input className="input" type="number" value={minPrice} onChange={e => setMin(e.target.value)} />
+            <InputWithSuffix
+              value={minPrice}
+              onChange={e => setMin(e.target.value)}
+              placeholder="0"
+              suffix="MAD"
+            />
           </div>
 
           <div>
             <label className="label">{t('filter.max_per_day')}</label>
-            <input className="input" type="number" value={maxPrice} onChange={e => setMax(e.target.value)} />
+            <InputWithSuffix
+              value={maxPrice}
+              onChange={e => setMax(e.target.value)}
+              placeholder="1000"
+              suffix="MAD"
+            />
           </div>
 
-          {/* NEW: Category filter */}
           <div>
             <label className="label">{t('forms.category') || 'Category'}</label>
             <select className="input" value={category} onChange={e => setCategory(e.target.value)}>
