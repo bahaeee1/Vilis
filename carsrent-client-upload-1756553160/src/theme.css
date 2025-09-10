@@ -136,3 +136,16 @@ textarea{ height:100px; resize: vertical }
 .spec-list li { margin: .15rem 0; }
 
 .car-hero { width: 100%; height: auto; border-radius: 12px; display: block; }
+
+/* suffix inside numeric inputs (for currency) */
+.input-suffix { position: relative; }
+.input-suffix .suffix {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted, #9aa3b2);
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.input-suffix > .input { padding-right: 56px; }
