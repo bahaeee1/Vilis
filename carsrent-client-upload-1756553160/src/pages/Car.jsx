@@ -12,7 +12,6 @@ export default function Car() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
 
-  // booking form fields
   const [customer_name, setName] = useState('');
   const [customer_phone, setPhone] = useState('');
   const [customer_email, setEmail] = useState('');
@@ -63,40 +62,32 @@ export default function Car() {
   return (
     <div className="container car-page">
       <div className="grid grid-2 gap-xl">
-        {/* LEFT: car info */}
         <section className="card">
           {car.image_url ? (
             <img src={car.image_url} alt={car.title} className="car-hero" />
           ) : null}
 
           <h1 className="h1 mt-md">{car.title}</h1>
+          <div className="muted mt-xs"><strong>{car.daily_price}</strong> MAD {t('car.price_per_day')}</div>
 
-          <div className="muted mt-xs">
-            <strong>{car.daily_price}</strong> MAD {t('car.price_per_day')}
-          </div>
-
-          {/* specs */}
+          {/* specs (no trunk; add category if present) */}
           <ul className="spec-list mt-md">
+            {car.category && <li>{car.category}</li>}
             {car.year && <li>{car.year}</li>}
             {car.transmission && <li>{car.transmission}</li>}
             {car.seats && <li>{car.seats} seats</li>}
             {car.doors && <li>{car.doors} doors</li>}
-            {car.trunk_liters && <li>{car.trunk_liters}L trunk</li>}
             {car.fuel_type && <li>{car.fuel_type}</li>}
           </ul>
 
-          {/* CONTACT — two rows, small button, fully wrapping */}
           <div className="mt-lg">
             <div className="contact-row">
               <span className="muted">
                 {t('tel')}:&nbsp;
                 {car.agency_phone ? (
                   <a className="link" href={`tel:${car.agency_phone}`}>{car.agency_phone}</a>
-                ) : (
-                  <em>-</em>
-                )}
+                ) : (<em>-</em>)}
               </span>
-
               {car.agency_phone && (
                 <a
                   className="btn btn-ghost btn-sm"
@@ -109,19 +100,13 @@ export default function Car() {
             </div>
 
             <div className="muted mt-xxs wrap-line">
-              <span>
-                {t('nav.register').includes('Register') ? 'Agency' : 'Agence'}:&nbsp;
-                <strong>{car.agency_name}</strong>
-              </span>
+              <span>{t('nav.register').includes('Register') ? 'Agency' : 'Agence'}:&nbsp;<strong>{car.agency_name}</strong></span>
               <span className="dot">·</span>
-              <Link className="link" to={`/agency/${car.agency_id}`}>
-                {t('btn.agency_catalog')}
-              </Link>
+              <Link className="link" to={`/agency/${car.agency_id}`}>{t('btn.agency_catalog')}</Link>
             </div>
           </div>
         </section>
 
-        {/* RIGHT: booking form */}
         <aside className="card">
           <h2 className="h2">{t('bookingRequest') || 'Booking request'}</h2>
 
@@ -130,22 +115,10 @@ export default function Car() {
             <input className="input" value={customer_name} onChange={e => setName(e.target.value)} required />
 
             <label className="label mt-sm">{t('forms.phone')}</label>
-            <input
-              className="input"
-              placeholder="+212…"
-              value={customer_phone}
-              onChange={e => setPhone(e.target.value)}
-              required
-            />
+            <input className="input" placeholder="+212…" value={customer_phone} onChange={e => setPhone(e.target.value)} required />
 
             <label className="label mt-sm">{t('forms.email')}</label>
-            <input
-              className="input"
-              type="email"
-              placeholder="name@email.com"
-              value={customer_email}
-              onChange={e => setEmail(e.target.value)}
-            />
+            <input className="input" type="email" placeholder="name@email.com" value={customer_email} onChange={e => setEmail(e.target.value)} />
 
             <div className="grid grid-2 gap-sm mt-sm">
               <div>
@@ -162,10 +135,7 @@ export default function Car() {
             <textarea className="input" rows="3" value={message} onChange={e => setMsg(e.target.value)} />
 
             {submitMsg && <div className="mt-sm muted">{submitMsg}</div>}
-
-            <button className="btn btn-primary mt-md" type="submit">
-              {t('btn.create')}
-            </button>
+            <button className="btn btn-primary mt-md" type="submit">{t('btn.create')}</button>
           </form>
         </aside>
       </div>
