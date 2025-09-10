@@ -75,7 +75,7 @@ export default function Car() {
             <strong>{car.daily_price}</strong> MAD {t('car.price_per_day')}
           </div>
 
-          {/* clean spec list */}
+          {/* specs */}
           <ul className="spec-list mt-md">
             {car.year && <li>{car.year}</li>}
             {car.transmission && <li>{car.transmission}</li>}
@@ -85,9 +85,9 @@ export default function Car() {
             {car.fuel_type && <li>{car.fuel_type}</li>}
           </ul>
 
-          {/* Agency line — keeps things tidy and never overlaps */}
+          {/* CONTACT — two rows, small button, fully wrapping */}
           <div className="mt-lg">
-            <div className="agency-line">
+            <div className="contact-row">
               <span className="muted">
                 {t('tel')}:&nbsp;
                 {car.agency_phone ? (
@@ -97,30 +97,27 @@ export default function Car() {
                 )}
               </span>
 
-              {/* Small inline “Agency catalog” link placed near the agency name */}
-              <span className="divider">•</span>
-              <span className="muted">
-                {t('nav.register').includes('Register') ? 'Agency' : 'Agence'}:&nbsp;
-                <strong>{car.agency_name}</strong>
-                &nbsp;&middot;&nbsp;
-                <Link className="link" to={`/agency/${car.agency_id}`}>
-                  {t('btn.agency_catalog')}
-                </Link>
-              </span>
-            </div>
-
-            {/* Optional WhatsApp button under contact row */}
-            {car.agency_phone && (
-              <div className="mt-sm">
+              {car.agency_phone && (
                 <a
-                  className="btn btn-ghost"
+                  className="btn btn-ghost btn-sm"
                   href={`https://wa.me/${car.agency_phone.replace(/\D/g, '')}`}
                   target="_blank" rel="noreferrer"
                 >
                   WhatsApp
                 </a>
-              </div>
-            )}
+              )}
+            </div>
+
+            <div className="muted mt-xxs wrap-line">
+              <span>
+                {t('nav.register').includes('Register') ? 'Agency' : 'Agence'}:&nbsp;
+                <strong>{car.agency_name}</strong>
+              </span>
+              <span className="dot">·</span>
+              <Link className="link" to={`/agency/${car.agency_id}`}>
+                {t('btn.agency_catalog')}
+              </Link>
+            </div>
           </div>
         </section>
 
