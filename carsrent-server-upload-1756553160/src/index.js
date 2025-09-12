@@ -124,34 +124,59 @@ app.post('/api/bookings', (req, res) => {
 });
 
 // ---- agency protected: cars + bookings ----
-app.post('/api/cars', requireAuth, (req, res) => {
+// --- public booking (always pending initially) ---
+app.post('/api/bookings', (req, res) => {
   const {
-    title, daily_price, image_url, year,
-    transmission, seats, doors, fuel_type, category // category NEW
+    car_id,
+    customer_name,
+    customer_phone,
+    customer_email,
+    start_date,
+    end_date,
+    message
   } = req.body || {};
 
-  if (!title || !daily_price) return res.status(400).json({ error: 'Missing title/daily_price' });
+  if (!car_id || !customer_name || !customer_phone) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  // ✅ Block invalid date ranges (only if both dates are provided)
+  if (start_date && end_date) {
+    const s = new Date(start_date);
+    const e = new Date(end_date);
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) {
+      return res.status(400).json({ error: 'Invalid dates' });
+    }
+    if (e < s) {
+      return res.status(400).json({ error: 'End date must be on or after start date' });
+    }
+  }
+
+  const car = db.prepare(`SELECT id, agency_id FROM cars WHERE id=?`).get(car_id);
+  if (!car) return res.status(400).json({ error: 'Invalid car' });
 
   const info = db.prepare(`
-    INSERT INTO cars
-    (agency_id,title,daily_price,image_url,year,transmission,seats,doors,fuel_type,category)
-    VALUES(@agency_id,@title,@daily_price,@image_url,@year,@transmission,@seats,@doors,@fuel_type,@category)
+    INSERT INTO bookings(
+      car_id, agency_id, customer_name, customer_phone, customer_email,
+      start_date, end_date, message, status
+    )
+    VALUES(@car_id,@agency_id,@customer_name,@customer_phone,@customer_email,
+           @start_date,@end_date,@message,'pending')
   `).run({
-    agency_id: req.agencyId,
-    title,
-    daily_price,
-    image_url: image_url || null,
-    year: year || null,
-    transmission: transmission || null,
-    seats: seats || null,
-    doors: doors || null,
-    fuel_type: fuel_type || null,
-    category: category || null
+    car_id,
+    agency_id: car.agency_id,
+    customer_name,
+    customer_phone,
+    customer_email: customer_email || null,
+    start_date: start_date || null,
+    end_date: end_date || null,
+    message: message || null
   });
 
-  const row = db.prepare(`SELECT * FROM cars WHERE id=?`).get(info.lastInsertRowid);
+  const row = db.prepare(`SELECT * FROM bookings WHERE id=?`).get(info.lastInsertRowid);
   res.json(row);
 });
+
 
 app.get('/api/agency/me/cars', requireAuth, (req, res) => {
   const rows = db.prepare(`SELECT * FROM cars WHERE agency_id=? ORDER BY created_at DESC`).all(req.agencyId);
