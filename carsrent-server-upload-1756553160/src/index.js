@@ -4,6 +4,7 @@ import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from './db.js';
+import { sendAgencyBookingEmail } from './mailer.js';
 
 const app = express();
 
@@ -172,7 +173,7 @@ app.get('/api/cars/:id', (req, res) => {
 });
 
 // ---------- public booking ----------
-app.post('/api/bookings', (req, res) => {
+app.post('/api/bookings', async (req, res) => {
   const {
     car_id,
     customer_name,
@@ -199,7 +200,7 @@ app.post('/api/bookings', (req, res) => {
     }
   }
 
-  const car = db.prepare(`SELECT id, agency_id FROM cars WHERE id = ?`).get(car_id);
+  const car = db.prepare(`SELECT id, agency_id, title FROM cars WHERE id = ?`).get(car_id);
   if (!car) return res.status(400).json({ error: 'Invalid car' });
 
   const info = db
@@ -222,8 +223,26 @@ app.post('/api/bookings', (req, res) => {
       message: message || null
     });
 
-  const row = db.prepare(`SELECT * FROM bookings WHERE id = ?`).get(info.lastInsertRowid);
-  res.json(row);
+  const bookingRow = db.prepare(`SELECT * FROM bookings WHERE id = ?`).get(info.lastInsertRowid);
+
+  // fetch agency email & name to notify
+  const agency = db
+    .prepare(`SELECT name, email FROM agencies WHERE id = ?`)
+    .get(car.agency_id);
+
+  // Send email (best-effort; do not block the HTTP with failures)
+  try {
+    await sendAgencyBookingEmail({
+      to: agency?.email,
+      agencyName: agency?.name,
+      carTitle: car?.title,
+      booking: bookingRow
+    });
+  } catch (e) {
+    console.error('[bookings] email send failed:', e);
+  }
+
+  res.json(bookingRow);
 });
 
 // ---------- agency protected: cars ----------
@@ -237,7 +256,7 @@ app.post('/api/cars', requireAuth, (req, res) => {
     seats,
     doors,
     fuel_type,
-    category // new: sedan | suv | hatchback | coupe | van | other
+    category // sedan | suv | hatchback | coupe | van | other
   } = req.body || {};
 
   if (!title || daily_price == null) {
@@ -283,7 +302,6 @@ app.delete('/api/cars/:id', requireAuth, (req, res) => {
     .get(req.params.id);
   if (!car || car.agency_id !== req.agencyId) return res.status(404).json({ error: 'Not found' });
 
-  // remove dependent bookings first to avoid FK errors
   db.prepare(`DELETE FROM bookings WHERE car_id = ?`).run(car.id);
   db.prepare(`DELETE FROM cars WHERE id = ?`).run(car.id);
 
@@ -347,16 +365,9 @@ app.delete('/api/agency/me/bookings/:id', requireAuth, (req, res) => {
 app.delete('/api/agency/me', requireAuth, (req, res) => {
   const id = req.agencyId;
 
-  // Bookings for this agency or any of its cars
   db.prepare(`DELETE FROM bookings WHERE agency_id = ?`).run(id);
-  db.prepare(
-    `DELETE FROM bookings WHERE car_id IN (SELECT id FROM cars WHERE agency_id = ?)`
-  ).run(id);
-
-  // Cars
+  db.prepare(`DELETE FROM bookings WHERE car_id IN (SELECT id FROM cars WHERE agency_id = ?)`).run(id);
   db.prepare(`DELETE FROM cars WHERE agency_id = ?`).run(id);
-
-  // Agency
   db.prepare(`DELETE FROM agencies WHERE id = ?`).run(id);
 
   res.json({ ok: true });
@@ -388,7 +399,6 @@ app.get('/api/admin/stats', requireAdmin, (_req, res) => {
     .prepare(`SELECT COUNT(*) AS n FROM bookings WHERE status = 'approved'`)
     .get().n;
 
-  // top 5 locations by car count
   const topLocations = db
     .prepare(
       `
