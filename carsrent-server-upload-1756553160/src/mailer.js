@@ -1,104 +1,59 @@
 // server/src/mailer.js
-// Simple mail helper using Resend (https://resend.com)
-// No extra dependency required (Node has global fetch).
-// Env needed:
-//  - RESEND_API_KEY
-//  - EMAIL_FROM   (e.g. "Vilis <notifications@yourdomain.com>")
+// Sends email via Resend with good debug logs.
+// Works even on Node 22+ (uses global fetch).
 
-function htmlEscape(s = '') {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const EMAIL_FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev'; // safe dev sender
 
-export async function sendAgencyBookingEmail({
-  to,
-  agencyName,
-  carTitle,
-  booking
-}) {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM;
-
-  if (!to || !apiKey || !from) {
-    console.log('[mailer] Email disabled or missing config. Skipping send.', {
-      hasTo: !!to,
-      hasKey: !!apiKey,
-      hasFrom: !!from,
-    });
-    return false;
+export async function sendAgencyBookingEmail({ to, agencyName, carTitle, booking }) {
+  // Friendly guardrails & logs (visible in Render logs)
+  if (!RESEND_API_KEY) {
+    console.warn('[email] SKIP: RESEND_API_KEY missing. Set it in Render env.');
+    return { skipped: true, reason: 'no_api_key' };
+  }
+  if (!to) {
+    console.warn('[email] SKIP: recipient "to" missing.');
+    return { skipped: true, reason: 'no_recipient' };
   }
 
-  const subject = `New booking request for "${carTitle}"`;
-  const {
-    customer_name,
-    customer_phone,
-    customer_email,
-    start_date,
-    end_date,
-    message,
-  } = booking || {};
+  const subject = `New booking for ${carTitle}`;
+  const text =
+`Hi ${agencyName || 'there'},
 
-  const html = `
-    <div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.5">
-      <h2>Hi ${htmlEscape(agencyName || 'there')},</h2>
-      <p>You have a new booking request on <b>Vilis</b>.</p>
+You have a new booking request on Vilis:
 
-      <h3>Car</h3>
-      <p><b>${htmlEscape(carTitle || '')}</b></p>
+• Car: ${carTitle}
+• Customer: ${booking.customer_name}
+• Phone: ${booking.customer_phone}
+• Email: ${booking.customer_email || '—'}
+• Dates: ${(booking.start_date || '—')} → ${(booking.end_date || '—')}
+• Message: ${booking.message || '—'}
 
-      <h3>Customer</h3>
-      <ul>
-        <li><b>Name:</b> ${htmlEscape(customer_name || '')}</li>
-        <li><b>Phone:</b> ${htmlEscape(customer_phone || '')}</li>
-        ${
-          customer_email
-            ? `<li><b>Email:</b> ${htmlEscape(customer_email)}</li>`
-            : ''
-        }
-      </ul>
+Log in to your dashboard to accept/decline.
 
-      <h3>Dates</h3>
-      <ul>
-        <li><b>Start:</b> ${htmlEscape(start_date || '—')}</li>
-        <li><b>End:</b> ${htmlEscape(end_date || '—')}</li>
-      </ul>
+— Vilis`;
 
-      ${
-        message
-          ? `<h3>Message</h3><p style="white-space:pre-wrap">${htmlEscape(message)}</p>`
-          : ''
-      }
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: EMAIL_FROM,   // For dev, 'onboarding@resend.dev' works without domain verify
+      to: [to],
+      subject,
+      text,
+    }),
+  });
 
-      <p style="margin-top:24px;color:#666">This message was sent automatically by Vilis.</p>
-    </div>
-  `;
+  const body = await res.text();
 
-  try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from,
-        to: [to],
-        subject,
-        html,
-      }),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error('[mailer] Resend error:', text);
-      return false;
-    }
-    console.log('[mailer] Email sent to', to);
-    return true;
-  } catch (err) {
-    console.error('[mailer] Send error:', err);
-    return false;
+  if (!res.ok) {
+    console.error('[email] FAILED', res.status, body);
+    throw new Error(`Email send failed: ${res.status} ${body}`);
   }
+
+  console.log('[email] SENT OK →', to, body);
+  try { return JSON.parse(body); } catch { return { ok: true }; }
 }
