@@ -164,3 +164,28 @@ textarea{ height:100px; resize: vertical }
   pointer-events: none;
 }
 .input-suffix > .input { padding-right: 56px; }
+
+/* --- Fix overlap under Tel/Agency on car page --- */
+
+.contact-line {
+  display: block;
+  margin: 0 0 10px 0;
+}
+
+/* Force buttons to a new row and add spacing */
+.car-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+
+  margin-top: 16px !important;
+  clear: both !important;      /* breaks out of any floats */
+  width: 100% !important;      /* occupies full row */
+  position: static !important; /* cancels any offsetting */
+}
+
+/* Make sure buttons themselves don’t shift position */
+.car-actions .btn {
+  position: static !important;
+  white-space: nowrap;
+}
