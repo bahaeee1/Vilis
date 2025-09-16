@@ -116,6 +116,21 @@ textarea{ height:100px; resize: vertical }
   flex-wrap: wrap;
 }
 
+/* Make sure the metadata lines have a little space */
+.car-meta p,
+.car-detail p {
+  margin: 0 0 8px 0;
+}
+
+/* Push the buttons down and prevent overlap */
+.car-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;   /* <- the nudge */
+}
+
+
 .wrap-line {
   display: flex;
   gap: .5rem;
