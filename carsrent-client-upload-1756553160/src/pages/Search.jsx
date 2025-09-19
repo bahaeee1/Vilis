@@ -9,7 +9,7 @@ const CITIES = [
   'Anywhere',
   'Casablanca','Rabat','Marrakesh','Tangier','Agadir','Fès','Meknès',
   'Kenitra','Salé','Oujda','Tétouan','Safi','El Jadida','Khouribga',
-  'Béni Mellal','Nador','Laayoune','Dakhla','Essaouira','Meknes'
+  'Béni Mellal','Nador','Laayoune','Dakhla','Essaouira'
 ];
 
 // Categories (first option means "no category filter")
