@@ -40,15 +40,17 @@ function Navbar() {
           </NavLink>
 
           {!token && (
-            <>
-              <NavLink to="/agency/register" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
-                {t('nav.register')}
-              </NavLink>
-              <NavLink to="/agency/login" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
-                {t('nav.login')}
-              </NavLink>
-            </>
-          )}
+  <>
+    {/* Replace public/agency register with info page */}
+    <NavLink to="/agency/onboarding" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+      {t('nav.get_listed') /* e.g., “Get listed” */}
+    </NavLink>
+    <NavLink to="/agency/login" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+      {t('nav.login')}
+    </NavLink>
+  </>
+)}
+
 
           {token && (
             <>
