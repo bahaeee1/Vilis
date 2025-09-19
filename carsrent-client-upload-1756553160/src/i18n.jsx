@@ -7,8 +7,8 @@ const TRANSLATIONS = {
   en: {
     // Navigation
     'nav.search': 'Search',
-    'nav.register': 'Register', // legacy (if still referenced)
     'nav.get_listed': 'Register your agency',
+    'nav.register': 'Register',         // legacy, safe to keep
     'nav.login': 'Login',
     'nav.logout': 'Logout',
     'nav.my_cars': 'My Cars',
@@ -24,12 +24,22 @@ const TRANSLATIONS = {
     // Buttons
     'btn.view': 'View',
     'btn.create': 'Create',
+    'btn.delete': 'Delete',
+    'btn.search': 'Search',
     'btn.approve': 'Approve',
     'btn.decline': 'Decline',
-    'btn.search': 'Search',
     'btn.agency_catalog': 'Agency catalog',
 
-    // Labels / forms
+    // Forms (all fields used by Add Car, Booking, etc.)
+    'forms.title': 'Title',
+    'forms.daily_price': 'Daily price',
+    'forms.image_url': 'Image URL',
+    'forms.year': 'Year',
+    'forms.transmission': 'Transmission',
+    'forms.seats': 'Seats',
+    'forms.doors': 'Doors',
+    'forms.fuel_type': 'Fuel type',
+    'forms.category': 'Category',
     'forms.name': 'Full name',
     'forms.email': 'Email',
     'forms.phone': 'Phone',
@@ -47,11 +57,11 @@ const TRANSLATIONS = {
     'select.city': 'Select a city',
 
     // Values
+    'values.transmission.manual': 'manual',
+    'values.transmission.automatic': 'automatic',
     'values.fuel.diesel': 'diesel',
     'values.fuel.petrol': 'petrol',
     'values.fuel.hybrid': 'hybrid',
-    'values.transmission.manual': 'manual',
-    'values.transmission.automatic': 'automatic',
     'values.fuel.electric': 'electric',
 
     // Car page
@@ -62,7 +72,7 @@ const TRANSLATIONS = {
     'addcar.title': 'Add a new car',
     'addcar.create': 'Create car',
 
-    // Agency register (legacy — kept in case you still show it anywhere)
+    // Agency register (legacy—can be unused)
     'areg.title': 'Agency registration',
     'areg.name': 'Agency name',
     'areg.email': 'Agency email',
@@ -71,7 +81,7 @@ const TRANSLATIONS = {
     'areg.phone': 'Phone',
     'areg.create': 'Create agency',
 
-    // Agency onboarding (Contact / Register your agency)
+    // Agency onboarding (new)
     'onboard.title': 'Register your agency',
     'onboard.text': 'Agency accounts are created by our team. Contact us and we’ll verify your details and set up your login.',
 
@@ -85,8 +95,8 @@ const TRANSLATIONS = {
   fr: {
     // Navigation
     'nav.search': 'Recherche',
-    'nav.register': 'Inscription', // legacy
     'nav.get_listed': 'Enregistrer votre agence',
+    'nav.register': 'Inscription',       // legacy
     'nav.login': 'Connexion',
     'nav.logout': 'Déconnexion',
     'nav.my_cars': 'Mes véhicules',
@@ -102,12 +112,22 @@ const TRANSLATIONS = {
     // Buttons
     'btn.view': 'Voir',
     'btn.create': 'Créer',
+    'btn.delete': 'Supprimer',
+    'btn.search': 'Rechercher',
     'btn.approve': 'Approuver',
     'btn.decline': 'Refuser',
-    'btn.search': 'Rechercher',
     'btn.agency_catalog': 'Catalogue de l’agence',
 
-    // Labels / forms
+    // Forms
+    'forms.title': 'Titre',
+    'forms.daily_price': 'Prix par jour',
+    'forms.image_url': 'URL de l’image',
+    'forms.year': 'Année',
+    'forms.transmission': 'Transmission',
+    'forms.seats': 'Places',
+    'forms.doors': 'Portes',
+    'forms.fuel_type': 'Type de carburant',
+    'forms.category': 'Catégorie',
     'forms.name': 'Nom complet',
     'forms.email': 'Email',
     'forms.phone': 'Téléphone',
@@ -125,11 +145,11 @@ const TRANSLATIONS = {
     'select.city': 'Sélectionnez une ville',
 
     // Values
+    'values.transmission.manual': 'manuelle',
+    'values.transmission.automatic': 'automatique',
     'values.fuel.diesel': 'diesel',
     'values.fuel.petrol': 'essence',
     'values.fuel.hybrid': 'hybride',
-    'values.transmission.manual': 'manuelle',
-    'values.transmission.automatic': 'automatique',
     'values.fuel.electric': 'électrique',
 
     // Car page
@@ -149,7 +169,7 @@ const TRANSLATIONS = {
     'areg.phone': 'Téléphone',
     'areg.create': 'Créer l’agence',
 
-    // Agency onboarding (Contact / Register your agency)
+    // Agency onboarding (new)
     'onboard.title': 'Enregistrer votre agence',
     'onboard.text': 'Les comptes agences sont créés par notre équipe. Contactez-nous pour vérification et création de votre accès.',
 
@@ -161,33 +181,24 @@ const TRANSLATIONS = {
   }
 };
 
-// ———————————————————————————————————————————————
-// i18n engine
-// ———————————————————————————————————————————————
-const I18nContext = createContext({
-  lang: 'en',
-  setLang: () => {},
-  t: (key, vars) => key
-});
+// ————————————————————————————————
+const I18nContext = createContext({ lang: 'en', setLang: () => {}, t: (k) => k });
 
 export function I18nProvider({ children }) {
   const [lang, setLang] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === 'en' || saved === 'fr') return saved;
-    // Fallback: browser language
     const nav = (navigator.language || 'en').toLowerCase();
     return nav.startsWith('fr') ? 'fr' : 'en';
   });
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, lang);
-  }, [lang]);
+  useEffect(() => { localStorage.setItem(STORAGE_KEY, lang); }, [lang]);
 
   const t = useMemo(() => {
     return function translate(key, vars = {}) {
       const dict = TRANSLATIONS[lang] || TRANSLATIONS.en;
-      let str = dict[key] ?? TRANSLATIONS.en[key] ?? key;
-      // Simple {{var}} interpolation
+      let str = (dict[key] ?? TRANSLATIONS.en[key] ?? key);
+      // simple {{var}} interpolation
       str = str.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, v) => (vars[v] ?? ''));
       return str;
     };
