@@ -189,3 +189,16 @@ textarea{ height:100px; resize: vertical }
   position: static !important;
   white-space: nowrap;
 }
+
+.divider {
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+  margin: 18px 0;
+}
+
+.footer-contact {
+  display: grid;
+  gap: 6px;
+  color: var(--text);
+}
+.footer-contact .link { color: #cfd6ff; text-decoration: underline; }
