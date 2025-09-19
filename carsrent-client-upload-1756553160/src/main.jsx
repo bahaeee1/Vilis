@@ -126,3 +126,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </I18nProvider>
   </React.StrictMode>
 );
+<footer className="site-footer">
+  {/* ...your existing footer content... */}
+  <div className="footer-contact sitewide">
+    <div><strong>Email:</strong> <a className="link" href="mailto:assist@vilis.com">assist@vilis.com</a></div>
+    <div><strong>Phone:</strong> <a className="link" href="https://wa.me/212621053938" target="_blank" rel="noreferrer">0621053938</a></div>
+  </div>
+</footer>
+
