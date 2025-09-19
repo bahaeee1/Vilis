@@ -8,6 +8,7 @@ import { getToken, clearToken, API_BASE } from './api';
 
 import Search from './pages/Search.jsx';
 import Car from './pages/Car.jsx';
+import AgencyOnboarding from './pages/AgencyOnboarding.jsx';
 
 import AgencyLogin from './pages/AgencyLogin.jsx';
 import AddCar from './pages/AddCar.jsx';
@@ -95,7 +96,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Search />} />
           <Route path="/car/:id" element={<Car />} />
-         
+         <Route path="/agency/onboarding" element={<AgencyOnboarding />} />
           <Route path="/agency/login" element={<AgencyLogin />} />
           <Route path="/agency/add-car" element={<AddCar />} />
           <Route path="/agency/bookings" element={<Bookings />} />
