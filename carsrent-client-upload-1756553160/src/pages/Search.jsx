@@ -97,16 +97,19 @@ export default function Search() {
       </div>
 
       <div className="grid grid-3 gap-md mt-lg">
-        {loading && <div className="card">Loading…</div>}
-        {!loading && cars.length === 0 && <div className="card">{t('misc.no_cars')}</div>}
-        {!loading && cars.map(c => (
-          <div className="card" key={c.id}>
-            {c.image_url && <img src={c.image_url} alt={c.title} style={{width:'100%', height:'180px', objectFit:'cover', borderRadius:'12px'}} />}
-            <h3 className="h3 mt-sm">{c.title}</h3>
-            <div className="muted">{c.daily_price} MAD {t('car.price_per_day')}</div>
-            <div className="muted mt-xxs">{c.location || '—'} {c.category ? `· ${c.category}` : ''}</div>
-            <Link className="btn btn-ghost mt-sm" to={`/car/${c.id}`}>{t('btn.view')}</Link>
-          </div>
+  {loading && <div className="card">Loading…</div>}
+  {!loading && cars.length === 0 && <div className="card">{t('misc.no_cars')}</div>}
+  {!loading && cars.map(c => (
+    <div className="card" key={c.id}>
+      {c.image_url && <img src={c.image_url} alt={c.title} style={{ width:'100%', height:'180px', objectFit:'cover', borderRadius:'12px' }} />}
+      <h3 className="h3 mt-sm">{c.title}</h3>
+      <div className="muted">{c.daily_price} MAD {t('car.price_per_day')}</div>
+      <div className="muted mt-xxs">{c.location || '—'} {c.category ? `· ${c.category}` : ''}</div>
+      <Link className="btn btn-ghost mt-sm" to={`/car/${c.id}`}>{t('btn.view')}</Link>
+    </div>
+  ))}
+</div>
+
         ))}
       </div>
     </div>
