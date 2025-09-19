@@ -8,7 +8,7 @@ import { getToken, clearToken, API_BASE } from './api';
 
 import Search from './pages/Search.jsx';
 import Car from './pages/Car.jsx';
-import AgencyRegister from './pages/AgencyRegister.jsx';
+
 import AgencyLogin from './pages/AgencyLogin.jsx';
 import AddCar from './pages/AddCar.jsx';
 import Bookings from './pages/Bookings.jsx';
