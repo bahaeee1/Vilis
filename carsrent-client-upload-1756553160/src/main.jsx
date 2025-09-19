@@ -95,7 +95,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Search />} />
           <Route path="/car/:id" element={<Car />} />
-          <Route path="/agency/register" element={<AgencyRegister />} />
+         
           <Route path="/agency/login" element={<AgencyLogin />} />
           <Route path="/agency/add-car" element={<AddCar />} />
           <Route path="/agency/bookings" element={<Bookings />} />
