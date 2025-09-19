@@ -1,259 +1,203 @@
 // client/src/i18n.jsx
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-const LS_KEY = 'vilis_lang';
+const STORAGE_KEY = 'lang';
 
-const en = {
-  nav: {
-    search: 'Search',
-    register: 'Register',
-    login: 'Login',
-    my_cars: 'My Cars',
-    add_car: 'Add Car',
-    bookings: 'Bookings',
-    logout: 'Logout'
-  },
-  ui: { account: 'Account' },
-  search: { title: 'Find a car' },
-  filter: { location: 'Location', min_per_day: 'Min/day', max_per_day: 'Max/day' },
-  select: { city: 'select city' },
+const TRANSLATIONS = {
+  en: {
+    // Navigation
+    'nav.search': 'Search',
+    'nav.register': 'Register', // legacy (if still referenced)
+    'nav.get_listed': 'Register your agency',
+    'nav.login': 'Login',
+    'nav.logout': 'Logout',
+    'nav.my_cars': 'My Cars',
+    'nav.add_car': 'Add Car',
+    'nav.bookings': 'Bookings',
 
-  // Agency register form (areg.*)
-  areg: {
-    title: 'Agency Register',
-    name: 'Name',
-    location: 'Location',
-    email: 'Email',
-    phone: 'Phone',
-    password: 'Password',
-    create: 'Create account'
-  },
+    // Generic UI
+    'ui.account': 'Account',
+    'ui.delete': 'Delete',
+    'ui.confirm_delete_car': 'Are you sure you want to delete this car?',
+    'ui.no_cars': 'No cars yet.',
 
-  // Agency login (alogin.*)
-  alogin: {
-    title: 'Agency Login',
-    email: 'Email',
-    password: 'Password',
-    login: 'Login'
-  },
+    // Buttons
+    'btn.view': 'View',
+    'btn.create': 'Create',
+    'btn.approve': 'Approve',
+    'btn.decline': 'Decline',
+    'btn.search': 'Search',
+    'btn.agency_catalog': 'Agency catalog',
 
-  // Add car (addcar.*)
-  addcar: {
-    title: 'Add Car',
-    create: 'Add car'
-  },
+    // Labels / forms
+    'forms.name': 'Full name',
+    'forms.email': 'Email',
+    'forms.phone': 'Phone',
+    'forms.message': 'Message',
+    'forms.start_date': 'Start date',
+    'forms.end_date': 'End date',
+    'tel': 'Tel',
 
-  // My cars (mycars.*)
-  mycars: {
-    title: 'My Cars',
-    delete: 'Delete',
-    confirm_delete: 'Delete this car?'
-  },
+    // Search page
+    'search.title': 'Find your car',
+    'filter.location': 'Location',
+    'filter.min_per_day': 'Min/day',
+    'filter.max_per_day': 'Max/day',
+    'filter.category': 'Category',
+    'select.city': 'Select a city',
 
-  btn: {
-    search: 'Search',
-    view: 'View',
-    agency_catalog: 'Agency catalog',
-    approve: 'Approve',
-    decline: 'Decline',
-    delete: 'Delete',
-    save: 'Save',
-    create: 'Create',
-    login: 'Login',
-  },
+    // Values
+    'values.fuel.diesel': 'diesel',
+    'values.fuel.petrol': 'petrol',
+    'values.fuel.hybrid': 'hybrid',
+    'values.transmission.manual': 'manual',
+    'values.transmission.automatic': 'automatic',
+    'values.fuel.electric': 'electric',
 
-  car: { price_per_day: '/day' },
-  tel: 'Tel',
+    // Car page
+    'car.price_per_day': 'per day',
+    'book.req_title': 'Booking request',
 
-  bookings: {
-    help: 'Approve, decline, or delete booking requests.'
-  },
+    // Add car
+    'addcar.title': 'Add a new car',
+    'addcar.create': 'Create car',
 
-  // Generic form labels (in case some pages use these)
-  forms: {
-    name: 'Name',
-    email: 'Email (optional)',
-    phone: 'Phone',
-    password: 'Password',
-    location: 'Location',
-    title: 'Title',
-    image_url: 'Photo URL (optional)',
-    daily_price: 'Price / day (MAD)',
-    year: 'Year',
-    transmission: 'Transmission',
-    seats: 'Seats',
-    doors: 'Doors',
-    trunk_liters: 'Trunk (L)',
-    fuel_type: 'Fuel',
-    start_date: 'Start date',
-    end_date: 'End date',
-    message: 'Message (optional)'
+    // Agency register (legacy — kept in case you still show it anywhere)
+    'areg.title': 'Agency registration',
+    'areg.name': 'Agency name',
+    'areg.email': 'Agency email',
+    'areg.password': 'Password',
+    'areg.location': 'Location',
+    'areg.phone': 'Phone',
+    'areg.create': 'Create agency',
+
+    // Agency onboarding (Contact / Register your agency)
+    'onboard.title': 'Register your agency',
+    'onboard.text': 'Agency accounts are created by our team. Contact us and we’ll verify your details and set up your login.',
+
+    // Bookings page
+    'bookings.help': 'Manage and update booking requests from your clients.',
+
+    // Misc
+    'misc.no_cars': 'No cars match your filters.'
   },
 
-  values: {
-    transmission: { manual: 'manual', automatic: 'automatic' },
-    fuel: { diesel: 'diesel', petrol: 'petrol', hybrid: 'hybrid', electric: 'electric' }
-  },
+  fr: {
+    // Navigation
+    'nav.search': 'Recherche',
+    'nav.register': 'Inscription', // legacy
+    'nav.get_listed': 'Enregistrer votre agence',
+    'nav.login': 'Connexion',
+    'nav.logout': 'Déconnexion',
+    'nav.my_cars': 'Mes véhicules',
+    'nav.add_car': 'Ajouter un véhicule',
+    'nav.bookings': 'Réservations',
 
-  misc: {
-    no_cars: 'No cars found.',
-    no_bookings: 'No bookings yet.',
-    back: 'Back'
-  },
+    // Generic UI
+    'ui.account': 'Compte',
+    'ui.delete': 'Supprimer',
+    'ui.confirm_delete_car': 'Voulez-vous vraiment supprimer ce véhicule ?',
+    'ui.no_cars': 'Aucun véhicule pour le moment.',
 
-  // inside en.forms
-category: 'Category',
+    // Buttons
+    'btn.view': 'Voir',
+    'btn.create': 'Créer',
+    'btn.approve': 'Approuver',
+    'btn.decline': 'Refuser',
+    'btn.search': 'Rechercher',
+    'btn.agency_catalog': 'Catalogue de l’agence',
 
+    // Labels / forms
+    'forms.name': 'Nom complet',
+    'forms.email': 'Email',
+    'forms.phone': 'Téléphone',
+    'forms.message': 'Message',
+    'forms.start_date': 'Date de début',
+    'forms.end_date': 'Date de fin',
+    'tel': 'Tél',
+
+    // Search page
+    'search.title': 'Trouvez votre voiture',
+    'filter.location': 'Lieu',
+    'filter.min_per_day': 'Min/jour',
+    'filter.max_per_day': 'Max/jour',
+    'filter.category': 'Catégorie',
+    'select.city': 'Sélectionnez une ville',
+
+    // Values
+    'values.fuel.diesel': 'diesel',
+    'values.fuel.petrol': 'essence',
+    'values.fuel.hybrid': 'hybride',
+    'values.transmission.manual': 'manuelle',
+    'values.transmission.automatic': 'automatique',
+    'values.fuel.electric': 'électrique',
+
+    // Car page
+    'car.price_per_day': 'par jour',
+    'book.req_title': 'Demande de réservation',
+
+    // Add car
+    'addcar.title': 'Ajouter un véhicule',
+    'addcar.create': 'Créer le véhicule',
+
+    // Agency register (legacy)
+    'areg.title': 'Inscription agence',
+    'areg.name': 'Nom de l’agence',
+    'areg.email': 'Email de l’agence',
+    'areg.password': 'Mot de passe',
+    'areg.location': 'Lieu',
+    'areg.phone': 'Téléphone',
+    'areg.create': 'Créer l’agence',
+
+    // Agency onboarding (Contact / Register your agency)
+    'onboard.title': 'Enregistrer votre agence',
+    'onboard.text': 'Les comptes agences sont créés par notre équipe. Contactez-nous pour vérification et création de votre accès.',
+
+    // Bookings page
+    'bookings.help': 'Gérez et mettez à jour les demandes de réservation de vos clients.',
+
+    // Misc
+    'misc.no_cars': 'Aucun véhicule ne correspond à vos filtres.'
+  }
 };
 
-const fr = {
-  nav: {
-    search: 'Rechercher',
-    register: "S'inscrire",
-    login: 'Se connecter',
-    my_cars: 'Mes voitures',
-    add_car: 'Ajouter une voiture',
-    bookings: 'Réservations',
-    logout: 'Déconnexion'
-  },
-  ui: { account: 'Compte' },
-  search: { title: 'Trouver une voiture' },
-  filter: { location: 'Ville', min_per_day: 'Min/jour', max_per_day: 'Max/jour' },
-  select: { city: 'sélectionner la ville' },
-
-  areg: {
-    title: "Inscription d'agence",
-    name: 'Nom',
-    location: 'Ville',
-    email: 'Email',
-    phone: 'Téléphone',
-    password: 'Mot de passe',
-    create: 'Créer le compte'
-  },
-
-  alogin: {
-    title: 'Connexion agence',
-    email: 'Email',
-    password: 'Mot de passe',
-    login: 'Connexion'
-  },
-
-  addcar: {
-    title: 'Ajouter une voiture',
-    create: 'Ajouter'
-  },
-
-  mycars: {
-    title: 'Mes voitures',
-    delete: 'Supprimer',
-    confirm_delete: 'Supprimer cette voiture ?'
-  },
-
-  btn: {
-    search: 'Rechercher',
-    view: 'Voir',
-    agency_catalog: "Catalogue d'agence",
-    approve: 'Approuver',
-    decline: 'Refuser',
-    delete: 'Supprimer',
-    save: 'Enregistrer',
-    create: 'Créer',
-    login: 'Connexion',
-  },
-
-  car: { price_per_day: '/jour' },
-  tel: 'Tél',
-
-  bookings: {
-    help: 'Approuvez, refusez ou supprimez des demandes de réservation.'
-  },
-
-  forms: {
-    name: 'Nom',
-    email: 'Email (optionnel)',
-    phone: 'Téléphone',
-    password: 'Mot de passe',
-    location: 'Ville',
-    title: 'Titre',
-    image_url: 'URL de la photo (optionnel)',
-    daily_price: 'Prix / jour (MAD)',
-    year: 'Année',
-    transmission: 'Boîte',
-    seats: 'Places',
-    doors: 'Portes',
-    trunk_liters: 'Coffre (L)',
-    fuel_type: 'Carburant',
-    start_date: 'Date début',
-    end_date: 'Date fin',
-    message: 'Message (optionnel)'
-  },
-
-  values: {
-    transmission: { manual: 'manuelle', automatic: 'automatique' },
-    fuel: { diesel: 'diesel', petrol: 'essence', hybrid: 'hybride', electric: 'électrique' }
-  },
-
-  misc: {
-    no_cars: 'Aucun véhicule trouvé.',
-    no_bookings: 'Aucune réservation.',
-    back: 'Retour'
-  },
-
-  category: 'Catégorie',
-};
-
-// --- aliases so both "addcar" and "addCar" (and friends) work ---
-en.addCar = en.addcar;
-en.aReg = en.areg;
-en.aLogin = en.alogin;
-
-fr.addCar = fr.addcar;
-fr.aReg = fr.areg;
-fr.aLogin = fr.alogin;
-
-
-const DICTS = { en, fr };
-
-function getNested(obj, path) {
-  return path.split('.').reduce((acc, k) => (acc && acc[k] != null ? acc[k] : undefined), obj);
-}
-
-const I18nCtx = createContext({
+// ———————————————————————————————————————————————
+// i18n engine
+// ———————————————————————————————————————————————
+const I18nContext = createContext({
   lang: 'en',
   setLang: () => {},
-  t: (key) => key
+  t: (key, vars) => key
 });
 
 export function I18nProvider({ children }) {
-  const [lang, setLangState] = useState(() => localStorage.getItem(LS_KEY) || 'en');
+  const [lang, setLang] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === 'en' || saved === 'fr') return saved;
+    // Fallback: browser language
+    const nav = (navigator.language || 'en').toLowerCase();
+    return nav.startsWith('fr') ? 'fr' : 'en';
+  });
 
   useEffect(() => {
-    if (!DICTS[lang]) {
-      setLangState('en');
-      localStorage.setItem(LS_KEY, 'en');
-    }
+    localStorage.setItem(STORAGE_KEY, lang);
   }, [lang]);
 
-  const setLang = (v) => {
-    const val = DICTS[v] ? v : 'en';
-    setLangState(val);
-    localStorage.setItem(LS_KEY, val);
-  };
-
   const t = useMemo(() => {
-    const dict = DICTS[lang] || DICTS.en;
-    return (key) => {
-      const v = getNested(dict, key);
-      if (v == null) {
-        const v2 = getNested(DICTS.en, key);
-        return v2 == null ? key : v2;
-      }
-      return v;
+    return function translate(key, vars = {}) {
+      const dict = TRANSLATIONS[lang] || TRANSLATIONS.en;
+      let str = dict[key] ?? TRANSLATIONS.en[key] ?? key;
+      // Simple {{var}} interpolation
+      str = str.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, v) => (vars[v] ?? ''));
+      return str;
     };
   }, [lang]);
 
   const value = useMemo(() => ({ lang, setLang, t }), [lang, t]);
-  return <I18nCtx.Provider value={value}>{children}</I18nCtx.Provider>;
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
-export function useI18n() { return useContext(I18nCtx); }
+export function useI18n() {
+  return useContext(I18nContext);
+}
