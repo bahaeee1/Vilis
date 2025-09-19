@@ -128,16 +128,17 @@ export default function CarPage() {
               </div>
             </div>
 
-            <div className="mt-sm">
-              {whatsappHref && (
-                <a className="btn" href={whatsappHref} target="_blank" rel="noreferrer">
-                  WhatsApp
-                </a>
-              )}
-              <Link className="btn btn-ghost" style={{ marginLeft: 8 }} to={`/agency/${car.agency_id}/cars`}>
-                {t('btn.agency_catalog')}
-              </Link>
-            </div>
+            <div className="car-actions">
+  {whatsappHref && (
+    <a className="btn" href={whatsappHref} target="_blank" rel="noreferrer">
+      WhatsApp
+    </a>
+  )}
+  <Link className="btn btn-ghost" to={`/agency/${car.agency_id}/cars`}>
+    {t('btn.agency_catalog')}
+  </Link>
+</div>
+
           </div>
         </div>
       </div>
