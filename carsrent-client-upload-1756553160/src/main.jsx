@@ -44,8 +44,9 @@ function Navbar() {
   <>
     {/* Replace public/agency register with info page */}
     <NavLink to="/agency/onboarding" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
-      {t('nav.get_listed') /* e.g., “Get listed” */}
-    </NavLink>
+  Register your agency
+</NavLink>
+
     <NavLink to="/agency/login" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
       {t('nav.login')}
     </NavLink>
