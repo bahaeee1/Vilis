@@ -74,7 +74,7 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 // ─────────────────────────────────────────────
 // Agency auth (email REQUIRED for agencies)
 // ─────────────────────────────────────────────
-app.post('/api/agency/register', (req, res) => {
+app.post('/api/agency/register', requireAdmin, (req, res) => {
   const { name, email, password, location, phone } = req.body || {};
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Missing name/email/password' });
