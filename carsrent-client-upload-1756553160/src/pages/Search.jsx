@@ -15,7 +15,6 @@ const CITIES = [
 // Categories (first option means "no category filter")
 const CATEGORIES = ['Any','sedan','suv','hatchback','pickup','van','convertible','coupe','wagon','crossover'];
 
-// Small helper to render an input with a suffix (e.g., MAD)
 function InputWithSuffix({ value, onChange, placeholder, suffix = 'MAD' }) {
   return (
     <div className="input-suffix">
@@ -47,14 +46,15 @@ export default function Search() {
   async function run() {
     setLoading(true);
     try {
-      const payload = {
-        location:  location === 'Anywhere' ? '' : location,
-        min_price: minPrice ? Number(minPrice) : null,
-        max_price: maxPrice ? Number(maxPrice) : null,
-        category:  category === 'Any' ? null : category
-      };
-      const res = await searchCars(payload);
-      setCars(res.cars || []);
+      // Build params ONLY with set filters (avoid category=null, etc.)
+      const params = {};
+      if (location && location !== 'Anywhere') params.location = location;
+      if (minPrice !== '') params.minPrice = Number(minPrice);
+      if (maxPrice !== '') params.maxPrice = Number(maxPrice);
+      if (category && category !== 'Any') params.category = category;
+
+      const res = await searchCars(params);
+      setCars(res || []); // server returns array
     } catch (e) {
       console.error('Search error:', e);
       setCars([]);
