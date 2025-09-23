@@ -202,6 +202,33 @@ textarea{ height:100px; resize: vertical }
   white-space: nowrap;
 }
 
+/* Ensure body stacks items vertically with spacing */
+.car .body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;                 /* space between rows */
+}
+
+/* Group for price + city/category lines */
+.car .body .meta {
+  display: grid;
+  gap: 4px;
+  line-height: 1.35;
+}
+
+/* Dedicated row for the button */
+.car .body .actions {
+  margin-top: 4px;
+}
+
+/* Make sure buttons aren’t absolutely positioned by old rules */
+.car .body .actions .btn {
+  position: static;
+  align-self: flex-start;
+}
+
+
 .divider {
   border: 0;
   border-top: 1px solid rgba(255,255,255,.08);
