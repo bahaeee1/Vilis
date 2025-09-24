@@ -1,14 +1,13 @@
-// server/src/index.js
-// Minimal, production-ready Express API for CarsRent
+// server/src/index.js  (ESM version)
 // Features: admin-only agency register, JWT auth, car search, bookings with tiered pricing
 
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const Database = require('better-sqlite3');
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import Database from 'better-sqlite3';
 
 // ---- Env ----
 const PORT = Number(process.env.PORT || 10000);
@@ -16,7 +15,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-secret';
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'dev-admin-token';
 const SQLITE_FILE = process.env.SQLITE_FILE || './data.sqlite';
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
-const APP_BASE = process.env.APP_BASE || 'http://localhost:5173'; // used in notifications/links
+const APP_BASE = process.env.APP_BASE || 'http://localhost:5173';
 
 // ---- App ----
 const app = express();
@@ -80,19 +79,18 @@ function initSchema() {
       start_date TEXT NOT NULL,
       end_date TEXT NOT NULL,
       status TEXT NOT NULL DEFAULT 'pending',
-      price_total INTEGER, -- optional; set by server when available
+      price_total INTEGER,
       created_at INTEGER NOT NULL
     )
   `).run();
 
-  // ---- Migrations (safe no-throw) ----
+  // Migrations (safe)
   try { db.prepare("SELECT price_tiers FROM cars LIMIT 1").get(); }
   catch { db.prepare("ALTER TABLE cars ADD COLUMN price_tiers TEXT").run(); }
 
   try { db.prepare("SELECT price_total FROM bookings LIMIT 1").get(); }
   catch { db.prepare("ALTER TABLE bookings ADD COLUMN price_total INTEGER").run(); }
 
-  // Helpful indexes
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_cars_agency ON cars(agency_id)`).run();
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_cars_category ON cars(category)`).run();
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_cars_location ON cars(category, created_at)`).run();
@@ -101,7 +99,7 @@ function initSchema() {
 initSchema();
 
 // ---- Helpers ----
-function now() { return Math.floor(Date.now() / 1000); }
+const now = () => Math.floor(Date.now() / 1000);
 
 function signToken(agency) {
   return jwt.sign({ id: agency.id, email: agency.email }, JWT_SECRET, { expiresIn: '30d' });
@@ -216,7 +214,6 @@ app.post('/api/agency/login', (req, res) => {
   res.json({ token, agency });
 });
 
-// Delete my account (and cascade cars/bookings)
 app.delete('/api/agency/me', requireAuth, (req, res) => {
   db.prepare('DELETE FROM agencies WHERE id = ?').run(req.user.id);
   res.json({ ok: true });
@@ -224,7 +221,6 @@ app.delete('/api/agency/me', requireAuth, (req, res) => {
 
 // ---------- Cars ----------
 app.get('/api/cars', (req, res) => {
-  // Accept camelCase or snake_case for compatibility
   const location = (req.query.location || '').trim();
   const category = (req.query.category || '').trim();
   const minPrice = req.query.minPrice ?? req.query.min_price;
@@ -257,14 +253,10 @@ app.get('/api/cars/:id', (req, res) => {
     WHERE c.id = ?
   `).get(req.params.id);
   if (!car) return res.status(404).json({ error: 'Not found' });
-
-  // If you want parsed tiers in response (optional):
   try { car.price_tiers = car.price_tiers ? JSON.parse(car.price_tiers) : []; } catch { car.price_tiers = []; }
-
   res.json(car);
 });
 
-// Public agency catalog
 app.get('/api/agency/:agencyId/cars', (req, res) => {
   const agency = db.prepare('SELECT id, name, email, phone, location FROM agencies WHERE id = ?').get(req.params.agencyId);
   if (!agency) return res.status(404).json({ error: 'Agency not found' });
@@ -272,18 +264,14 @@ app.get('/api/agency/:agencyId/cars', (req, res) => {
   res.json({ agency, cars });
 });
 
-// Add a car (agency)
 app.post('/api/cars', requireAuth, (req, res) => {
   const b = req.body || {};
-  // Required fields
   const required = ['title','daily_price','image_url','year','transmission','seats','doors','fuel_type','category'];
   for (const k of required) {
     if (b[k] === undefined || b[k] === null || String(b[k]).trim() === '') {
       return res.status(400).json({ error: `Missing ${k}` });
     }
   }
-
-  // Validate numeric ranges (basic)
   const year = Number(b.year);
   const seats = Number(b.seats);
   const doors = Number(b.doors);
@@ -293,7 +281,6 @@ app.post('/api/cars', requireAuth, (req, res) => {
     return res.status(400).json({ error: 'Invalid numeric values' });
   }
 
-  // Tiers (optional)
   let tiers = [];
   try { tiers = normTiers(b.price_tiers); } catch (e) {
     return res.status(400).json({ error: 'Invalid price_tiers: ' + e.message });
@@ -323,7 +310,6 @@ app.post('/api/cars', requireAuth, (req, res) => {
   res.json({ car });
 });
 
-// Delete a car (must belong to me)
 app.delete('/api/cars/:id', requireAuth, (req, res) => {
   const car = db.prepare('SELECT * FROM cars WHERE id = ?').get(req.params.id);
   if (!car) return res.status(404).json({ error: 'Not found' });
@@ -332,15 +318,12 @@ app.delete('/api/cars/:id', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-// My cars
 app.get('/api/agency/me/cars', requireAuth, (req, res) => {
   const cars = db.prepare('SELECT * FROM cars WHERE agency_id = ? ORDER BY created_at DESC').all(req.user.id);
   res.json(cars);
 });
 
 // ---------- Bookings ----------
-
-// Public: create booking
 app.post('/api/bookings', (req, res) => {
   const b = req.body || {};
   if (!b.car_id || !b.name || !b.phone || !b.start_date || !b.end_date) {
@@ -349,7 +332,6 @@ app.post('/api/bookings', (req, res) => {
   const car = db.prepare('SELECT * FROM cars WHERE id = ?').get(b.car_id);
   if (!car) return res.status(404).json({ error: 'Car not found' });
 
-  // price using per-car tiers
   let tiers = [];
   try { tiers = normTiers(car.price_tiers); } catch { tiers = []; }
   const days = daysBetween(b.start_date, b.end_date);
@@ -365,7 +347,6 @@ app.post('/api/bookings', (req, res) => {
   res.json({ booking, days, daily_rate: daily, currency: 'MAD' });
 });
 
-// My bookings (agency)
 app.get('/api/agency/me/bookings', requireAuth, (req, res) => {
   const rows = db.prepare(`
     SELECT b.*, c.title as car_title, c.image_url as car_image_url
@@ -377,7 +358,6 @@ app.get('/api/agency/me/bookings', requireAuth, (req, res) => {
   res.json(rows);
 });
 
-// Update booking status (agency)
 app.patch('/api/agency/me/bookings/:id', requireAuth, (req, res) => {
   const { status } = req.body || {};
   if (!['pending','approved','declined','completed','cancelled'].includes(status)) {
@@ -390,7 +370,6 @@ app.patch('/api/agency/me/bookings/:id', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-// Delete a booking (agency)
 app.delete('/api/agency/me/bookings/:id', requireAuth, (req, res) => {
   const row = db.prepare('SELECT * FROM bookings WHERE id = ?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Not found' });
