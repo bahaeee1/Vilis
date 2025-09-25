@@ -155,6 +155,25 @@ export default function CarPage() {
     {t('btn.agency_catalog')}
   </Link>
 </div>
+{tariffs && (
+  <section className="tariff mt-lg">
+    <h3 className="tariff-title">TARIFICATION</h3>
+    <div className="tariff-wrap">
+      <div className="tariff-pill">
+        <div className="tariff-price">MAD {fmtMAD(tariffs.dayTotal)}</div>
+        <div className="tariff-unit">/ jour</div>
+      </div>
+      <div className="tariff-pill">
+        <div className="tariff-price">MAD {fmtMAD(tariffs.weekTotal)}</div>
+        <div className="tariff-unit">/ semaine</div>
+      </div>
+      <div className="tariff-pill">
+        <div className="tariff-price">MAD {fmtMAD(tariffs.monthTotal)}</div>
+        <div className="tariff-unit">/ mois</div>
+      </div>
+    </div>
+  </section>
+)}
 
           </div>
         </div>
