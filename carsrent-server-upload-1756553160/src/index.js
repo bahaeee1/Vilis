@@ -318,7 +318,7 @@ app.get('/api/cars/:id', (req, res) => {
   res.json(car);
 });
 
-app.get('/api/agency/:agencyId/cars', (req, res) => {
+app.get('/api/agency/:agencyId(\\d+)/cars', (req, res) => {
   const agency = db.prepare('SELECT id, name, email, phone, location FROM agencies WHERE id = ?')
                    .get(req.params.agencyId);
   if (!agency) return res.status(404).json({ error: 'Agency not found' });
