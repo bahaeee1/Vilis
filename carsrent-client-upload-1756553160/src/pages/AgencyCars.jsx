@@ -23,7 +23,7 @@ export default function AgencyCars() {
       <div className="card">
         <h1 className="h2">Mes véhicules</h1>
         {error && <div className="alert">{JSON.stringify({ error })}</div>}
-        {(!error && cars.length === 0) && <div className="muted">Aucun véhicule pour le moment.</div>}
+        {!error && cars.length === 0 && <div className="muted">Aucun véhicule pour le moment.</div>}
 
         <div className="grid grid-3 gap-md mt-md">
           {cars.map(c => (
