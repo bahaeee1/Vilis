@@ -11,8 +11,10 @@ export function clearToken() {
   localStorage.removeItem('token');
   window.dispatchEvent(new Event('tokenUpdated'));
 }
-function authHeaders() { const t = getToken(); return t ? { Authorization: 'Bearer ' + t } : {}; }
-
+function authHeaders() {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 async function throwNiceError(res) {
   const text = await res.text();
   try { throw JSON.parse(text); } catch { throw { error: text || `${res.status} ${res.statusText}` }; }
@@ -68,9 +70,11 @@ export async function addCar(payload) {
   return r.json();
 }
 export async function getMyCars() {
-  const r = await fetch(`${API_BASE}/api/agency/me/cars`, { headers: { ...authHeaders() } });
-  if (!r.ok) await throwNiceError(r);
-  return r.json();
+  const res = await fetch(`${API_BASE}/api/agency/me/cars`, {
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+  });
+  if (!res.ok) throw await res.json().catch(() => ({ error: 'Error' }));
+  return res.json();
 }
 export async function deleteCar(id) {
   const r = await fetch(`${API_BASE}/api/cars/${id}`, {
