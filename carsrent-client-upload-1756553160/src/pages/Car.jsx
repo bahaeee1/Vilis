@@ -4,6 +4,23 @@ import { useParams, Link } from 'react-router-dom';
 import { getCar, createBooking } from '../api';
 import { useI18n } from '../i18n';
 
+// Format MAD nicely
+const fmtMAD = (n) => new Intl.NumberFormat('fr-MA').format(Math.round(Number(n) || 0));
+
+// Pick the daily rate for a given rental length using the car's tiers (same logic as server)
+function pickDailyRateFromTiers(dailyFallback, tiersRaw, days) {
+  let tiers = tiersRaw || [];
+  try { if (typeof tiers === 'string') tiers = JSON.parse(tiers); } catch {}
+  if (!Array.isArray(tiers) || tiers.length === 0) return Number(dailyFallback);
+  for (const t of tiers) {
+    const min = Number(t.minDays);
+    const max = (t.maxDays == null || t.maxDays === '') ? Infinity : Number(t.maxDays);
+    if (days >= min && days <= max) return Number(t.price);
+  }
+  return Number(dailyFallback);
+}
+
+
 export default function CarPage() {
   const { id } = useParams();
   const { t } = useI18n();
