@@ -1,53 +1,42 @@
-import { useEffect, useState } from 'react';
-import { getMyCars, deleteCar } from '../api';
-import { useI18n } from '../i18n.jsx';
+import React, { useEffect, useState } from 'react';
+import { getMyCars } from '../api';
+import { Link } from 'react-router-dom';
 
 export default function AgencyCars() {
-  const { t } = useI18n();
   const [cars, setCars] = useState([]);
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState('');
+  const [error, setError] = useState('');
 
-  const load = async () => {
-    setErr('');
-    try { setCars(await getMyCars()); }
-    catch (e) { setErr(e?.error || 'Error'); }
-  };
-  useEffect(() => { load(); }, []);
-
-  const onDelete = async (id) => {
-    if (!confirm(t('ui.confirm_delete_car'))) return;
-    setBusy(true);
-    try {
-      await deleteCar(id);
-      setCars(prev => prev.filter(c => c.id !== id));
-    } catch (e) {
-      alert(e?.error || 'Delete failed');
-    } finally { setBusy(false); }
-  };
+  useEffect(() => {
+    (async () => {
+      try {
+        const rows = await getMyCars();   // <-- uses /api/agency/me/cars
+        setCars(rows || []);
+      } catch (e) {
+        const msg = (e && (e.error || e.message)) || 'Auth required';
+        setError(msg);
+      }
+    })();
+  }, []);
 
   return (
-    <div className="card">
-      <h2 style={{marginTop:0}}>{t('nav.my_cars')}</h2>
-      {err && <div className="error">{String(err)}</div>}
-      <div className="grid" style={{marginTop:12}}>
-        {cars.map(c => (
-          <div key={c.id} className="car" style={{gridColumn:'span 6'}}>
-            {c.image_url && <img src={c.image_url} alt={c.title} />}
-            <div className="body">
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                <strong>{c.title}</strong>
-                <button className="btn secondary" disabled={busy} onClick={() => onDelete(c.id)}>
-                  {t('ui.delete')}
-                </button>
-              </div>
-              <div className="muted" style={{marginTop:6}}>
-                {(c.brand || '')} {(c.model || '')} • {c.location} • {c.daily_price} MAD
+    <div className="container">
+      <div className="card">
+        <h1 className="h2">Mes véhicules</h1>
+        {error && <div className="alert">{JSON.stringify({ error })}</div>}
+        {(!error && cars.length === 0) && <div className="muted">Aucun véhicule pour le moment.</div>}
+
+        <div className="grid grid-3 gap-md mt-md">
+          {cars.map(c => (
+            <div className="car" key={c.id}>
+              {c.image_url && <img src={c.image_url} alt={c.title} />}
+              <div className="body">
+                <h3 className="h3">{c.title}</h3>
+                <div className="muted">{c.daily_price} MAD / jour · {c.category}</div>
+                <Link className="btn btn-ghost mt-sm" to={`/car/${c.id}`}>Voir</Link>
               </div>
             </div>
-          </div>
-        ))}
-        {cars.length === 0 && <div className="muted" style={{padding:'8px 2px'}}>{t('ui.no_cars')}</div>}
+          ))}
+        </div>
       </div>
     </div>
   );
