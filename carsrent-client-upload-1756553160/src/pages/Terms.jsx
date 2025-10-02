@@ -27,7 +27,7 @@ export default function Terms() {
       <p>We may update these terms by posting a new version here.</p>
 
       <h3>8. Contact</h3>
-      <p>Questions? Email: support@vilis.app (example)</p>
+      <p>Email: assistance@vilis-ma.com (example)</p>
     </div>
   );
 }
