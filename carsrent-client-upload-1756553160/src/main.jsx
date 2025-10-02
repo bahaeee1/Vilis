@@ -114,8 +114,8 @@ function App() {
         <NavLink to="/privacy">Privacy</NavLink>
          {/* ...your existing footer content... */}
         <div className="footer-contact sitewide">
-          <div><strong>Email:</strong> <a className="link" href="mailto:assist@vilis.com">assist@vilis.com</a></div>
-          <div><strong>Phone:</strong> <a className="link" href="https://wa.me/212621053938" target="_blank" rel="noreferrer">0621053938</a></div>
+          <div><strong>Email:</strong> <a className="link" href="mailto:assistance@vilis-ma.com">assistance@vilis-ma.com</a></div>
+          <div><strong>Phone:</strong> <a className="link" href="https://wa.me/212717163533" target="_blank" rel="noreferrer">0717163533</a></div>
         </div>
       </footer>
     </>
@@ -134,8 +134,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 <footer className="site-footer">
   {/* ...your existing footer content... */}
   <div className="footer-contact sitewide">
-    <div><strong>Email:</strong> <a className="link" href="mailto:assist@vilis.com">assist@vilis.com</a></div>
-    <div><strong>Phone:</strong> <a className="link" href="https://wa.me/212621053938" target="_blank" rel="noreferrer">0621053938</a></div>
+    <div><strong>Email:</strong> <a className="link" href="mailto:assistance@vilis-ma.com">assistance@vilis-ma.com</a></div>
+    <div><strong>Phone:</strong> <a className="link" href="https://wa.me/212717163533" target="_blank" rel="noreferrer">0717163533</a></div>
   </div>
 </footer>
 
