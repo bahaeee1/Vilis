@@ -2,11 +2,11 @@
 import React from 'react';
 
 export default function AgencyOnboarding() {
-  const email = 'assist@vilis.com';
+  const email = 'assistance@vilis-ma.com';
   // WhatsApp link must use international format without + or leading 0
-  // Morocco (+212) → 0621053938  =>  212621053938
-  const waNumberIntl = '212621053938';
-  const phoneLocal = '0621053938';
+
+  const waNumberIntl = '212717163533';
+  const phoneLocal = '0717163533';
 
   return (
     <div className="container">
