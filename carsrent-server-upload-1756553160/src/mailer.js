@@ -3,7 +3,7 @@
 // Works even on Node 22+ (uses global fetch).
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM = process.env.EMAIL_FROM || 'onboarding@resend.dev'; // safe dev sender
+const EMAIL_FROM = process.env.EMAIL_FROM || 'assistance@vilis-ma.com'; // safe dev sender
 
 export async function sendAgencyBookingEmail({ to, agencyName, carTitle, booking }) {
   // Friendly guardrails & logs (visible in Render logs)
