@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Database from 'better-sqlite3';
+import { sendAgencyBookingEmail } from './mailer.js';
 
 // ========= ENV =========
 const PORT        = Number(process.env.PORT || 10000);
@@ -440,6 +441,23 @@ app.delete('/api/agency/me/bookings/:id', requireAuth, (req, res) => {
   if (row.agency_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
   db.prepare('DELETE FROM bookings WHERE id = ?').run(row.id);
   res.json({ ok: true });
+});
+
+// after saving booking and loading agency + car info:
+await sendAgencyBookingEmail({
+  to: agency.email,                     // must be a real address
+  agencyName: agency.name,
+  carTitle: car.title,
+  booking: {
+    customer_name: req.body.name,
+    customer_phone: req.body.phone,
+    customer_email: req.body.email,
+    start_date: req.body.start_date,
+    end_date: req.body.end_date,
+    message: req.body.message,
+    total_price: totalPrice,            // if you compute it
+  },
+  replyTo: req.body.email,              // optional: replies go to the customer
 });
 
 // ---- Admin stats ----
