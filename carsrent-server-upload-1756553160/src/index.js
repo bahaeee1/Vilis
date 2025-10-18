@@ -409,7 +409,31 @@ app.post('/api/bookings', (req, res) => {
     INSERT INTO bookings (agency_id, car_id, name, phone, start_date, end_date, status, price_total, created_at)
     VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, ?)
   `).run(car.agency_id, car.id, String(b.name).trim(), String(b.phone).trim(), b.start_date, b.end_date, total, now());
-
+try {
+  const agency = db.prepare('SELECT * FROM agencies WHERE id = ?').get(car.agency_id);
+  if (agency && agency.email) {
+    setImmediate(() => {
+      sendAgencyBookingEmail({
+        to: agency.email,
+        agencyName: agency.name,
+        carTitle: car.title || 'Nouvelle réservation',
+        booking: {
+          customer_name: String(b.name).trim(),
+          customer_phone: String(b.phone).trim(),
+          start_date: b.start_date,
+          end_date: b.end_date,
+          total_price: total,
+        },
+        replyTo: b.email || undefined,
+      }).catch(err => console.error('[email] send failed', err));
+    });
+  } else {
+    console.warn('[email] Agency has no email, skipping');
+  }
+} catch (e) {
+  console.error('[email] lookup failed', e);
+}
+  
   const booking = db.prepare('SELECT * FROM bookings WHERE id = ?').get(info.lastInsertRowid);
   res.json({ booking, days, daily_rate: daily, currency: 'MAD' });
 });
