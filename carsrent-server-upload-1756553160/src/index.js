@@ -524,6 +524,22 @@ app.post('/api/bookings', async (req, res) => {
   }
 });
 
+// Test email route
+app.post('/api/test-email', async (req, res) => {
+  try {
+    const { to } = req.body || {};
+    if (!to) return res.status(400).json({ error: 'Missing "to" in body' });
+    const { sendTestEmail } = await import('./mailer.js');
+    const result = await sendTestEmail(to);
+    return res.json({ ok: true, result });
+  } catch (e) {
+    console.error('[test-email] failed', e?.response?.data || e?.message || e);
+    return res.status(500).json({ ok: false, error: e?.response?.data || String(e) });
+  }
+});
+
+
+
 // ---- Admin stats ----
 app.get('/api/admin/stats', requireAdmin, (_req, res) => {
   const agencies = db.prepare('SELECT COUNT(*) AS n FROM agencies').get().n;
