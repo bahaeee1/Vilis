@@ -10,6 +10,9 @@ import jwt from 'jsonwebtoken';
 import Database from 'better-sqlite3';
 import { sendAgencyBookingEmail } from './mailer.js';
 
+import { sendTestEmail } from './mailer.js';
+
+
 // ========= ENV =========
 const PORT        = Number(process.env.PORT || 10000);
 const JWT_SECRET  = process.env.JWT_SECRET  || 'dev-jwt-secret';
