@@ -444,20 +444,84 @@ app.delete('/api/agency/me/bookings/:id', requireAuth, (req, res) => {
 });
 
 // after saving booking and loading agency + car info:
-await sendAgencyBookingEmail({
-  to: agency.email,                     // must be a real address
-  agencyName: agency.name,
-  carTitle: car.title,
-  booking: {
-    customer_name: req.body.name,
-    customer_phone: req.body.phone,
-    customer_email: req.body.email,
-    start_date: req.body.start_date,
-    end_date: req.body.end_date,
-    message: req.body.message,
-    total_price: totalPrice,            // if you compute it
-  },
-  replyTo: req.body.email,              // optional: replies go to the customer
+app.post('/api/bookings', async (req, res) => {
+  try {
+    const {
+      car_id,
+      name,
+      phone,
+      email,
+      start_date,
+      end_date,
+      message,
+    } = req.body || {};
+
+    // 1) Basic validation
+    if (!car_id || !name || !phone || !start_date || !end_date) {
+      return res.status(400).json({ error: 'missing_required_fields' });
+    }
+
+    // 2) Load car and agency (so we know where to email)
+    const car = db.prepare(
+      `SELECT id, title, agency_id FROM cars WHERE id = ?`
+    ).get(car_id);
+
+    if (!car) return res.status(404).json({ error: 'car_not_found' });
+
+    const agency = db.prepare(
+      `SELECT id, name, email FROM agencies WHERE id = ?`
+    ).get(car.agency_id);
+
+    if (!agency) return res.status(404).json({ error: 'agency_not_found' });
+
+    // 3) (Optional) compute total price if you support tiered pricing
+    // const totalPrice = computeTotalPrice(car, start_date, end_date);
+
+    // 4) Insert booking
+    const insert = db.prepare(`
+      INSERT INTO bookings
+      (car_id, customer_name, customer_phone, customer_email, start_date, end_date, message, status, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', strftime('%Y-%m-%d %H:%M:%S','now'))
+    `);
+    const info = insert.run(
+      car_id,
+      name,
+      phone,
+      email || null,
+      start_date,
+      end_date,
+      message || null
+    );
+
+    const bookingId = info.lastInsertRowid;
+
+    // 5) Fire-and-forget email (don’t let a send error crash the request)
+    setImmediate(() => {
+      sendAgencyBookingEmail({
+        to: agency.email,                // <-- now defined
+        agencyName: agency.name,
+        carTitle: car.title,
+        booking: {
+          customer_name: name,
+          customer_phone: phone,
+          customer_email: email || '',
+          start_date,
+          end_date,
+          message: message || '',
+          // total_price: totalPrice,
+        },
+        replyTo: email || undefined,
+      }).catch(err => {
+        console.error('[email] send failed (bookingId=' + bookingId + '):', err);
+      });
+    });
+
+    // 6) Respond to client
+    res.json({ ok: true, booking_id: bookingId /*, total_price: totalPrice*/ });
+  } catch (err) {
+    console.error('[bookings] create error:', err);
+    res.status(500).json({ error: 'server_error' });
+  }
 });
 
 // ---- Admin stats ----
