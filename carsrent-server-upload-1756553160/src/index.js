@@ -212,6 +212,29 @@ app.post('/api/debug/migrate-mileage', (req, res) => {
   }
 });
 
+// Temporary migration: add "insurance" (TEXT) and "min_age" (INTEGER) to cars if missing
+app.post('/api/debug/migrate-insurance-age', (req, res) => {
+  try {
+    let actions = [];
+    const hasIns = db.prepare("SELECT 1 FROM pragma_table_info('cars') WHERE name='insurance'").get();
+    if (!hasIns) {
+      db.prepare("ALTER TABLE cars ADD COLUMN insurance TEXT DEFAULT 'incluse'").run();
+      actions.push('added insurance');
+    }
+    const hasAge = db.prepare("SELECT 1 FROM pragma_table_info('cars') WHERE name='min_age'").get();
+    if (!hasAge) {
+      db.prepare("ALTER TABLE cars ADD COLUMN min_age INTEGER DEFAULT 21").run();
+      actions.push('added min_age');
+    }
+    if (actions.length === 0) return res.json({ ok: true, action: 'already exists' });
+    return res.json({ ok: true, action: actions.join(', ') });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+
 // ========= ROUTES =========
 
 // Health
@@ -369,7 +392,7 @@ app.get('/api/agency/:agencyId(\\d+)/cars', (req, res) => {
 
 app.post('/api/cars', requireAuth, (req, res) => {
   const b = req.body || {};
-  const required = ['title','daily_price','image_url','year','transmission','seats','doors','fuel_type','category','mileage_limit'];
+  const required = ['title','daily_price','image_url','year','transmission','seats','doors','fuel_type','category','mileage_limit','insurance','min_age'];
   for (const k of required) {
     if (b[k] === undefined || b[k] === null || String(b[k]).trim() === '')
       return res.status(400).json({ error: `Missing ${k}` });
@@ -391,8 +414,8 @@ app.post('/api/cars', requireAuth, (req, res) => {
 
   const info = db.prepare(`
     INSERT INTO cars (
-  agency_id, title, daily_price, image_url, year, transmission, seats, doors, fuel_type, category, mileage_limit, price_tiers, created_at
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+  agency_id, title, daily_price, image_url, year, transmission, seats, doors, fuel_type, category, mileage_limit, insurance, min_age, price_tiers, created_at
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `).run(
     req.user.id,
     String(b.title).trim(),
@@ -405,6 +428,8 @@ app.post('/api/cars', requireAuth, (req, res) => {
     String(b.fuel_type),
     String(b.category),
     String(b.mileage_limit || 'illimité'),
+    String(b.insurance || 'incluse'),
+    Number(b.min_age ?? 21),
     JSON.stringify(tiers),
     now()
   );
