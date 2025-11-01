@@ -3,6 +3,39 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getCar } from '../api';
 
+// ---- Reusable styles ----
+const infoBoxStyle = {
+  width: "200px",
+  height: "120px",
+  borderRadius: "16px",
+  background: "rgba(255, 255, 255, 0.08)",
+  backdropFilter: "blur(8px)",
+  border: "1px solid rgba(255, 255, 255, 0.2)",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "#ffffff",
+  textAlign: "center",
+  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+};
+
+const labelStyle = {
+  fontSize: "16px",
+  fontWeight: "700",
+  marginBottom: "6px",
+  color: "#ffffff",
+};
+
+const valueStyle = {
+  fontSize: "20px",
+  fontWeight: "800",
+  color: "#60a5fa",
+  textTransform: "capitalize",
+};
+
+
 const API_BASE = import.meta.env.VITE_API_BASE;
 
 // format numbers like 35 000
@@ -157,103 +190,51 @@ export default function Car() {
           />
         )}
 
-      {car?.category && (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      marginTop: "20px",
-    }}
-  >
-    <div
-      style={{
-        width: "240px",
-        height: "120px",
-        borderRadius: "16px",
-        background: "rgba(255, 255, 255, 0.08)",
-        backdropFilter: "blur(8px)",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#ffffff",
-        textAlign: "center",
-        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "18px",
-          fontWeight: "700",
-          marginBottom: "6px",
-          color: "#ffffff",
-        }}
-      >
-        Category:
-      </div>
-      <div
-        style={{
-          fontSize: "22px",
-          fontWeight: "800",
-          color: "#60a5fa",
-          textTransform: "capitalize",
-        }}
-      >
-        {car.category}
-      </div>
+{/* CAR INFO BOXES */}
+<div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    gap: "24px",
+    marginTop: "30px",
+    flexWrap: "wrap", // wraps on small screens
+  }}
+>
+  {/* CATEGORY BOX */}
+  {car?.category && (
+    <div style={infoBoxStyle}>
+      <div style={labelStyle}>Category:</div>
+      <div style={valueStyle}>{car.category}</div>
     </div>
-  </div>
-)}
+  )}
 
-{car?.transmission && (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      marginTop: "20px",
-    }}
-  >
-    <div
-      style={{
-        width: "240px",
-        height: "120px",
-        borderRadius: "16px",
-        background: "rgba(255, 255, 255, 0.08)",
-        backdropFilter: "blur(8px)",
-        border: "1px solid rgba(255, 255, 255, 0.2)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#ffffff",
-        textAlign: "center",
-        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "18px",
-          fontWeight: "700",
-          marginBottom: "6px",
-          color: "#ffffff",
-        }}
-      >
-        Transmission:
-      </div>
-      <div
-        style={{
-          fontSize: "22px",
-          fontWeight: "800",
-          color: "#60a5fa",
-          textTransform: "capitalize",
-        }}
-      >
-        {car.transmission}
-      </div>
+  {/* TRANSMISSION BOX */}
+  {car?.transmission && (
+    <div style={infoBoxStyle}>
+      <div style={labelStyle}>Transmission:</div>
+      <div style={valueStyle}>{car.transmission}</div>
     </div>
+  )}
+
+  {/* KILOMÉTRAGE BOX */}
+  <div style={infoBoxStyle}>
+    <div style={labelStyle}>Kilométrage:</div>
+    <div style={valueStyle}>Illimité</div>
   </div>
-)}
+
+  {/* ASSURANCE BOX */}
+  <div style={infoBoxStyle}>
+    <div style={labelStyle}>Assurance:</div>
+    <div style={valueStyle}>Incluse</div>
+  </div>
+
+  {/* ÂGE MINIMUM BOX */}
+  <div style={infoBoxStyle}>
+    <div style={labelStyle}>Âge minimum:</div>
+    <div style={valueStyle}>21 ans</div>
+  </div>
+</div>
+
 
 
         <div className="body">
