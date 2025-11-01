@@ -216,11 +216,13 @@ export default function Car() {
     </div>
   )}
 
-  {/* KILOMÉTRAGE BOX */}
+ {/* KILOMÉTRAGE BOX */}
+{car?.mileage_limit && (
   <div style={infoBoxStyle}>
     <div style={labelStyle}>Kilométrage:</div>
-    <div style={valueStyle}>Illimité</div>
+    <div style={valueStyle}>{car.mileage_limit}</div>
   </div>
+)}
 
   {/* ASSURANCE BOX */}
   <div style={infoBoxStyle}>
