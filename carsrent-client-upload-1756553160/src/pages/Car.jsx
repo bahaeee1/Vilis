@@ -206,7 +206,54 @@ export default function Car() {
   </div>
 )}
 
-
+{car?.transmission && (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      marginTop: "20px",
+    }}
+  >
+    <div
+      style={{
+        width: "240px",
+        height: "120px",
+        borderRadius: "16px",
+        background: "rgba(255, 255, 255, 0.08)",
+        backdropFilter: "blur(8px)",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#ffffff",
+        textAlign: "center",
+        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "18px",
+          fontWeight: "700",
+          marginBottom: "6px",
+          color: "#ffffff",
+        }}
+      >
+        Transmission:
+      </div>
+      <div
+        style={{
+          fontSize: "22px",
+          fontWeight: "800",
+          color: "#60a5fa",
+          textTransform: "capitalize",
+        }}
+      >
+        {car.transmission}
+      </div>
+    </div>
+  </div>
+)}
 
 
         <div className="body">
