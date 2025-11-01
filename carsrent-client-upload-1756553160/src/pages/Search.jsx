@@ -130,6 +130,19 @@ export default function Search() {
                 {c.agency_name ? <strong>{c.agency_name}</strong> : (c.location || '—')}
                 {c.category ? ` — ${c.category}` : ''}
               </div>
+              {(c.agency_cities || c.agency_location || c.location) && (
+            <div className="muted" style={{ marginTop: 4 }}>
+    {/* prefer the multi-city field if present, else fall back */}
+    {(c.agency_cities && c.agency_cities
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean)
+      .join(', '))
+     || c.agency_location
+     || c.location}
+  </div>
+)}
+
 
               <Link className="btn btn-ghost mt-sm" to={`/car/${c.id}`}>
                 {t('btn.view')}
