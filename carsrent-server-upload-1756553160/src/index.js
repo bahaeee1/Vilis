@@ -349,7 +349,7 @@ app.get('/api/agency/:agencyId(\\d+)/cars', (req, res) => {
 
 app.post('/api/cars', requireAuth, (req, res) => {
   const b = req.body || {};
-  const required = ['title','daily_price','image_url','year','transmission','seats','doors','fuel_type','category'];
+  const required = ['title','daily_price','image_url','year','transmission','seats','doors','fuel_type','category','mileage_limit'];
   for (const k of required) {
     if (b[k] === undefined || b[k] === null || String(b[k]).trim() === '')
       return res.status(400).json({ error: `Missing ${k}` });
@@ -371,8 +371,8 @@ app.post('/api/cars', requireAuth, (req, res) => {
 
   const info = db.prepare(`
     INSERT INTO cars (
-      agency_id, title, daily_price, image_url, year, transmission, seats, doors, fuel_type, category, price_tiers, created_at
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+  agency_id, title, daily_price, image_url, year, transmission, seats, doors, fuel_type, category, mileage_limit, price_tiers, created_at
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
   `).run(
     req.user.id,
     String(b.title).trim(),
@@ -384,6 +384,7 @@ app.post('/api/cars', requireAuth, (req, res) => {
     doors,
     String(b.fuel_type),
     String(b.category),
+    String(b.mileage_limit || 'illimité'),
     JSON.stringify(tiers),
     now()
   );
