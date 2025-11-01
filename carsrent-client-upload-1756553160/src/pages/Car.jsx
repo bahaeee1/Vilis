@@ -190,17 +190,16 @@ export default function Car() {
           />
         )}
 
-{/* CAR INFO BOXES */}
+{/* INFO BOXES */}
 <div
   style={{
-    display: "flex",
-    justifyContent: "center",
-    gap: "24px",
-    marginTop: "30px",
-    flexWrap: "wrap", // wraps on small screens
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '16px',
+    marginTop: '24px'
   }}
 >
-  {/* CATEGORY BOX */}
+  {/* CATEGORY */}
   {car?.category && (
     <div style={infoBoxStyle}>
       <div style={labelStyle}>Category:</div>
@@ -208,7 +207,7 @@ export default function Car() {
     </div>
   )}
 
-  {/* TRANSMISSION BOX */}
+  {/* TRANSMISSION */}
   {car?.transmission && (
     <div style={infoBoxStyle}>
       <div style={labelStyle}>Transmission:</div>
@@ -216,29 +215,31 @@ export default function Car() {
     </div>
   )}
 
- {/* KILOMÉTRAGE BOX */}
-{car?.mileage_limit && (
-  <div style={infoBoxStyle}>
-    <div style={labelStyle}>Kilométrage:</div>
-    <div style={valueStyle}>{car.mileage_limit}</div>
-  </div>
-)}
+  {/* KILOMÉTRAGE */}
+  {car?.mileage_limit && (
+    <div style={infoBoxStyle}>
+      <div style={labelStyle}>Kilométrage:</div>
+      <div style={valueStyle}>{car.mileage_limit}</div>
+    </div>
+  )}
 
-  {/* ASSURANCE BOX */}
-{car?.insurance && (
-  <div style={infoBoxStyle}>
-    <div style={labelStyle}>Assurance:</div>
-    <div style={valueStyle} style={{...valueStyle, textTransform:'none'}}>{car.insurance}</div>
-  </div>
-)}
+  {/* ASSURANCE */}
+  {car?.insurance && (
+    <div style={infoBoxStyle}>
+      <div style={labelStyle}>Assurance:</div>
+      {/* NOTE: only one style prop; merge objects if you need overrides */}
+      <div style={{ ...valueStyle, textTransform: 'none' }}>{car.insurance}</div>
+    </div>
+  )}
 
-{/* ÂGE MINIMUM BOX */}
-{(car?.min_age != null) && (
-  <div style={infoBoxStyle}>
-    <div style={labelStyle}>Âge minimum:</div>
-    <div style={valueStyle}>{car.min_age} ans</div>
-  </div>
-)}
+  {/* ÂGE MINIMUM */}
+  {(car?.min_age != null) && (
+    <div style={infoBoxStyle}>
+      <div style={labelStyle}>Âge minimum:</div>
+      <div style={valueStyle}>{car.min_age} ans</div>
+    </div>
+  )}
+</div>
 
 
 
