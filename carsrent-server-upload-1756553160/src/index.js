@@ -176,6 +176,22 @@ function pickDailyRate(dailyFallback, tiers, days) {
   return Number(dailyFallback);
 }
 
+app.post('/api/debug/migrate-category', (req, res) => {
+  try {
+    const has = db.prepare(
+      "SELECT 1 FROM pragma_table_info('cars') WHERE name='category'"
+    ).get();
+    if (!has) {
+      db.prepare("ALTER TABLE cars ADD COLUMN category TEXT DEFAULT 'SUV'").run();
+      return res.json({ ok: true, action: 'added category column' });
+    }
+    return res.json({ ok: true, action: 'already exists' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
 // ========= ROUTES =========
 
 // Health
