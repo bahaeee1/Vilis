@@ -157,6 +157,12 @@ export default function Car() {
           />
         )}
 
+        {car?.category && (
+  <div className="mt-2 inline-block rounded-full px-3 py-1 text-sm bg-white/10 text-white/90 backdrop-blur">
+    {car.category}
+  </div>
+)}
+
         <div className="body">
           <h1 className="h2">{car.title}</h1>
           <div className="muted">
