@@ -65,6 +65,9 @@ function initSchema() {
       doors INTEGER NOT NULL,
       fuel_type TEXT NOT NULL,
       category TEXT NOT NULL,
+      mileage_limit TEXT DEFAULT 'illimité',
+      insurance TEXT DEFAULT 'incluse',
+      min_age INTEGER DEFAULT 21,
       price_tiers TEXT,      -- JSON string (optional)
       created_at INTEGER NOT NULL
     )
@@ -101,6 +104,16 @@ function initSchema() {
 
   try { db.prepare('SELECT price_total FROM bookings LIMIT 1').get(); }
   catch { db.prepare('ALTER TABLE bookings ADD COLUMN price_total INTEGER').run(); }
+
+  try { db.prepare("SELECT mileage_limit FROM cars LIMIT 1").get(); }
+catch { db.prepare("ALTER TABLE cars ADD COLUMN mileage_limit TEXT DEFAULT 'illimité'").run(); }
+
+try { db.prepare("SELECT insurance FROM cars LIMIT 1").get(); }
+catch { db.prepare("ALTER TABLE cars ADD COLUMN insurance TEXT DEFAULT 'incluse'").run(); }
+
+try { db.prepare("SELECT min_age FROM cars LIMIT 1").get(); }
+catch { db.prepare("ALTER TABLE cars ADD COLUMN min_age INTEGER DEFAULT 21").run(); }
+
 
   // Indexes
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_cars_agency    ON cars(agency_id)`).run();
@@ -414,24 +427,25 @@ app.post('/api/cars', requireAuth, (req, res) => {
 
   const info = db.prepare(`
     INSERT INTO cars (
-  agency_id, title, daily_price, image_url, year, transmission, seats, doors, fuel_type, category, mileage_limit, insurance, min_age, price_tiers, created_at
+  agency_id, title, daily_price, image_url, year, transmission, seats, doors,
+  fuel_type, category, mileage_limit, insurance, min_age, price_tiers, created_at
 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `).run(
     req.user.id,
-    String(b.title).trim(),
-    price,
-    String(b.image_url).trim(),
-    year,
-    String(b.transmission),
-    seats,
-    doors,
-    String(b.fuel_type),
-    String(b.category),
-    String(b.mileage_limit || 'illimité'),
-    String(b.insurance || 'incluse'),
-    Number(b.min_age ?? 21),
-    JSON.stringify(tiers),
-    now()
+String(b.title).trim(),
+price,
+String(b.image_url).trim(),
+year,
+String(b.transmission),
+seats,
+doors,
+String(b.fuel_type),
+String(b.category),
+String(b.mileage_limit || 'illimité'),
+String(b.insurance || 'incluse'),
+Number(b.min_age || 21),
+JSON.stringify(tiers),
+now()
   );
 
   const car = db.prepare('SELECT * FROM cars WHERE id = ?').get(info.lastInsertRowid);
