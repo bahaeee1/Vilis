@@ -43,6 +43,9 @@ export default function AddCar() {
     if (!fuel_type) return t('forms.fuel_type') + ' required';
     if (!category) return t('forms.category') + ' required';
     if (!mileage_limit) return 'Kilométrage required';
+    if (!insurance) return 'Assurance required';
+    if (!(Number(min_age) >= 18 && Number(min_age) <= 30)) return 'Âge minimum doit être entre 18 et 30';
+
 
     
     const priceN = ensureNumber(daily_price);
@@ -127,6 +130,8 @@ export default function AddCar() {
         fuel_type,
         category,
         mileage_limit,
+        insurance,      // <-- add
+        min_age,        // <-- add
         price_tiers: tiers // server accepts array or JSON string
       };
       await addCar(payload);
@@ -280,6 +285,31 @@ export default function AddCar() {
     <option value="150 km/jour">Max 150 km/jour</option>
     <option value="100 km/jour">Max 100 km/jour</option>
   </select>
+</div>
+
+          {/* Assurance */}
+<div className="form-row">
+  <label>Assurance</label>
+  <select
+    value={insurance}
+    onChange={(e) => setInsurance(e.target.value)}
+  >
+    <option value="incluse">Incluse</option>
+    <option value="tous risques">Tous risques</option>
+    <option value="de base">De base</option>
+  </select>
+</div>
+          {/* Âge minimum */}
+<div className="form-row">
+  <label>Âge minimum</label>
+  <input
+    type="number"
+    min={18}
+    max={30}
+    value={min_age}
+    onChange={(e) => setMinAge(Number(e.target.value))}
+    placeholder="21"
+  />
 </div>
 
 
