@@ -158,10 +158,11 @@ export default function Car() {
         )}
 
         {car?.category && (
-  <div className="mt-2 inline-block rounded-full px-3 py-1 text-sm bg-white/10 text-white/90 backdrop-blur">
-    {car.category}
-  </div>
+  <p className="mt-3 text-lg font-semibold text-white text-center">
+    Category: <span className="text-blue-400">{car.category}</span>
+  </p>
 )}
+
 
         <div className="body">
           <h1 className="h2">{car.title}</h1>
