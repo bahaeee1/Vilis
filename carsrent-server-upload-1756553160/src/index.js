@@ -208,11 +208,6 @@ app.post('/api/debug/migrate-mileage', (req, res) => {
   }
 });
 
-
-
-  
-});
-
 // ========= ROUTES =========
 
 // Health
