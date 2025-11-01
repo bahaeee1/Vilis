@@ -21,6 +21,8 @@ export default function AddCar() {
   const [fuel_type, setFuel] = useState(FUEL[0]);
   const [category, setCategory] = useState('suv');
   const [mileage_limit, setMileageLimit] = useState('illimité');
+  const [insurance, setInsurance] = useState('incluse');
+  const [min_age, setMinAge] = useState(21);
 
   // Tiered pricing editor
   // Each tier: { minDays: number, maxDays: number|null, price: number }
