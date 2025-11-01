@@ -190,6 +190,27 @@ app.post('/api/debug/migrate-category', (req, res) => {
     console.error(e);
     return res.status(500).json({ ok: false, error: e.message });
   }
+
+  // Temporary migration: add "mileage_limit" to cars if missing
+app.post('/api/debug/migrate-mileage', (req, res) => {
+  try {
+    const has = db.prepare(
+      "SELECT 1 FROM pragma_table_info('cars') WHERE name='mileage_limit'"
+    ).get();
+    if (!has) {
+      db.prepare("ALTER TABLE cars ADD COLUMN mileage_limit TEXT DEFAULT 'illimité'").run();
+      return res.json({ ok: true, action: 'added mileage_limit column' });
+    }
+    return res.json({ ok: true, action: 'already exists' });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok: false, error: e.message });
+  }
+});
+
+
+
+  
 });
 
 // ========= ROUTES =========
