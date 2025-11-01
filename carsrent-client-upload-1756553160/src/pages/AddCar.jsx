@@ -20,6 +20,7 @@ export default function AddCar() {
   const [doors, setDoors] = useState('');
   const [fuel_type, setFuel] = useState(FUEL[0]);
   const [category, setCategory] = useState('suv');
+  const [mileage_limit, setMileageLimit] = useState('illimité');
 
   // Tiered pricing editor
   // Each tier: { minDays: number, maxDays: number|null, price: number }
@@ -41,7 +42,9 @@ export default function AddCar() {
     if (!transmission) return t('forms.transmission') + ' required';
     if (!fuel_type) return t('forms.fuel_type') + ' required';
     if (!category) return t('forms.category') + ' required';
+    if (!mileage_limit) return 'Kilométrage required';
 
+    
     const priceN = ensureNumber(daily_price);
     const yearN  = ensureNumber(year);
     const seatsN = ensureNumber(seats);
@@ -123,6 +126,7 @@ export default function AddCar() {
         doors: Number(doors),
         fuel_type,
         category,
+        mileage_limit,
         price_tiers: tiers // server accepts array or JSON string
       };
       await addCar(payload);
@@ -263,6 +267,21 @@ export default function AddCar() {
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
+
+          {/* Kilométrage */}
+<div className="form-row">
+  <label>Kilométrage</label>
+  <select
+    value={mileage_limit}
+    onChange={(e) => setMileageLimit(e.target.value)}
+  >
+    <option value="illimité">Illimité</option>
+    <option value="200 km/jour">Max 200 km/jour</option>
+    <option value="150 km/jour">Max 150 km/jour</option>
+    <option value="100 km/jour">Max 100 km/jour</option>
+  </select>
+</div>
+
 
           {/* Tiered pricing editor */}
           <div className="mt-md">
