@@ -190,7 +190,9 @@ app.post('/api/debug/migrate-category', (req, res) => {
     console.error(e);
     return res.status(500).json({ ok: false, error: e.message });
   }
+  });
 
+  
   // Temporary migration: add "mileage_limit" to cars if missing
 app.post('/api/debug/migrate-mileage', (req, res) => {
   try {
@@ -390,7 +392,7 @@ app.post('/api/cars', requireAuth, (req, res) => {
   const info = db.prepare(`
     INSERT INTO cars (
   agency_id, title, daily_price, image_url, year, transmission, seats, doors, fuel_type, category, mileage_limit, price_tiers, created_at
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
   `).run(
     req.user.id,
     String(b.title).trim(),
