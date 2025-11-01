@@ -127,8 +127,10 @@ export default function Search() {
                 {c.daily_price} MAD {t('car.price_per_day')}
               </div>
               <div className="muted mt-xxs">
-                {c.location || '—'}{c.category ? ` · ${c.category}` : ''}
+                {c.agency_name ? <strong>{c.agency_name}</strong> : (c.location || '—')}
+                {c.category ? ` — ${c.category}` : ''}
               </div>
+
               <Link className="btn btn-ghost mt-sm" to={`/car/${c.id}`}>
                 {t('btn.view')}
               </Link>
