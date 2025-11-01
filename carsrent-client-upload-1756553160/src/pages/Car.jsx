@@ -225,17 +225,21 @@ export default function Car() {
 )}
 
   {/* ASSURANCE BOX */}
+{car?.insurance && (
   <div style={infoBoxStyle}>
     <div style={labelStyle}>Assurance:</div>
-    <div style={valueStyle}>Incluse</div>
+    <div style={valueStyle} style={{...valueStyle, textTransform:'none'}}>{car.insurance}</div>
   </div>
+)}
 
-  {/* ÂGE MINIMUM BOX */}
+{/* ÂGE MINIMUM BOX */}
+{(car?.min_age != null) && (
   <div style={infoBoxStyle}>
     <div style={labelStyle}>Âge minimum:</div>
-    <div style={valueStyle}>21 ans</div>
+    <div style={valueStyle}>{car.min_age} ans</div>
   </div>
-</div>
+)}
+
 
 
 
