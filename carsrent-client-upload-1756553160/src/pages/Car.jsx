@@ -157,28 +157,55 @@ export default function Car() {
           />
         )}
 
-       {car?.category && (
-  <div className="mt-6 flex justify-center">
-    <div className="flex flex-col items-center justify-center w-48 h-32 rounded-2xl bg-white/10 backdrop-blur-md text-white shadow-lg border border-white/20">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-8 h-8 mb-2 text-blue-400"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
+      {car?.category && (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      marginTop: "20px",
+    }}
+  >
+    <div
+      style={{
+        width: "240px",
+        height: "120px",
+        borderRadius: "16px",
+        background: "rgba(255, 255, 255, 0.08)",
+        backdropFilter: "blur(8px)",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#ffffff",
+        textAlign: "center",
+        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "18px",
+          fontWeight: "700",
+          marginBottom: "6px",
+          color: "#ffffff",
+        }}
       >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M3 13h18M5 10h14l1.38 3.44A2 2 0 0120.48 16H3.52a2 2 0 01-1.9-2.56L3 10zM8 16v4m8-4v4"
-        />
-      </svg>
-      <p className="text-sm font-semibold">Type de voiture</p>
-      <p className="text-lg font-bold text-blue-400">{car.category}</p>
+        Category:
+      </div>
+      <div
+        style={{
+          fontSize: "22px",
+          fontWeight: "800",
+          color: "#60a5fa",
+          textTransform: "capitalize",
+        }}
+      >
+        {car.category}
+      </div>
     </div>
   </div>
 )}
+
 
 
 
