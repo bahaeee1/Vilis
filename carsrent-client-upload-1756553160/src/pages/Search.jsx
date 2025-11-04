@@ -54,7 +54,9 @@ export default function Search() {
       if (minPrice !== '') params.minPrice = Number(minPrice);
       if (maxPrice !== '') params.maxPrice = Number(maxPrice);
       if (category && category !== 'Any') params.category = category;
-      if (chauffeur !== 'Any') params.chauffeur_included = (chauffeur === 'Included') ? 1 : 0;
+      if (['yes','no','on_demand'].includes(chauffeur))
+  params.chauffeur = chauffeur;
+
 
       const res = await searchCars(params);
       setCars(res || []); // server returns array
