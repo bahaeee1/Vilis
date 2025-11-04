@@ -66,7 +66,7 @@ export default function Search() {
   useEffect(() => { run(); }, []); // initial load
 
   return (
-    <div className="container">
+    <div className="container" style={{ paddingBottom: '160px' }}>
       <div className="card">
         <h1 className="h2">{t('search.title')}</h1>
 
