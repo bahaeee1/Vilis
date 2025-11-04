@@ -196,7 +196,9 @@ export default function Car() {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '16px',
-    marginTop: '24px'
+    marginTop: '24px',
+    alignItems: 'stretch',
+    justifyContent: 'flex-start'
   }}
 >
   {/* CATEGORY */}
@@ -227,7 +229,6 @@ export default function Car() {
   {car?.insurance && (
     <div style={infoBoxStyle}>
       <div style={labelStyle}>Assurance:</div>
-      {/* NOTE: only one style prop; merge objects if you need overrides */}
       <div style={{ ...valueStyle, textTransform: 'none' }}>{car.insurance}</div>
     </div>
   )}
@@ -239,16 +240,15 @@ export default function Car() {
       <div style={valueStyle}>{car.min_age} ans</div>
     </div>
   )}
+
+  {/* CARBURANT */}
+  {car?.fuel_type && (
+    <div style={infoBoxStyle}>
+      <div style={labelStyle}>Carburant:</div>
+      <div style={valueStyle}>{car.fuel_type}</div>
+    </div>
+  )}
 </div>
-        {/* FUEL TYPE */}
-{car?.fuel_type && (
-  <div style={infoBoxStyle}>
-    <div style={labelStyle}>Carburant:</div>
-    <div style={valueStyle}>{car.fuel_type}</div>
-  </div>
-)}
-
-
 
 
 
