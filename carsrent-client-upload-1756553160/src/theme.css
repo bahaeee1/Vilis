@@ -42,7 +42,7 @@ main{ max-width: var(--wrap); margin: 26px auto 40px; padding: 0 20px; }
 .topnav .wrap{ max-width: var(--wrap); margin: 0 auto; padding: 14px 20px;
   display: grid; grid-template-columns: 140px 1fr 100px; gap: 12px; align-items: center; }
 .brand{ font-weight: 800; font-size: 22px; letter-spacing: .5px; color: #cfd6ff; }
-.nav-tabs{ display:flex; align-items:center; gap:6px; overflow-x:hidden; scrollbar-width:none }
+.nav-tabs{ display:flex; align-items:center; gap:6px; overflow-x:auto; scrollbar-width:none }
 .nav-tabs::-webkit-scrollbar{ display:none }
 .tab{ display:inline-flex; align-items:center; height:36px; padding:0 12px; border-radius:999px; background:transparent;
   color:var(--text); border:1px solid transparent; transition: background .15s ease, border-color .15s ease, color .15s ease; cursor:pointer; font-weight:600; opacity:.92 }
