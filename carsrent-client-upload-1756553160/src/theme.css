@@ -241,3 +241,13 @@ textarea{ height:100px; resize: vertical }
   color: var(--text);
 }
 .footer-contact .link { color: #cfd6ff; text-decoration: underline; }
+/* --- Fix: keep cards clear of the footer --- */
+.container {
+  padding-bottom: 140px;   /* leave room above footer; tweak if your footer is taller */
+}
+
+/* Footer should not overlay content */
+footer {
+  position: relative;  /* override any fixed/absolute footer */
+  z-index: 0;
+}
