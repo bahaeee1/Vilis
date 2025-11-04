@@ -23,6 +23,8 @@ export default function AddCar() {
   const [mileage_limit, setMileageLimit] = useState('illimité');
   const [insurance, setInsurance] = useState('incluse');
   const [min_age, setMinAge] = useState(21);
+  const [chauffeur, setChauffeur] = useState('no'); // 'yes' | 'no' | 'on_demand'
+
 
   // Tiered pricing editor
   // Each tier: { minDays: number, maxDays: number|null, price: number }
@@ -131,6 +133,7 @@ export default function AddCar() {
         doors: Number(doors),
         fuel_type,
         category,
+        chauffeur_option: chauffeur,
         mileage_limit,
         insurance,      // <-- add
         min_age,        // <-- add
@@ -274,6 +277,20 @@ export default function AddCar() {
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
+
+          <div>
+  <label className="label">Chauffeur</label>
+  <select
+    className="input"
+    value={chauffeur}
+    onChange={(e) => setChauffeur(e.target.value)}
+  >
+    <option value="no">No</option>
+    <option value="yes">Yes</option>
+    <option value="on_demand">On demand</option>
+  </select>
+</div>
+
 
           {/* Kilométrage */}
 <div className="form-row">
