@@ -164,6 +164,7 @@ export default function Search() {
           </div>
         ))}
       </div>
+      <div style={{ height: '160px' }} />
     </div>
   );
 }
