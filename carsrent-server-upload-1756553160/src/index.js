@@ -118,7 +118,7 @@ catch { db.prepare("ALTER TABLE cars ADD COLUMN min_age INTEGER DEFAULT 21").run
   try { db.prepare("SELECT chauffeur_option FROM cars LIMIT 1").get(); }
 catch { db.prepare("ALTER TABLE cars ADD COLUMN chauffeur_option TEXT DEFAULT 'no'").run(); }
 
-// optional: if the old column exists, migrate values
+// optional: if the old column exists, migrate values into the new column
 try {
   const hasOld = db.prepare("SELECT 1 FROM pragma_table_info('cars') WHERE name='chauffeur_included'").get();
   if (hasOld) {
@@ -128,10 +128,10 @@ try {
         WHEN IFNULL(chauffeur_included, 0) = 1 THEN 'yes'
         ELSE 'no'
       END
-      WHERE chauffeur_option IS NULL OR chauffeur_option = ''
     `).run();
   }
 } catch {}
+
 
 
 
@@ -140,6 +140,8 @@ try {
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_cars_category  ON cars(category)`).run();
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_bookings_agency ON bookings(agency_id, created_at)`).run();
   db.prepare(`CREATE INDEX IF NOT EXISTS idx_agcity_agency   ON agency_cities(agency_id)`).run();
+  db.prepare(`CREATE INDEX IF NOT EXISTS idx_cars_chauffeur ON cars(chauffeur_option)`).run();
+
 }
 initSchema();
 
