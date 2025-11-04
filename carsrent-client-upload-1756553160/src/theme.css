@@ -248,26 +248,35 @@ footer, .footer {
   position: relative;
   display: block;
 
-/* === Footer: subtle purple, true full width === */
+/* === Footer: subtle purple, full width, not fixed === */
 footer, .footer {
-  position: relative;
-  left: 0;
-  right: 0;
+  position: relative;           /* NOT fixed */
   width: 100%;
-  max-width: 100%;
+  max-width: none;
+  margin-top: auto;             /* flex pushes it to the bottom */
   background: linear-gradient(180deg, #141024 0%, #2f2755 100%);
   color: #ddd;
   padding: 1rem 2rem;
   text-align: center;
-  z-index: 1;
   box-shadow: 0 -1px 4px rgba(0,0,0,0.4) inset;
 }
 
-/* prevent any side scroll caused by old styles */
-html, body {
+/* === App layout: footer at the bottom without overlay === */
+html, body, #root {
+  height: 100%;
   margin: 0;
   padding: 0;
+  background: #0b0f14;         /* solid dark page */
   overflow-x: hidden;
-  background-color: #0b0f14 !important;
 }
 
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Whatever contains your pages (main/outlet) should grow to push footer down */
+main, .page, .container-root, .router-outlet {
+  flex: 1 0 auto;
+}
