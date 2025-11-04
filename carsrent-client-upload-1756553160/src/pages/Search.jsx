@@ -38,6 +38,8 @@ export default function Search() {
   const [minPrice, setMinPrice]   = useState('');
   const [maxPrice, setMaxPrice]   = useState('');
   const [category, setCategory]   = useState('Any');
+  const [chauffeur, setChauffeur] = useState('Any'); // Any | Included | Not included
+
 
   // Results
   const [cars, setCars]           = useState([]);
@@ -52,6 +54,7 @@ export default function Search() {
       if (minPrice !== '') params.minPrice = Number(minPrice);
       if (maxPrice !== '') params.maxPrice = Number(maxPrice);
       if (category && category !== 'Any') params.category = category;
+      if (chauffeur !== 'Any') params.chauffeur_included = (chauffeur === 'Included') ? 1 : 0;
 
       const res = await searchCars(params);
       setCars(res || []); // server returns array
@@ -71,7 +74,7 @@ export default function Search() {
         <h1 className="h2">{t('search.title')}</h1>
 
         {/* Filters */}
-        <div className="grid grid-4 gap-sm mt-md">
+        <div className="grid grid-5 gap-sm mt-md">
           <div>
             <label className="label">{t('filter.location')}</label>
             <select className="input" value={location} onChange={e => setLocation(e.target.value)}>
@@ -106,6 +109,16 @@ export default function Search() {
             </select>
           </div>
         </div>
+
+        <div>
+  <label className="label">Chauffeur</label>
+  <select className="input" value={chauffeur} onChange={e => setChauffeur(e.target.value)}>
+    <option>Any</option>
+    <option>Included</option>
+    <option>Not included</option>
+  </select>
+</div>
+
 
         <button className="btn btn-primary mt-md" onClick={run}>
           {t('btn.search')}
