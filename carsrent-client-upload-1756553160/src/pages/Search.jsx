@@ -113,15 +113,18 @@ export default function Search() {
       </div>
 
       {/* Results */}
-      <div
+     <div
   className="car-grid mt-lg"
   style={{
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
     gap: '1.5rem',
-    justifyContent: 'center',
+    justifyItems: 'center',     // center items in each grid cell
+    alignItems: 'start',        // prevent row stretching
+    marginBottom: '160px',      // guaranteed space above footer
   }}
 >
+
 
 
         {loading && <div className="card">Loading…</div>}
@@ -164,7 +167,6 @@ export default function Search() {
           </div>
         ))}
       </div>
-      <div style={{ height: '160px' }} />
     </div>
   );
 }
