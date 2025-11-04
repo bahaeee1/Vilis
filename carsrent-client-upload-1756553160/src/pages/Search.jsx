@@ -112,11 +112,13 @@ export default function Search() {
 
         <div>
   <label className="label">Chauffeur</label>
-  <select className="input" value={chauffeur} onChange={e => setChauffeur(e.target.value)}>
-    <option>Any</option>
-    <option>Included</option>
-    <option>Not included</option>
-  </select>
+ <select value={chauffeur} onChange={e => setChauffeur(e.target.value)}>
+  <option value="">Any</option>
+  <option value="yes">Included</option>
+  <option value="no">Not included</option>
+  <option value="on_demand">On demand</option>
+</select>
+
 </div>
 
 
