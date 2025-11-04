@@ -261,26 +261,91 @@ export default function Car() {
             Agence: {car.agency_name} — {car.agency_location || '—'}
           </div>
 
-          {/* Tarification (tiers) */}
-          {tariffs && (
-            <section className="tariff mt-lg">
-              <h3 className="tariff-title">TARIFICATION</h3>
-              <div className="tariff-wrap">
-                <div className="tariff-pill">
-                  <div className="tariff-price">MAD {fmtMAD(tariffs.dayTotal)}</div>
-                  <div className="tariff-unit">/ jour</div>
-                </div>
-                <div className="tariff-pill">
-                  <div className="tariff-price">MAD {fmtMAD(tariffs.weekTotal)}</div>
-                  <div className="tariff-unit">/ semaine</div>
-                </div>
-                <div className="tariff-pill">
-                  <div className="tariff-price">MAD {fmtMAD(tariffs.monthTotal)}</div>
-                  <div className="tariff-unit">/ mois</div>
-                </div>
-              </div>
-            </section>
-          )}
+         {/* Tarification (tiers) */}
+{tariffs && (
+  <section className="tariff mt-lg">
+    <h3 className="tariff-title" style={{ marginBottom: "16px" }}>TARIFICATION</h3>
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: "16px",
+        justifyContent: "center",
+        marginTop: "8px",
+      }}
+    >
+      {/* Per Day */}
+      <div
+        style={{
+          width: "200px",
+          height: "120px",
+          borderRadius: "16px",
+          background: "rgba(255, 255, 255, 0.08)",
+          backdropFilter: "blur(8px)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#ffffff",
+          boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+        }}
+      >
+        <div style={{ fontSize: "20px", fontWeight: "800", color: "#60a5fa" }}>
+          MAD {fmtMAD(tariffs.dayTotal)}
+        </div>
+        <div style={{ fontSize: "16px", fontWeight: "700" }}>/ jour</div>
+      </div>
+
+      {/* Per Week */}
+      <div
+        style={{
+          width: "200px",
+          height: "120px",
+          borderRadius: "16px",
+          background: "rgba(255, 255, 255, 0.08)",
+          backdropFilter: "blur(8px)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#ffffff",
+          boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+        }}
+      >
+        <div style={{ fontSize: "20px", fontWeight: "800", color: "#60a5fa" }}>
+          MAD {fmtMAD(tariffs.weekTotal)}
+        </div>
+        <div style={{ fontSize: "16px", fontWeight: "700" }}>/ semaine</div>
+      </div>
+
+      {/* Per Month */}
+      <div
+        style={{
+          width: "200px",
+          height: "120px",
+          borderRadius: "16px",
+          background: "rgba(255, 255, 255, 0.08)",
+          backdropFilter: "blur(8px)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#ffffff",
+          boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
+        }}
+      >
+        <div style={{ fontSize: "20px", fontWeight: "800", color: "#60a5fa" }}>
+          MAD {fmtMAD(tariffs.monthTotal)}
+        </div>
+        <div style={{ fontSize: "16px", fontWeight: "700" }}>/ mois</div>
+      </div>
+    </div>
+  </section>
+)}
+
 
           {/* Contact quick actions */}
           <div className="mt-md" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
