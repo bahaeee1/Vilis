@@ -241,33 +241,23 @@ textarea{ height:100px; resize: vertical }
   color: var(--text);
 }
 .footer-contact .link { color: #cfd6ff; text-decoration: underline; }
-/* === Force page bg dark; keep purple only in footer === */
-html, body, #root {
-  background: #0b0f14 !important;         /* solid dark */
-  background-image: none !important;       /* kill any global gradients */
-}
 
-/* If a pseudo-element is used to paint a gradient, hide it */
-body::before,
-body::after,
-#root::before,
-#root::after {
-  content: none !important;
-}
 
-/* Ensure main/content stays transparent (so the body shows through) */
-main, .container {
-  background: transparent !important;
-}
-
-/* Footer owns the purple */
+/* === Footer (dark purple, full width) === */
 footer, .footer {
-  background: linear-gradient(180deg, #32285a 0%, #6b5cff 100%) !important;
-  /* optional: subtle top divider to separate from content */
-  box-shadow: 0 -1px 0 rgba(255,255,255,0.06) inset;
+  width: 100%;
+  background: linear-gradient(180deg, #141024 0%, #362b5e 100%); /* subtle purple tone */
+  color: #ddd;
+  padding: 1rem 2rem;
+  text-align: center;
   position: relative;
   z-index: 1;
+  box-shadow: 0 -1px 4px rgba(0,0,0,0.4) inset; /* soft separation line */
 }
 
-
-
+/* make sure body doesn't restrict width */
+html, body, #root {
+  background-color: #0b0f14 !important;
+  margin: 0;
+  padding: 0;
+}
