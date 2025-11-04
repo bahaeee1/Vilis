@@ -113,7 +113,19 @@ export default function Search() {
       </div>
 
       {/* Results */}
-      <div className="grid grid-3 gap-md mt-lg">
+      <div
+  className="car"
+  key={c.id}
+  style={{
+    backgroundColor: '#0d0d1a',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+    textAlign: 'center',
+    padding: '1rem',
+  }}
+>
+
         {loading && <div className="card">Loading…</div>}
         {!loading && cars.length === 0 && <div className="card">{t('misc.no_cars')}</div>}
 
