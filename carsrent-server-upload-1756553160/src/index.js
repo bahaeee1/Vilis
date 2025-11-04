@@ -64,6 +64,7 @@ function initSchema() {
       seats INTEGER NOT NULL,
       doors INTEGER NOT NULL,
       fuel_type TEXT NOT NULL,
+      chauffeur_included INTEGER NOT NULL DEFAULT 0,
       category TEXT NOT NULL,
       mileage_limit TEXT DEFAULT 'illimité',
       insurance TEXT DEFAULT 'incluse',
@@ -113,6 +114,10 @@ catch { db.prepare("ALTER TABLE cars ADD COLUMN insurance TEXT DEFAULT 'incluse'
 
 try { db.prepare("SELECT min_age FROM cars LIMIT 1").get(); }
 catch { db.prepare("ALTER TABLE cars ADD COLUMN min_age INTEGER DEFAULT 21").run(); }
+
+  try { db.prepare("SELECT chauffeur_included FROM cars LIMIT 1").get(); }
+  catch { db.prepare("ALTER TABLE cars ADD COLUMN chauffeur_included INTEGER DEFAULT 0").run(); }
+
 
 
   // Indexes
@@ -347,6 +352,8 @@ app.get('/api/cars', (req, res) => {
   const category = (req.query.category || '').trim();
   const minPrice = req.query.minPrice ?? req.query.min_price;
   const maxPrice = req.query.maxPrice ?? req.query.max_price;
+  const chauffeur = req.query.chauffeur_included;
+
 
   const where = [];
   const params = {};
@@ -363,6 +370,11 @@ app.get('/api/cars', (req, res) => {
   if (category) { where.push('c.category = @cat'); params.cat = category; }
   if (minPrice !== undefined && minPrice !== '') { where.push('c.daily_price >= @min'); params.min = Number(minPrice); }
   if (maxPrice !== undefined && maxPrice !== '') { where.push('c.daily_price <= @max'); params.max = Number(maxPrice); }
+  const chauffeur = req.query.chauffeur_included;
+  if (chauffeur === '1' || chauffeur === '0') {
+    where.push('c.chauffeur_included = @ch');
+    params.ch = Number(chauffeur);
+  }
 
   const sql = `
     SELECT
@@ -415,6 +427,7 @@ app.post('/api/cars', requireAuth, (req, res) => {
   const seats = Number(b.seats);
   const doors = Number(b.doors);
   const price = Number(b.daily_price);
+  const chauffeurIncluded = Number(b.chauffeur_included) ? 1 : 0;
   const maxYear = new Date().getFullYear() + 1;
   if (!(price > 0) || !(year >= 1990 && year <= maxYear) || !(seats >= 1 && seats <= 9) || !(doors >= 2 && doors <= 6)) {
     return res.status(400).json({ error: 'Invalid numeric values' });
@@ -425,28 +438,30 @@ app.post('/api/cars', requireAuth, (req, res) => {
     return res.status(400).json({ error: 'Invalid price_tiers: ' + e.message });
   }
 
-  const info = db.prepare(`
+    const info = db.prepare(`
     INSERT INTO cars (
-  agency_id, title, daily_price, image_url, year, transmission, seats, doors,
-  fuel_type, category, mileage_limit, insurance, min_age, price_tiers, created_at
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+      agency_id, title, daily_price, image_url, year, transmission, seats, doors,
+      fuel_type, chauffeur_included, category, mileage_limit, insurance, min_age, price_tiers, created_at
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `).run(
     req.user.id,
-String(b.title).trim(),
-price,
-String(b.image_url).trim(),
-year,
-String(b.transmission),
-seats,
-doors,
-String(b.fuel_type),
-String(b.category),
-String(b.mileage_limit || 'illimité'),
-String(b.insurance || 'incluse'),
-Number(b.min_age || 21),
-JSON.stringify(tiers),
-now()
+    String(b.title).trim(),
+    price,
+    String(b.image_url).trim(),
+    year,
+    String(b.transmission),
+    seats,
+    doors,
+    String(b.fuel_type),
+    chauffeurIncluded,
+    String(b.category),
+    String(b.mileage_limit || 'illimité'),
+    String(b.insurance || 'incluse'),
+    Number(b.min_age || 21),
+    JSON.stringify(tiers),
+    now()
   );
+
 
   const car = db.prepare('SELECT * FROM cars WHERE id = ?').get(info.lastInsertRowid);
   res.json({ car });
