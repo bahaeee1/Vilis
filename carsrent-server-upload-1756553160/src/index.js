@@ -64,7 +64,7 @@ function initSchema() {
       seats INTEGER NOT NULL,
       doors INTEGER NOT NULL,
       fuel_type TEXT NOT NULL,
-      chauffeur_included INTEGER NOT NULL DEFAULT 0,
+       chauffeur_option TEXT NOT NULL DEFAULT 'no',  -- 'yes' | 'no' | 'on_demand'
       category TEXT NOT NULL,
       mileage_limit TEXT DEFAULT 'illimité',
       insurance TEXT DEFAULT 'incluse',
@@ -115,8 +115,23 @@ catch { db.prepare("ALTER TABLE cars ADD COLUMN insurance TEXT DEFAULT 'incluse'
 try { db.prepare("SELECT min_age FROM cars LIMIT 1").get(); }
 catch { db.prepare("ALTER TABLE cars ADD COLUMN min_age INTEGER DEFAULT 21").run(); }
 
-  try { db.prepare("SELECT chauffeur_included FROM cars LIMIT 1").get(); }
-  catch { db.prepare("ALTER TABLE cars ADD COLUMN chauffeur_included INTEGER DEFAULT 0").run(); }
+  try { db.prepare("SELECT chauffeur_option FROM cars LIMIT 1").get(); }
+catch { db.prepare("ALTER TABLE cars ADD COLUMN chauffeur_option TEXT DEFAULT 'no'").run(); }
+
+// optional: if the old column exists, migrate values
+try {
+  const hasOld = db.prepare("SELECT 1 FROM pragma_table_info('cars') WHERE name='chauffeur_included'").get();
+  if (hasOld) {
+    db.prepare(`
+      UPDATE cars
+      SET chauffeur_option = CASE
+        WHEN IFNULL(chauffeur_included, 0) = 1 THEN 'yes'
+        ELSE 'no'
+      END
+      WHERE chauffeur_option IS NULL OR chauffeur_option = ''
+    `).run();
+  }
+} catch {}
 
 
 
@@ -426,7 +441,10 @@ app.post('/api/cars', requireAuth, (req, res) => {
   const seats = Number(b.seats);
   const doors = Number(b.doors);
   const price = Number(b.daily_price);
-  const chauffeurIncluded = Number(b.chauffeur_included) ? 1 : 0;
+  const chauffeurOption = String(b.chauffeur_option || 'no').toLowerCase();
+const validCh = new Set(['yes','no','on_demand']);
+const finalChauffeur = validCh.has(chauffeurOption) ? chauffeurOption : 'no';
+
   const maxYear = new Date().getFullYear() + 1;
   if (!(price > 0) || !(year >= 1990 && year <= maxYear) || !(seats >= 1 && seats <= 9) || !(doors >= 2 && doors <= 6)) {
     return res.status(400).json({ error: 'Invalid numeric values' });
@@ -440,7 +458,7 @@ app.post('/api/cars', requireAuth, (req, res) => {
     const info = db.prepare(`
     INSERT INTO cars (
       agency_id, title, daily_price, image_url, year, transmission, seats, doors,
-      fuel_type, chauffeur_included, category, mileage_limit, insurance, min_age, price_tiers, created_at
+      fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age, price_tiers, created_at
     ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `).run(
     req.user.id,
@@ -452,7 +470,7 @@ app.post('/api/cars', requireAuth, (req, res) => {
     seats,
     doors,
     String(b.fuel_type),
-    chauffeurIncluded,
+    finalChauffeur,
     String(b.category),
     String(b.mileage_limit || 'illimité'),
     String(b.insurance || 'incluse'),
