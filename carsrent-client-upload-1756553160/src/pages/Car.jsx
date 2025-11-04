@@ -262,16 +262,19 @@ export default function Car() {
           </div>
 
          {/* Tarification (tiers) */}
+{/* Tarification (tiers) */}
 {tariffs && (
-  <section className="tariff mt-lg">
-    <h3 className="tariff-title" style={{ marginBottom: "16px" }}>TARIFICATION</h3>
+  <section
+    className="tariff mt-lg"
+    style={{ marginBottom: "40px" }} // adds distance below boxes
+  >
     <div
       style={{
         display: "flex",
         flexWrap: "wrap",
         gap: "16px",
         justifyContent: "center",
-        marginTop: "8px",
+        marginTop: "24px", // little more space above boxes too
       }}
     >
       {/* Per Day */}
