@@ -352,7 +352,7 @@ app.get('/api/cars', (req, res) => {
   const category = (req.query.category || '').trim();
   const minPrice = req.query.minPrice ?? req.query.min_price;
   const maxPrice = req.query.maxPrice ?? req.query.max_price;
-  const chauffeur = req.query.chauffeur_included;
+  const chauffeur = (req.query.chauffeur || '').toLowerCase();
 
 
   const where = [];
@@ -370,11 +370,10 @@ app.get('/api/cars', (req, res) => {
   if (category) { where.push('c.category = @cat'); params.cat = category; }
   if (minPrice !== undefined && minPrice !== '') { where.push('c.daily_price >= @min'); params.min = Number(minPrice); }
   if (maxPrice !== undefined && maxPrice !== '') { where.push('c.daily_price <= @max'); params.max = Number(maxPrice); }
-  const chauffeur = req.query.chauffeur_included;
-  if (chauffeur === '1' || chauffeur === '0') {
-    where.push('c.chauffeur_included = @ch');
-    params.ch = Number(chauffeur);
-  }
+if (['yes','no','on_demand'].includes(chauffeur)) {
+  where.push('c.chauffeur_option = @ch');
+  params.ch = chauffeur;
+}
 
   const sql = `
     SELECT
