@@ -126,10 +126,13 @@ export default function Search() {
               <div className="muted">
                 {c.daily_price} MAD {t('car.price_per_day')}
               </div>
-              <div className="muted mt-xxs">
-                {c.agency_name ? <strong>{c.agency_name}</strong> : (c.location || '—')}
-                {c.category ? ` — ${c.category}` : ''}
-              </div>
+             <div className="muted mt-xxs">
+  {c.agency_name ? <strong>{c.agency_name}</strong> : (c.location || '—')}
+  {c.category ? ` — ${c.category}` : ''}
+  {c.transmission ? ` — ${c.transmission}` : ''}
+  {c.fuel_type ? ` — ${c.fuel_type}` : ''}
+</div>
+
               {(c.agency_cities || c.agency_location || c.location) && (
             <div className="muted" style={{ marginTop: 4 }}>
     {/* prefer the multi-city field if present, else fall back */}
