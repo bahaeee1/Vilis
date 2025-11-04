@@ -263,3 +263,9 @@ footer, .footer {
   z-index: 1;
   box-shadow: 0 -1px 4px rgba(0,0,0,0.4) inset;
 }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* avoids side scroll caused by 100vw full-bleed */
+}
