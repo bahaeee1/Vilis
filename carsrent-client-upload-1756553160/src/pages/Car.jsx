@@ -240,6 +240,14 @@ export default function Car() {
     </div>
   )}
 </div>
+        {/* FUEL TYPE */}
+{car?.fuel_type && (
+  <div style={infoBoxStyle}>
+    <div style={labelStyle}>Carburant:</div>
+    <div style={valueStyle}>{car.fuel_type}</div>
+  </div>
+)}
+
 
 
 
