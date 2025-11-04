@@ -249,6 +249,16 @@ export default function Car() {
     </div>
   )}
 </div>
+    {/* CHAUFFEUR */}
+  {car?.chauffeur_included != null && (
+    <div style={infoBoxStyle}>
+      <div style={labelStyle}>Chauffeur:</div>
+      <div style={{ ...valueStyle, textTransform: 'none' }}>
+        {Number(car.chauffeur_included) ? 'Inclus' : 'Non inclus'}
+      </div>
+    </div>
+  )}
+
 
 
 
