@@ -1,6 +1,14 @@
 // server/src/db.js
 import Database from 'better-sqlite3';
 
+// --- Migration: ensure chauffeur_included exists on cars ---
+try {
+  db.prepare("ALTER TABLE cars ADD COLUMN chauffeur_included INTEGER DEFAULT 0").run();
+} catch (e) {
+  // ignore if column already exists
+}
+
+
 const DB_FILE = process.env.SQLITE_FILE || 'data.db';
 const db = new Database(DB_FILE);
 db.pragma('journal_mode = WAL');
