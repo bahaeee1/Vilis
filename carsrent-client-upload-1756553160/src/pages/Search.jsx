@@ -114,17 +114,15 @@ export default function Search() {
 
       {/* Results */}
       <div
-  className="car"
-  key={c.id}
+  className="car-grid mt-lg"
   style={{
-    backgroundColor: '#0d0d1a',
-    borderRadius: '12px',
-    overflow: 'hidden',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-    textAlign: 'center',
-    padding: '1rem',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gap: '1.5rem',
+    justifyContent: 'center',
   }}
 >
+
 
         {loading && <div className="card">Loading…</div>}
         {!loading && cars.length === 0 && <div className="card">{t('misc.no_cars')}</div>}
