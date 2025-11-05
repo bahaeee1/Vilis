@@ -248,7 +248,7 @@ export default function Car() {
       <div style={valueStyle}>{car.fuel_type}</div>
     </div>
   )}
-</div>
+
     {/* CHAUFFEUR */}
   {car?.chauffeur_included != null && (
     <div style={infoBoxStyle}>
