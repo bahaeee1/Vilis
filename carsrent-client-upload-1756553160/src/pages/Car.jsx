@@ -35,6 +35,31 @@ const valueStyle = {
   textTransform: "capitalize",
 };
 
+function pickChauffeurValue(car) {
+  const candidates = [
+    car?.chauffeur,
+    car?.chauffeur_included,
+    car?.with_driver,
+    car?.driver,
+    car?.has_chauffeur,
+    car?.options?.chauffeur,
+    car?.features?.chauffeur,
+    car?.extras?.chauffeur,
+    car?.details?.chauffeur,
+  ];
+  for (const v of candidates) if (v !== null && v !== undefined) return v;
+  return null;
+}
+
+function formatChauffeurLabel(v) {
+  if (v === null || v === undefined || String(v).trim() === '') return '—';
+  const s = String(v).toLowerCase().trim();
+  if (['yes','true','1','included','incl','avec','with'].includes(s)) return 'Inclus';
+  if (['no','false','0','not included','non','sans'].includes(s)) return 'Non inclus';
+  if (['on_demand','on-demand','ondemand','sur demande'].includes(s)) return 'Sur demande';
+  return String(v); // fallback: show raw
+}
+
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
@@ -249,38 +274,14 @@ export default function Car() {
     </div>
   )}
 
-   {/* CHAUFFEUR */}
-{(() => {
-  // accept multiple possible field names
-  const chauffeurRaw =
-    car?.chauffeur ??
-    car?.chauffeur_included ??
-    car?.with_driver ??
-    car?.driver ??
-    car?.has_chauffeur ??
-    null;
+  {/* CHAUFFEUR */}
+<div style={infoBoxStyle}>
+  <div style={labelStyle}>Chauffeur:</div>
+  <div style={valueStyle}>
+    {formatChauffeurLabel(pickChauffeurValue(car))}
+  </div>
+</div>
 
-  // if none of the fields exist, don't render the box
-  if (chauffeurRaw === null || typeof chauffeurRaw === 'undefined') return null;
-
-  // normalize value to a friendly label
-  const s = String(chauffeurRaw).toLowerCase().trim();
-  const label =
-    ['yes','true','1','included','incl','avec','with'].includes(s) ? 'Inclus' :
-    ['no','false','0','not included','non','sans'].includes(s)            ? 'Non inclus' :
-    ['on_demand','on-demand','ondemand','sur demande'].includes(s)        ? 'Sur demande' :
-    (s === '' || s === 'null' || s === 'undefined')                       ? '—' :
-    chauffeurRaw;
-
-  return (
-    <div style={infoBoxStyle}>
-      <div style={labelStyle}>Chauffeur:</div>
-      <div style={valueStyle}>{label}</div>
-    </div>
-  );
-})()}
-
- </div>
 
 
 
