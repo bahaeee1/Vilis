@@ -290,6 +290,26 @@ export default function AddCar() {
     <option value="on_demand">On demand</option>
   </select>
 </div>
+          <div className="form-row">
+  <label>Livraison</label>
+  <input
+    className="input"
+    placeholder="ex: Aéroport, Hôtel, Sur demande..."
+    value={delivery}
+    onChange={(e) => setDelivery(e.target.value)}
+  />
+</div>
+          <div className="form-row">
+  <label>Dépôt (MAD)</label>
+  <input
+    className="input"
+    type="number"
+    min={0}
+    value={deposit}
+    onChange={(e) => setDeposit(e.target.value)}
+  />
+</div>
+
 
 
           {/* Kilométrage */}
