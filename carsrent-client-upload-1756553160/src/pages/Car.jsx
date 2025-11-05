@@ -282,6 +282,21 @@ export default function Car() {
   </div>
 </div>
 </div>
+        {/* LIVRAISON */}
+{car?.delivery && (
+  <div style={infoBoxStyle}>
+    <div style={labelStyle}>Livraison:</div>
+    <div style={valueStyle}>{car.delivery}</div>
+  </div>
+)}
+        {/* DÉPÔT DE GARANTIE */}
+{car?.deposit && (
+  <div style={infoBoxStyle}>
+    <div style={labelStyle}>Dépôt:</div>
+    <div style={valueStyle}>{car.deposit} MAD</div>
+  </div>
+)}
+
 
 
 
