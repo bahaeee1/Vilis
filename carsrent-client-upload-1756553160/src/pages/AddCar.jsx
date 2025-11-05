@@ -133,7 +133,7 @@ export default function AddCar() {
         doors: Number(doors),
         fuel_type,
         category,
-        chauffeur_option: chauffeur,
+        chauffeur: chauffeur,
         mileage_limit,
         insurance,      // <-- add
         min_age,        // <-- add
