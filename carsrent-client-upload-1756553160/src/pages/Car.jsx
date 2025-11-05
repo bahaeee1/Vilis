@@ -261,7 +261,7 @@ export default function Car() {
     </div>
   </div>
 )}
-
+ </div>
 
 
 
