@@ -250,17 +250,36 @@ export default function Car() {
   )}
 
    {/* CHAUFFEUR */}
-{car?.chauffeur != null && (
-  <div style={infoBoxStyle}>
-    <div style={labelStyle}>Chauffeur:</div>
-    <div style={valueStyle}>
-      {car.chauffeur === "yes" ? "Inclus"
-      : car.chauffeur === "no" ? "Non inclus"
-      : car.chauffeur === "on_demand" ? "Sur demande"
-      : car.chauffeur}
+{(() => {
+  // accept multiple possible field names
+  const chauffeurRaw =
+    car?.chauffeur ??
+    car?.chauffeur_included ??
+    car?.with_driver ??
+    car?.driver ??
+    car?.has_chauffeur ??
+    null;
+
+  // if none of the fields exist, don't render the box
+  if (chauffeurRaw === null || typeof chauffeurRaw === 'undefined') return null;
+
+  // normalize value to a friendly label
+  const s = String(chauffeurRaw).toLowerCase().trim();
+  const label =
+    ['yes','true','1','included','incl','avec','with'].includes(s) ? 'Inclus' :
+    ['no','false','0','not included','non','sans'].includes(s)            ? 'Non inclus' :
+    ['on_demand','on-demand','ondemand','sur demande'].includes(s)        ? 'Sur demande' :
+    (s === '' || s === 'null' || s === 'undefined')                       ? '—' :
+    chauffeurRaw;
+
+  return (
+    <div style={infoBoxStyle}>
+      <div style={labelStyle}>Chauffeur:</div>
+      <div style={valueStyle}>{label}</div>
     </div>
-  </div>
-)}
+  );
+})()}
+
  </div>
 
 
