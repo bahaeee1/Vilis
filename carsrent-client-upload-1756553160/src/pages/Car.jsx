@@ -283,19 +283,21 @@ export default function Car() {
 </div>
 </div>
         {/* LIVRAISON */}
-{car?.delivery && (
+{car?.delivery && String(car.delivery).trim() && (
   <div style={infoBoxStyle}>
     <div style={labelStyle}>Livraison:</div>
-    <div style={valueStyle}>{car.delivery}</div>
+    <div style={valueStyle}>{String(car.delivery).trim()}</div>
   </div>
 )}
+
         {/* DÉPÔT DE GARANTIE */}
-{car?.deposit && (
+{car?.deposit != null && (
   <div style={infoBoxStyle}>
     <div style={labelStyle}>Dépôt:</div>
-    <div style={valueStyle}>{car.deposit} MAD</div>
+    <div style={valueStyle}>{fmtMAD(car.deposit)} MAD</div>
   </div>
 )}
+
 
 
 
