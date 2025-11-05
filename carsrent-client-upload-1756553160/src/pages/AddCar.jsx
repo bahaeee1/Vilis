@@ -20,6 +20,8 @@ export default function AddCar() {
   const [doors, setDoors] = useState('');
   const [fuel_type, setFuel] = useState(FUEL[0]);
   const [category, setCategory] = useState('suv');
+  const [delivery, setDelivery] = useState('');   // e.g., "Aéroport, Hôtel, Sur demande"
+const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce later
   const [mileage_limit, setMileageLimit] = useState('illimité');
   const [insurance, setInsurance] = useState('incluse');
   const [min_age, setMinAge] = useState(21);
@@ -134,6 +136,8 @@ export default function AddCar() {
         fuel_type,
         category,
         chauffeur: chauffeur,
+        delivery: delivery?.trim() || null,
+        deposit: deposit === '' ? null : Number(deposit),
         mileage_limit,
         insurance,      // <-- add
         min_age,        // <-- add
