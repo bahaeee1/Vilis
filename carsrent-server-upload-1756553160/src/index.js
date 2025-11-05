@@ -38,43 +38,40 @@ const db = new Database(SQLITE_FILE);
 // --------------------------------------------
 // Ensure new columns exist (safe migrations)
 // --------------------------------------------
-function ensureColumns() {
-  const cols = db.prepare("PRAGMA table_info(cars)").all().map(c => c.name);
 
-  if (!cols.includes("chauffeur")) {
-    db.exec("ALTER TABLE cars ADD COLUMN chauffeur TEXT;");
-  }
-  if (!cols.includes("delivery")) {
-    db.exec("ALTER TABLE cars ADD COLUMN delivery TEXT;");
-  }
-  if (!cols.includes("deposit")) {
-    db.exec("ALTER TABLE cars ADD COLUMN deposit INTEGER;");
-  }
-  if (!cols.includes("price_tiers")) {
-    db.exec("ALTER TABLE cars ADD COLUMN price_tiers TEXT;");
-  }
-}
-
-ensureColumns();
-
+// ========= DB =========
+const db = new Database(SQLITE_FILE);
 
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// 1) Create all tables first
 function initSchema() {
-  // Agencies
-  db.prepare(`
-    CREATE TABLE IF NOT EXISTS agencies (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      password_hash TEXT NOT NULL,
-      location TEXT,         -- HQ city (optional)
-      phone TEXT,
-      created_at INTEGER NOT NULL
-    )
-  `).run();
+  // your full CREATE TABLE agencies / cars / bookings / etc...
+}
+initSchema();
 
+// 2) After tables exist → add missing columns safely
+function ensureColumns() {
+  // Check if cars table exists
+  const hasCars = db.prepare(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='cars'"
+  ).get();
+  if (!hasCars) return;
+
+  const cols = db.prepare("PRAGMA table_info(cars)").all().map(c => c.name);
+
+  if (!cols.includes("delivery")) db.exec("ALTER TABLE cars ADD COLUMN delivery TEXT;");
+  if (!cols.includes("deposit")) db.exec("ALTER TABLE cars ADD COLUMN deposit INTEGER;");
+  if (!cols.includes("price_tiers")) db.exec("ALTER TABLE cars ADD COLUMN price_tiers TEXT;");
+  if (!cols.includes("chauffeur")) db.exec("ALTER TABLE cars ADD COLUMN chauffeur TEXT;");
+}
+
+// ✅ run AFTER initSchema()
+ensureColumns();
+
+
+  
   // Cars
   db.prepare(`
     CREATE TABLE IF NOT EXISTS cars (
@@ -93,6 +90,8 @@ function initSchema() {
       mileage_limit TEXT DEFAULT 'illimité',
       insurance TEXT DEFAULT 'incluse',
       min_age INTEGER DEFAULT 21,
+      delivery TEXT,
+deposit INTEGER,
       price_tiers TEXT,      -- JSON string (optional)
       created_at INTEGER NOT NULL
     )
