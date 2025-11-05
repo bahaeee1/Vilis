@@ -34,6 +34,30 @@ app.use(rateLimit({ windowMs: 60_000, max: 120 }));
 
 // ========= DB =========
 const db = new Database(SQLITE_FILE);
+
+// --------------------------------------------
+// Ensure new columns exist (safe migrations)
+// --------------------------------------------
+function ensureColumns() {
+  const cols = db.prepare("PRAGMA table_info(cars)").all().map(c => c.name);
+
+  if (!cols.includes("chauffeur")) {
+    db.exec("ALTER TABLE cars ADD COLUMN chauffeur TEXT;");
+  }
+  if (!cols.includes("delivery")) {
+    db.exec("ALTER TABLE cars ADD COLUMN delivery TEXT;");
+  }
+  if (!cols.includes("deposit")) {
+    db.exec("ALTER TABLE cars ADD COLUMN deposit INTEGER;");
+  }
+  if (!cols.includes("price_tiers")) {
+    db.exec("ALTER TABLE cars ADD COLUMN price_tiers TEXT;");
+  }
+}
+
+ensureColumns();
+
+
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
@@ -457,29 +481,52 @@ const finalChauffeur = validCh.has(chauffeurOption) ? chauffeurOption : 'no';
     return res.status(400).json({ error: 'Invalid price_tiers: ' + e.message });
   }
 
-    const info = db.prepare(`
-    INSERT INTO cars (
-      agency_id, title, daily_price, image_url, year, transmission, seats, doors,
-      fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age, price_tiers, created_at
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-  `).run(
-    req.user.id,
-    String(b.title).trim(),
-    price,
-    String(b.image_url).trim(),
+   const info = db.prepare(`
+  INSERT INTO cars (
+    agency_id,
+    title,
+    daily_price,
+    image_url,
     year,
-    String(b.transmission),
+    transmission,
     seats,
     doors,
-    String(b.fuel_type),
-    finalChauffeur,
-    String(b.category),
-    String(b.mileage_limit || 'illimité'),
-    String(b.insurance || 'incluse'),
-    Number(b.min_age || 21),
-    JSON.stringify(tiers),
-    now()
-  );
+    fuel_type,
+    chauffeur_option,
+    category,
+    mileage_limit,
+    insurance,
+    min_age,
+    delivery,
+    deposit,
+    price_tiers,
+    created_at
+  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+`).run(
+  req.user.id,
+  String(b.title).trim(),
+  price,
+  String(b.image_url).trim(),
+  year,
+  String(b.transmission),
+  seats,
+  doors,
+  String(b.fuel_type),
+  finalChauffeur,
+  String(b.category),
+  String(b.mileage_limit || 'illimité'),
+  String(b.insurance || 'incluse'),
+  Number(b.min_age || 21),
+
+  // ✅ NEW FIELDS BELOW
+  b.delivery?.trim() || null,
+  (b.deposit === '' || b.deposit == null) ? null : Number(b.deposit),
+
+  // ✅ EXISTING FIELDS
+  JSON.stringify(tiers),
+  now()
+);
+
 
 
   const car = db.prepare('SELECT * FROM cars WHERE id = ?').get(info.lastInsertRowid);
