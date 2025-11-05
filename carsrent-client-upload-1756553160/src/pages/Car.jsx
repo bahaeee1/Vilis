@@ -249,15 +249,19 @@ export default function Car() {
     </div>
   )}
 
-    {/* CHAUFFEUR */}
-  {car?.chauffeur_included != null && (
-    <div style={infoBoxStyle}>
-      <div style={labelStyle}>Chauffeur:</div>
-      <div style={{ ...valueStyle, textTransform: 'none' }}>
-        {Number(car.chauffeur_included) ? 'Inclus' : 'Non inclus'}
-      </div>
+   {/* CHAUFFEUR */}
+{car?.chauffeur != null && (
+  <div style={infoBoxStyle}>
+    <div style={labelStyle}>Chauffeur:</div>
+    <div style={valueStyle}>
+      {car.chauffeur === "yes" ? "Inclus"
+      : car.chauffeur === "no" ? "Non inclus"
+      : car.chauffeur === "on_demand" ? "Sur demande"
+      : car.chauffeur}
     </div>
-  )}
+  </div>
+)}
+
 
 
 
