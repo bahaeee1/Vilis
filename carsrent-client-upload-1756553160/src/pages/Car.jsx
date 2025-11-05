@@ -38,7 +38,7 @@ const valueStyle = {
 function pickChauffeurValue(car) {
   const candidates = [
     car?.chauffeur,
-    car?.chauffeur_included,
+    car?.chauffeur_option,
     car?.with_driver,
     car?.driver,
     car?.has_chauffeur,
