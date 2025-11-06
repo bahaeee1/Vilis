@@ -67,6 +67,8 @@ function initSchema() {
       fuel_type TEXT NOT NULL,
        chauffeur_option TEXT NOT NULL DEFAULT 'no',  -- 'yes' | 'no' | 'on_demand'
       category TEXT NOT NULL,
+      delivery TEXT,              -- e.g., "Airport / Hotel / Sur demande"
+deposit  INTEGER,           -- MAD; null = no deposit
       mileage_limit TEXT DEFAULT 'illimité',
       insurance TEXT DEFAULT 'incluse',
       min_age INTEGER DEFAULT 21,
@@ -119,6 +121,13 @@ catch { db.prepare("ALTER TABLE cars ADD COLUMN min_age INTEGER DEFAULT 21").run
   try { db.prepare("SELECT chauffeur_option FROM cars LIMIT 1").get(); }
 catch { db.prepare("ALTER TABLE cars ADD COLUMN chauffeur_option TEXT DEFAULT 'no'").run(); }
 
+try { db.prepare("SELECT delivery FROM cars LIMIT 1").get(); }
+catch { db.prepare("ALTER TABLE cars ADD COLUMN delivery TEXT").run(); }
+
+try { db.prepare("SELECT deposit FROM cars LIMIT 1").get(); }
+catch { db.prepare("ALTER TABLE cars ADD COLUMN deposit INTEGER").run(); }
+
+  
 // optional: if the old column exists, migrate values into the new column
 try {
   const hasOld = db.prepare("SELECT 1 FROM pragma_table_info('cars') WHERE name='chauffeur_included'").get();
@@ -447,6 +456,12 @@ app.post('/api/cars', requireAuth, (req, res) => {
   const chauffeurOption = String(b.chauffeur_option || 'no').toLowerCase();
 const validCh = new Set(['yes','no','on_demand']);
 const finalChauffeur = validCh.has(chauffeurOption) ? chauffeurOption : 'no';
+  const delivery = (b.delivery ?? null) ? String(b.delivery).trim() : null;
+const deposit  = b.deposit === '' || b.deposit == null ? null : Number(b.deposit);
+if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
+  return res.status(400).json({ error: 'Invalid deposit' });
+}
+
 
   const maxYear = new Date().getFullYear() + 1;
   if (!(price > 0) || !(year >= 1990 && year <= maxYear) || !(seats >= 1 && seats <= 9) || !(doors >= 2 && doors <= 6)) {
@@ -461,7 +476,7 @@ const finalChauffeur = validCh.has(chauffeurOption) ? chauffeurOption : 'no';
     const info = db.prepare(`
     INSERT INTO cars (
       agency_id, title, daily_price, image_url, year, transmission, seats, doors,
-      fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age, price_tiers, created_at
+      fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age, delivery, deposit, price_tiers, created_at
     ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
   `).run(
     req.user.id,
@@ -474,12 +489,14 @@ const finalChauffeur = validCh.has(chauffeurOption) ? chauffeurOption : 'no';
     doors,
     String(b.fuel_type),
     finalChauffeur,
-    String(b.category),
-    String(b.mileage_limit || 'illimité'),
-    String(b.insurance || 'incluse'),
-    Number(b.min_age || 21),
-    JSON.stringify(tiers),
-    now()
+String(b.category),
+String(b.mileage_limit || 'illimité'),
+String(b.insurance || 'incluse'),
+Number(b.min_age || 21),
+delivery,
+deposit,
+JSON.stringify(tiers),
+now()
   );
 
 
