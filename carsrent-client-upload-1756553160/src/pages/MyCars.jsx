@@ -134,19 +134,20 @@ export default function MyCars() {
                 </div>
 
                 <div style={{ display: 'flex', gap: 10 }}>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => nav(`/agency/cars/${car.id}/edit`)}
-                  >
-                    Modifier
-                  </button>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDelete(car.id)}
-                  >
-                    Supprimer
-                  </button>
-                </div>
+  <button
+    className="btn btn-primary"
+    onClick={() => nav(`/agency/cars/${car.id}/edit`)}
+  >
+    Modifier
+  </button>
+  <button
+    className="btn btn-danger"
+    onClick={() => handleDelete(car.id)}
+  >
+    Supprimer
+  </button>
+</div>
+
               </div>
             ))}
           </div>
