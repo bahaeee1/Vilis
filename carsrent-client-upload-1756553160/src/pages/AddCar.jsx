@@ -26,6 +26,8 @@ const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce 
   const [insurance, setInsurance] = useState('incluse');
   const [min_age, setMinAge] = useState(21);
   const [chauffeur, setChauffeur] = useState('no'); // 'yes' | 'no' | 'on_demand'
+  const [optionsText, setOptionsText] = useState('');
+
 
 
   // Tiered pricing editor
@@ -125,6 +127,13 @@ const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce 
 
     setSaving(true);
     try {
+
+      const options =
+  optionsText
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+      
       const payload = {
         title: title.trim(),
         daily_price: Number(daily_price),
@@ -141,6 +150,7 @@ const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce 
         mileage_limit,
         insurance,      // <-- add
         min_age,        // <-- add
+        options, 
         price_tiers: tiers // server accepts array or JSON string
       };
       await addCar(payload);
@@ -148,7 +158,10 @@ const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce 
       // reset
       setTitle(''); setPrice(''); setImage(''); setYear('');
       setTrans('manual'); setSeats(''); setDoors('');
-      setFuel(FUEL[0]); setCategory('suv');
+      setFuel(FUEL[0]); setCategory('suv');setDelivery('');
+setDeposit('');
+setOptionsText('');
+setChauffeur('no');
       setTiers([]);
     } catch (err) {
       const text = (err && (err.error || err.message)) || 'Error';
@@ -401,6 +414,20 @@ const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce 
 
             <button type="button" className="btn btn-ghost mt-sm" onClick={addTier}>+ Add tier</button>
           </div>
+
+          <div className="mt-sm">
+  <label className="label">Options (facultatif)</label>
+  <input
+    className="input"
+    placeholder="ex: GPS, Siège bébé, Livraison hôtel, 2e conducteur"
+    value={optionsText}
+    onChange={(e) => setOptionsText(e.target.value)}
+  />
+  <div className="muted mt-xxs">
+    Séparez par des virgules. Exemple: <em>GPS, Siège bébé</em>
+  </div>
+</div>
+
 
           {/* Message */}
           {msg && <div className="mt-sm muted">{msg}</div>}
