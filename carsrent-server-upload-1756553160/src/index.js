@@ -121,11 +121,14 @@ catch { db.prepare("ALTER TABLE cars ADD COLUMN min_age INTEGER DEFAULT 21").run
   try { db.prepare("SELECT chauffeur_option FROM cars LIMIT 1").get(); }
 catch { db.prepare("ALTER TABLE cars ADD COLUMN chauffeur_option TEXT DEFAULT 'no'").run(); }
 
+// Add delivery if missing
 try { db.prepare("SELECT delivery FROM cars LIMIT 1").get(); }
 catch { db.prepare("ALTER TABLE cars ADD COLUMN delivery TEXT").run(); }
 
+// Add deposit if missing
 try { db.prepare("SELECT deposit FROM cars LIMIT 1").get(); }
 catch { db.prepare("ALTER TABLE cars ADD COLUMN deposit INTEGER").run(); }
+
 
   
 // optional: if the old column exists, migrate values into the new column
