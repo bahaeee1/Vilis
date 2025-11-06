@@ -1,18 +1,19 @@
 // client/src/pages/MyCars.jsx
 import React, { useEffect, useState } from 'react';
-import { getMyCars, deleteCar, updateCar } from '../api';
+import { getMyCars, deleteCar } from '../api';
+import { useNavigate } from 'react-router-dom';
 
 export default function MyCars() {
   const [cars, setCars] = useState([]);
   const [msg, setMsg] = useState('');
-  const [editingId, setEditingId] = useState(null);
-  const [newPrice, setNewPrice] = useState('');
+  const nav = useNavigate();
 
   useEffect(() => {
     (async () => {
       try {
         const res = await getMyCars();
-        setCars(res.cars || []);
+        // ✅ Some backends return array directly instead of { cars: [] }
+        setCars(res.cars || res || []);
       } catch (err) {
         setMsg(err?.error || 'Erreur de chargement');
       }
@@ -23,24 +24,10 @@ export default function MyCars() {
     if (!window.confirm('Supprimer ce véhicule ?')) return;
     try {
       await deleteCar(id);
-      setCars(cars.filter((c) => c.id !== id));
+      setCars((prev) => prev.filter((c) => c.id !== id));
+      setMsg('Véhicule supprimé ✅');
     } catch (err) {
       setMsg(err?.error || 'Erreur de suppression');
-    }
-  }
-
-  async function handleSave(id) {
-    try {
-      await updateCar(id, { daily_price: Number(newPrice) });
-      setCars((prev) =>
-        prev.map((c) =>
-          c.id === id ? { ...c, daily_price: Number(newPrice) } : c
-        )
-      );
-      setEditingId(null);
-      setMsg('Prix mis à jour ✅');
-    } catch (err) {
-      setMsg(err?.error || 'Erreur de mise à jour');
     }
   }
 
@@ -100,6 +87,20 @@ export default function MyCars() {
                 }}
               >
                 <div>
+                  {car.image_url && (
+                    <img
+                      src={car.image_url}
+                      alt={car.title}
+                      style={{
+                        width: '100%',
+                        borderRadius: '12px',
+                        marginBottom: '12px',
+                        objectFit: 'cover',
+                        height: '180px',
+                      }}
+                    />
+                  )}
+
                   <h3
                     style={{
                       fontSize: '18px',
@@ -109,7 +110,7 @@ export default function MyCars() {
                       textTransform: 'capitalize',
                     }}
                   >
-                    {car.title}
+                    {car.title || '—'}
                   </h3>
                   <div
                     style={{
@@ -118,7 +119,7 @@ export default function MyCars() {
                       marginBottom: '6px',
                     }}
                   >
-                    {car.daily_price} MAD / jour
+                    {car.daily_price ? `${car.daily_price} MAD / jour` : '—'}
                   </div>
                   <div
                     style={{
@@ -128,57 +129,24 @@ export default function MyCars() {
                       marginBottom: '16px',
                     }}
                   >
-                    {car.category}
+                    {car.category || '—'}
                   </div>
                 </div>
 
-                {editingId === car.id ? (
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <input
-                      type="number"
-                      className="input"
-                      value={newPrice}
-                      placeholder="Nouveau prix"
-                      onChange={(e) => setNewPrice(e.target.value)}
-                      style={{
-                        width: '100%',
-                        background: 'rgba(255,255,255,0.1)',
-                        border: 'none',
-                        color: '#fff',
-                      }}
-                    />
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => handleSave(car.id)}
-                    >
-                      Enregistrer
-                    </button>
-                    <button
-                      className="btn btn-ghost"
-                      onClick={() => setEditingId(null)}
-                    >
-                      Annuler
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', gap: 10 }}>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => {
-                        setEditingId(car.id);
-                        setNewPrice(car.daily_price);
-                      }}
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(car.id)}
-                    >
-                      Supprimer
-                    </button>
-                  </div>
-                )}
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => nav(`/agency/cars/${car.id}/edit`)}
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleDelete(car.id)}
+                  >
+                    Supprimer
+                  </button>
+                </div>
               </div>
             ))}
           </div>
