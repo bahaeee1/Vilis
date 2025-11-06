@@ -9,16 +9,15 @@ import { getToken, clearToken, API_BASE } from './api';
 import Search from './pages/Search.jsx';
 import Car from './pages/Car.jsx';
 import AgencyOnboarding from './pages/AgencyOnboarding.jsx';
-
 import AgencyLogin from './pages/AgencyLogin.jsx';
 import AddCar from './pages/AddCar.jsx';
 import Bookings from './pages/Bookings.jsx';
 import AgencyCars from './pages/AgencyCars.jsx';
-import AgencyCatalog from './pages/AgencyCatalog.jsx';   // <-- NEW
+import AgencyCatalog from './pages/AgencyCatalog.jsx';
 import Account from './pages/Account.jsx';
 import Terms from './pages/Terms.jsx';
 import Privacy from './pages/Privacy.jsx';
-import MyCars from './pages/MyCars';
+import MyCars from './pages/MyCars.jsx'; // ✅ new page import
 
 
 function Navbar() {
@@ -38,39 +37,65 @@ function Navbar() {
         <div className="brand">Vilis</div>
 
         <nav className="nav-tabs">
-          <NavLink end to="/" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+          <NavLink end to="/" className={({ isActive }) => isActive ? 'tab active' : 'tab'}>
             {t('nav.search')}
           </NavLink>
 
           {!token && (
-  <>
-    {/* Replace public/agency register with info page */}
-    <NavLink to="/agency/onboarding" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
-  Register your agency
-</NavLink>
+            <>
+              <NavLink
+                to="/agency/onboarding"
+                className={({ isActive }) => isActive ? 'tab active' : 'tab'}
+              >
+                Register your agency
+              </NavLink>
 
-    <NavLink to="/agency/login" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
-      {t('nav.login')}
-    </NavLink>
-  </>
-)}
-
+              <NavLink
+                to="/agency/login"
+                className={({ isActive }) => isActive ? 'tab active' : 'tab'}
+              >
+                {t('nav.login')}
+              </NavLink>
+            </>
+          )}
 
           {token && (
             <>
-              <NavLink to="/agency/cars" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+              <NavLink
+                to="/me/cars"
+                className={({ isActive }) => isActive ? 'tab active' : 'tab'}
+              >
                 {t('nav.my_cars')}
               </NavLink>
-              <NavLink to="/agency/add-car" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+
+              <NavLink
+                to="/agency/add-car"
+                className={({ isActive }) => isActive ? 'tab active' : 'tab'}
+              >
                 {t('nav.add_car')}
               </NavLink>
-              <NavLink to="/agency/bookings" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+
+              <NavLink
+                to="/agency/bookings"
+                className={({ isActive }) => isActive ? 'tab active' : 'tab'}
+              >
                 {t('nav.bookings')}
               </NavLink>
-              <NavLink to="/agency/account" className={({isActive}) => isActive ? 'tab active' : 'tab'}>
+
+              <NavLink
+                to="/agency/account"
+                className={({ isActive }) => isActive ? 'tab active' : 'tab'}
+              >
                 {t('ui.account')}
               </NavLink>
-              <button className="tab ghost" onClick={() => { clearToken(); nav('/'); }}>
+
+              <button
+                className="tab ghost"
+                onClick={() => {
+                  clearToken();
+                  nav('/');
+                }}
+              >
                 {t('nav.logout')}
               </button>
             </>
@@ -78,7 +103,11 @@ function Navbar() {
         </nav>
 
         <div className="nav-right">
-          <select className="lang small" value={lang} onChange={e=>setLang(e.target.value)}>
+          <select
+            className="lang small"
+            value={lang}
+            onChange={(e) => setLang(e.target.value)}
+          >
             <option value="en">EN</option>
             <option value="fr">FR</option>
           </select>
@@ -88,10 +117,12 @@ function Navbar() {
   );
 }
 
+
 function App() {
   useEffect(() => {
     fetch(`${API_BASE}/api/health`, { mode: 'cors' }).catch(() => {});
   }, []);
+
   return (
     <>
       <Navbar />
@@ -99,13 +130,13 @@ function App() {
         <Routes>
           <Route path="/" element={<Search />} />
           <Route path="/car/:id" element={<Car />} />
-          <Route path="/me/cars" element={<MyCars />} />
-         <Route path="/agency/onboarding" element={<AgencyOnboarding />} />
+          <Route path="/me/cars" element={<MyCars />} /> {/* ✅ new route */}
+          <Route path="/agency/onboarding" element={<AgencyOnboarding />} />
           <Route path="/agency/login" element={<AgencyLogin />} />
           <Route path="/agency/add-car" element={<AddCar />} />
           <Route path="/agency/bookings" element={<Bookings />} />
           <Route path="/agency/cars" element={<AgencyCars />} />
-          <Route path="/agency/:id/cars" element={<AgencyCatalog />} /> {/* <-- NEW */}
+          <Route path="/agency/:id/cars" element={<AgencyCatalog />} />
           <Route path="/agency/account" element={<Account />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
@@ -115,15 +146,30 @@ function App() {
       <footer className="site-footer">
         <NavLink to="/terms">Terms</NavLink>
         <NavLink to="/privacy">Privacy</NavLink>
-         {/* ...your existing footer content... */}
         <div className="footer-contact sitewide">
-          <div><strong>Email:</strong> <a className="link" href="mailto:assistance@vilis-ma.com">assistance@vilis-ma.com</a></div>
-          <div><strong>Phone:</strong> <a className="link" href="https://wa.me/212717163533" target="_blank" rel="noreferrer">0717163533</a></div>
+          <div>
+            <strong>Email:</strong>{' '}
+            <a className="link" href="mailto:assistance@vilis-ma.com">
+              assistance@vilis-ma.com
+            </a>
+          </div>
+          <div>
+            <strong>Phone:</strong>{' '}
+            <a
+              className="link"
+              href="https://wa.me/212717163533"
+              target="_blank"
+              rel="noreferrer"
+            >
+              0717163533
+            </a>
+          </div>
         </div>
       </footer>
     </>
   );
 }
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -134,11 +180,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </I18nProvider>
   </React.StrictMode>
 );
-<footer className="site-footer">
-  {/* ...your existing footer content... */}
-  <div className="footer-contact sitewide">
-    <div><strong>Email:</strong> <a className="link" href="mailto:assistance@vilis-ma.com">assistance@vilis-ma.com</a></div>
-    <div><strong>Phone:</strong> <a className="link" href="https://wa.me/212717163533" target="_blank" rel="noreferrer">0717163533</a></div>
-  </div>
-</footer>
-
