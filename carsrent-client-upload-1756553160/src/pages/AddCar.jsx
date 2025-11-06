@@ -22,6 +22,7 @@ export default function AddCar() {
   const [category, setCategory] = useState('suv');
   const [delivery, setDelivery] = useState('');   // e.g., "Aéroport, Hôtel, Sur demande"
 const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce later
+  const [license_plate, setLicensePlate] = useState('');
   const [mileage_limit, setMileageLimit] = useState('illimité');
   const [insurance, setInsurance] = useState('incluse');
   const [min_age, setMinAge] = useState(21);
@@ -136,6 +137,7 @@ const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce 
       
       const payload = {
         title: title.trim(),
+        license_plate,
         daily_price: Number(daily_price),
         image_url: image_url.trim(),
         year: Number(year),
@@ -325,6 +327,17 @@ setChauffeur('no');
     value={deposit}
     onChange={(e) => setDeposit(e.target.value)}
   />
+</div>
+
+          <div className="form-row">
+  <label>Plaque d’immatriculation (privé)</label>
+  <input
+    className="input"
+    placeholder="ex: 12345-أ-6"
+    value={license_plate}
+    onChange={(e) => setLicensePlate(e.target.value)}
+  />
+  <div className="muted mt-xxs">Visible uniquement pour votre agence.</div>
 </div>
 
 
