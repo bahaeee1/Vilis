@@ -1,139 +1,103 @@
 // client/src/pages/MyCars.jsx
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getMyCars, deleteCar, updateCar } from '../api';
 
 export default function MyCars() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [msg, setMsg] = useState('');
-  const [editRow, setEditRow] = useState(null); // car id being edited
-  const [form, setForm] = useState({}); // partial patch
+  const [editingId, setEditingId] = useState(null);
+  const [editFields, setEditFields] = useState({});
+  const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        const list = await getMyCars();
-        setCars(list);
-      } catch (e) {
-        setMsg(e?.error || 'Erreur');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  const startEdit = (car) => {
-    setEditRow(car.id);
-    setForm({
-      title: car.title,
-      daily_price: car.daily_price,
-      chauffeur_option: car.chauffeur_option,
-      delivery: car.delivery || '',
-      deposit: car.deposit ?? '',
-      options: Array.isArray(car.options) ? car.options.join(', ') : '',
-    });
-  };
-
-  const cancelEdit = () => { setEditRow(null); setForm({}); };
-
-  const saveEdit = async (id) => {
+  async function refresh() {
     try {
-      setMsg('');
-      const patch = { ...form };
-      // coerce numbers cleanly
-      if (patch.daily_price !== undefined) patch.daily_price = Number(patch.daily_price);
-      if (patch.deposit === '') patch.deposit = null; else if (patch.deposit != null) patch.deposit = Number(patch.deposit);
-      const saved = await updateCar(id, patch);
-      setCars((prev) => prev.map(c => c.id === id ? saved : c));
-      cancelEdit();
-    } catch (e) {
-      setMsg(e?.error || 'Erreur sauvegarde');
+      setLoading(true);
+      const data = await getMyCars();
+      setCars(data);
+    } catch (err) {
+      setMessage(err.error || 'Erreur de chargement');
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
-  const removeCar = async (id) => {
-    if (!confirm('Supprimer ce véhicule ?')) return;
+  useEffect(() => { refresh(); }, []);
+
+  async function handleDelete(id) {
+    if (!window.confirm('Supprimer cette voiture ?')) return;
     try {
       await deleteCar(id);
       setCars(prev => prev.filter(c => c.id !== id));
-    } catch (e) {
-      setMsg(e?.error || 'Erreur suppression');
+    } catch (err) {
+      alert(err.error || 'Erreur lors de la suppression');
     }
-  };
+  }
 
-  if (loading) return <div className="container"><div className="card">Chargement…</div></div>;
+  function startEdit(car) {
+    setEditingId(car.id);
+    setEditFields({ ...car });
+  }
+
+  async function handleSave(id) {
+    try {
+      await updateCar(id, editFields);
+      setEditingId(null);
+      setMessage('Voiture mise à jour ✅');
+      refresh();
+    } catch (err) {
+      setMessage(err.error || 'Erreur de mise à jour');
+    }
+  }
+
+  if (loading) return <div className="container">Chargement…</div>;
 
   return (
     <div className="container">
       <div className="card">
-        <h1 className="h2">Mes véhicules</h1>
-        {msg && <div className="alert mt-xxs">{msg}</div>}
-        {cars.length === 0 && <div className="muted">Aucun véhicule pour l’instant.</div>}
+        <h1 className="h2">Mes voitures</h1>
+        {message && <p>{message}</p>}
 
-        <div className="mt-sm" style={{ display:'grid', gap:12 }}>
-          {cars.map(car => (
-            <div key={car.id} className="card" style={{ padding:12 }}>
-              <div style={{ display:'flex', gap:12, alignItems:'center' }}>
-                {car.image_url && <img src={car.image_url} alt="" style={{ width:120, height:80, objectFit:'cover', borderRadius:8 }} />}
-                <div style={{ flex:1 }}>
-                  <div className="h3" style={{ margin:0 }}>{car.title}</div>
-                  <div className="muted">{car.daily_price} MAD/jour · {car.category}</div>
+        {cars.length === 0 && <p>Aucune voiture enregistrée.</p>}
+
+        {cars.map(car => (
+          <div
+            key={car.id}
+            style={{
+              border: '1px solid #ddd',
+              borderRadius: 12,
+              padding: 16,
+              marginBottom: 16,
+            }}
+          >
+            {editingId === car.id ? (
+              <>
+                <input
+                  value={editFields.title}
+                  onChange={e => setEditFields(f => ({ ...f, title: e.target.value }))}
+                  placeholder="Titre"
+                />
+                <input
+                  value={editFields.daily_price}
+                  type="number"
+                  onChange={e => setEditFields(f => ({ ...f, daily_price: e.target.value }))}
+                  placeholder="Prix"
+                />
+                <button onClick={() => handleSave(car.id)}>💾 Enregistrer</button>
+                <button onClick={() => setEditingId(null)}>❌ Annuler</button>
+              </>
+            ) : (
+              <>
+                <h3>{car.title}</h3>
+                <p>{car.daily_price} MAD / jour</p>
+                <p>{car.category}</p>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => startEdit(car)}>Modifier</button>
+                  <button onClick={() => handleDelete(car.id)}>Supprimer</button>
                 </div>
-                {editRow !== car.id ? (
-                  <>
-                    <button className="btn" onClick={() => startEdit(car)}>Modifier</button>
-                    <button className="btn btn-ghost" onClick={() => removeCar(car.id)}>Supprimer</button>
-                  </>
-                ) : (
-                  <>
-                    <button className="btn btn-primary" onClick={() => saveEdit(car.id)}>Enregistrer</button>
-                    <button className="btn" onClick={cancelEdit}>Annuler</button>
-                  </>
-                )}
-              </div>
-
-              {editRow === car.id && (
-                <div className="mt-sm" style={{ display:'grid', gap:8 }}>
-                  <div className="grid grid-2 gap-sm">
-                    <div>
-                      <label className="label">Titre</label>
-                      <input className="input" value={form.title||''} onChange={e=>setForm(f=>({...f, title:e.target.value}))}/>
-                    </div>
-                    <div>
-                      <label className="label">Prix / jour (MAD)</label>
-                      <input className="input" type="number" min={1} value={form.daily_price||''} onChange={e=>setForm(f=>({...f, daily_price:e.target.value}))}/>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-3 gap-sm">
-                    <div>
-                      <label className="label">Chauffeur</label>
-                      <select className="input" value={form.chauffeur_option||'no'} onChange={e=>setForm(f=>({...f, chauffeur_option:e.target.value}))}>
-                        <option value="no">No</option>
-                        <option value="yes">Yes</option>
-                        <option value="on_demand">On demand</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="label">Livraison</label>
-                      <input className="input" value={form.delivery||''} onChange={e=>setForm(f=>({...f, delivery:e.target.value}))}/>
-                    </div>
-                    <div>
-                      <label className="label">Dépôt (MAD)</label>
-                      <input className="input" type="number" min={0} value={form.deposit===null?'':form.deposit} onChange={e=>setForm(f=>({...f, deposit:e.target.value}))}/>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="label">Options (séparées par des virgules)</label>
-                    <input className="input" value={form.options||''} onChange={e=>setForm(f=>({...f, options:e.target.value}))} placeholder="GPS, Siège bébé, 2e conducteur"/>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+              </>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
