@@ -78,12 +78,32 @@ function coerceTiers(tiers) {
 }
 
 function coerceOptions(v) {
-  try {
-    if (!v) return [];
-    if (typeof v === 'string') return JSON.parse(v) || [];
-    return Array.isArray(v) ? v : [];
-  } catch { return []; }
+  if (!v) return [];
+  // Already an array?
+  if (Array.isArray(v)) {
+    return v.map(s => String(s || '').trim()).filter(Boolean);
+  }
+  // String cases
+  const s = String(v).trim();
+  if (!s) return [];
+  // JSON array string?
+  if ((s.startsWith('[') && s.endsWith(']')) || s.startsWith('["')) {
+    try {
+      const arr = JSON.parse(s);
+      return Array.isArray(arr)
+        ? arr.map(x => String(x || '').trim()).filter(Boolean)
+        : [];
+    } catch {
+      // fall through to CSV split
+    }
+  }
+  // CSV fallback: "GPS, Siège bébé, USB"
+  return s
+    .split(',')
+    .map(x => x.trim())
+    .filter(Boolean);
 }
+
 
 
 function pickDailyRateFromTiers(dailyFallback, tiersRaw, days) {
