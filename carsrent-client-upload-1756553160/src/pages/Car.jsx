@@ -223,7 +223,7 @@ export default function Car() {
     gap: '16px',
     marginTop: '24px',
     alignItems: 'stretch',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
   }}
 >
   {/* CATEGORY */}
@@ -259,7 +259,7 @@ export default function Car() {
   )}
 
   {/* ÂGE MINIMUM */}
-  {(car?.min_age != null) && (
+  {car?.min_age != null && (
     <div style={infoBoxStyle}>
       <div style={labelStyle}>Âge minimum:</div>
       <div style={valueStyle}>{car.min_age} ans</div>
@@ -275,31 +275,30 @@ export default function Car() {
   )}
 
   {/* CHAUFFEUR */}
-<div style={infoBoxStyle}>
-  <div style={labelStyle}>Chauffeur:</div>
-  <div style={valueStyle}>
-    {formatChauffeurLabel(pickChauffeurValue(car))}
+  <div style={infoBoxStyle}>
+    <div style={labelStyle}>Chauffeur:</div>
+    <div style={valueStyle}>{formatChauffeurLabel(pickChauffeurValue(car))}</div>
   </div>
+
   {/* LIVRAISON */}
-{car?.delivery && String(car.delivery).trim() && (
-  <div style={infoBoxStyle}>
-    <div style={labelStyle}>Livraison:</div>
-    <div style={{ ...valueStyle, textTransform: 'none' }}>
-      {String(car.delivery).trim()}
+  {car?.delivery && String(car.delivery).trim() && (
+    <div style={infoBoxStyle}>
+      <div style={labelStyle}>Livraison:</div>
+      <div style={{ ...valueStyle, textTransform: 'none' }}>
+        {String(car.delivery).trim()}
+      </div>
     </div>
-  </div>
-)}
+  )}
 
-{/* DÉPÔT DE GARANTIE */}
-{car?.deposit != null && (
-  <div style={infoBoxStyle}>
-    <div style={labelStyle}>Dépôt:</div>
-    <div style={valueStyle}>{fmtMAD(car.deposit)} MAD</div>
-  </div>
-)}
+  {/* DÉPÔT DE GARANTIE */}
+  {car?.deposit != null && (
+    <div style={infoBoxStyle}>
+      <div style={labelStyle}>Dépôt:</div>
+      <div style={valueStyle}>{fmtMAD(car.deposit)} MAD</div>
+    </div>
+  )}
+</div>
 
-</div>
-</div>
 
 
 
