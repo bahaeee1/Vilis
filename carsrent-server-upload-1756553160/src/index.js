@@ -129,6 +129,9 @@ catch { db.prepare("ALTER TABLE cars ADD COLUMN delivery TEXT").run(); }
 try { db.prepare("SELECT deposit FROM cars LIMIT 1").get(); }
 catch { db.prepare("ALTER TABLE cars ADD COLUMN deposit INTEGER").run(); }
 
+// Add options (TEXT JSON) if missing
+try { db.prepare("SELECT options FROM cars LIMIT 1").get(); }
+catch { db.prepare("ALTER TABLE cars ADD COLUMN options TEXT").run(); }
 
   
 // optional: if the old column exists, migrate values into the new column
@@ -432,6 +435,9 @@ app.get('/api/cars/:id', (req, res) => {
   if (!car) return res.status(404).json({ error: 'Not found' });
   try { car.price_tiers = car.price_tiers ? JSON.parse(car.price_tiers) : []; }
   catch { car.price_tiers = []; }
+  try { car.options = car.options ? JSON.parse(car.options) : []; }
+catch { car.options = []; }
+
   res.json(car);
 });
 
@@ -452,6 +458,33 @@ app.post('/api/cars', requireAuth, (req, res) => {
       return res.status(400).json({ error: `Missing ${k}` });
   }
 
+// ---- options (optional) ----
+function normOptions(input) {
+  if (!input) return [];
+  let arr = input;
+  if (typeof input === 'string') {
+    try { arr = JSON.parse(input); } catch { /* fallback below */ }
+  }
+  // If still a string like "GPS, Siège bébé", split by commas:
+  if (typeof arr === 'string') arr = arr.split(',');
+
+  if (!Array.isArray(arr)) return [];
+  // trim, dedupe, keep short strings only
+  const seen = new Set();
+  const out = [];
+  for (const raw of arr) {
+    const s = String(raw || '').trim();
+    if (!s) continue;
+    if (s.length > 80) continue;           // prevent giant entries
+    const key = s.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(s);
+  }
+  return out.slice(0, 20); // cap to 20 options
+}
+
+  
   const year = Number(b.year);
   const seats = Number(b.seats);
   const doors = Number(b.doors);
@@ -460,6 +493,7 @@ app.post('/api/cars', requireAuth, (req, res) => {
 const validCh = new Set(['yes','no','on_demand']);
 const finalChauffeur = validCh.has(chauffeurOption) ? chauffeurOption : 'no';
   const delivery = (b.delivery ?? null) ? String(b.delivery).trim() : null;
+  const options = normOptions(b.options); // optional
 const deposit  = b.deposit === '' || b.deposit == null ? null : Number(b.deposit);
 if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
   return res.status(400).json({ error: 'Invalid deposit' });
@@ -477,11 +511,12 @@ if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
   }
 
    const info = db.prepare(`
-  INSERT INTO cars (
-    agency_id, title, daily_price, image_url, year, transmission, seats, doors,
-    fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age,
-    delivery, deposit, price_tiers, created_at
-  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+INSERT INTO cars (
+  agency_id, title, daily_price, image_url, year, transmission, seats, doors,
+  fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age,
+  delivery, deposit, options, price_tiers, created_at
+) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+
 `).run(
   req.user.id,
   String(b.title).trim(),
@@ -499,8 +534,9 @@ if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
   Number(b.min_age || 21),
   delivery,
   deposit,
-  JSON.stringify(tiers),
-  now()
+  JSON.stringify(options),
+JSON.stringify(tiers),
+now()
 );
 
 
