@@ -133,6 +133,10 @@ catch { db.prepare("ALTER TABLE cars ADD COLUMN deposit INTEGER").run(); }
 try { db.prepare("SELECT options FROM cars LIMIT 1").get(); }
 catch { db.prepare("ALTER TABLE cars ADD COLUMN options TEXT").run(); }
 
+  // Add license_plate if missing
+try { db.prepare("SELECT license_plate FROM cars LIMIT 1").get(); }
+catch { db.prepare("ALTER TABLE cars ADD COLUMN license_plate TEXT").run(); }
+
   
 // optional: if the old column exists, migrate values into the new column
 try {
@@ -409,17 +413,21 @@ if (['yes','no','on_demand'].includes(chauffeur)) {
 }
 
   const sql = `
-    SELECT
-      c.*,
-      a.name  AS agency_name,
-      a.phone AS agency_phone,
-      a.email AS agency_email,
-      a.location AS agency_location
-    FROM cars c
-    JOIN agencies a ON a.id = c.agency_id
-    ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
-    ORDER BY c.created_at DESC, c.id DESC
-    LIMIT 300
+  SELECT
+    c.id, c.agency_id, c.title, c.daily_price, c.image_url, c.year,
+    c.transmission, c.seats, c.doors, c.fuel_type, c.chauffeur_option,
+    c.category, c.mileage_limit, c.insurance, c.min_age,
+    c.delivery, c.deposit, c.price_tiers, c.created_at,
+    -- NOTE: license_plate intentionally NOT selected here (privacy)
+    a.name  AS agency_name,
+    a.phone AS agency_phone,
+    a.email AS agency_email,
+    a.location AS agency_location
+  FROM cars c
+  JOIN agencies a ON a.id = c.agency_id
+  ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
+  ORDER BY c.created_at DESC, c.id DESC
+  LIMIT 300
   `;
   const rows = db.prepare(sql).all(params);
   res.json(rows);
@@ -427,11 +435,18 @@ if (['yes','no','on_demand'].includes(chauffeur)) {
 
 app.get('/api/cars/:id', (req, res) => {
   const car = db.prepare(`
-    SELECT c.*, a.name AS agency_name, a.phone AS agency_phone, a.email AS agency_email, a.location AS agency_location
-    FROM cars c
-    JOIN agencies a ON a.id = c.agency_id
-    WHERE c.id = ?
-  `).get(req.params.id);
+  SELECT
+    c.id, c.agency_id, c.title, c.daily_price, c.image_url, c.year,
+    c.transmission, c.seats, c.doors, c.fuel_type, c.chauffeur_option,
+    c.category, c.mileage_limit, c.insurance, c.min_age,
+    c.delivery, c.deposit, c.price_tiers, c.created_at,
+    -- license_plate NOT exposed here
+    a.name AS agency_name, a.phone AS agency_phone,
+    a.email AS agency_email, a.location AS agency_location
+  FROM cars c
+  JOIN agencies a ON a.id = c.agency_id
+  WHERE c.id = ?
+`).get(req.params.id);
   if (!car) return res.status(404).json({ error: 'Not found' });
   try { car.price_tiers = car.price_tiers ? JSON.parse(car.price_tiers) : []; }
   catch { car.price_tiers = []; }
@@ -493,6 +508,7 @@ function normOptions(input) {
 const validCh = new Set(['yes','no','on_demand']);
 const finalChauffeur = validCh.has(chauffeurOption) ? chauffeurOption : 'no';
   const delivery = (b.delivery ?? null) ? String(b.delivery).trim() : null;
+  const licensePlate = (b.license_plate ?? '').trim() || null; // optional
   const options = normOptions(b.options); // optional
 const deposit  = b.deposit === '' || b.deposit == null ? null : Number(b.deposit);
 if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
@@ -510,13 +526,12 @@ if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
     return res.status(400).json({ error: 'Invalid price_tiers: ' + e.message });
   }
 
-   const info = db.prepare(`
-INSERT INTO cars (
-  agency_id, title, daily_price, image_url, year, transmission, seats, doors,
-  fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age,
-  delivery, deposit, options, price_tiers, created_at
-) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-
+  const info = db.prepare(`
+  INSERT INTO cars (
+    agency_id, title, daily_price, image_url, year, transmission, seats, doors,
+    fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age,
+    delivery, deposit, license_plate, options, price_tiers, created_at
+  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 `).run(
   req.user.id,
   String(b.title).trim(),
@@ -534,9 +549,10 @@ INSERT INTO cars (
   Number(b.min_age || 21),
   delivery,
   deposit,
+  licensePlate,
   JSON.stringify(options),
-JSON.stringify(tiers),
-now()
+  JSON.stringify(tiers),
+  now()
 );
 
 
@@ -812,12 +828,16 @@ try {
 
 app.get('/api/agency/me/bookings', requireAuth, (req, res) => {
   const rows = db.prepare(`
-    SELECT b.*, c.title AS car_title, c.image_url AS car_image_url
-    FROM bookings b
-    JOIN cars c ON c.id = b.car_id
-    WHERE b.agency_id = ?
-    ORDER BY b.created_at DESC
-  `).all(req.user.id);
+  SELECT
+    b.*,
+    c.title       AS car_title,
+    c.image_url   AS car_image_url,
+    c.license_plate AS car_plate
+  FROM bookings b
+  JOIN cars c ON c.id = b.car_id
+  WHERE b.agency_id = ?
+  ORDER BY b.created_at DESC
+`).all(req.user.id);
   res.json(rows);
 });
 
