@@ -18,6 +18,8 @@ import AgencyCatalog from './pages/AgencyCatalog.jsx';   // <-- NEW
 import Account from './pages/Account.jsx';
 import Terms from './pages/Terms.jsx';
 import Privacy from './pages/Privacy.jsx';
+import MyCars from './pages/MyCars';
+
 
 function Navbar() {
   const { t, lang, setLang } = useI18n();
@@ -97,6 +99,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Search />} />
           <Route path="/car/:id" element={<Car />} />
+          <Route path="/me/cars" element={<MyCars />} />
          <Route path="/agency/onboarding" element={<AgencyOnboarding />} />
           <Route path="/agency/login" element={<AgencyLogin />} />
           <Route path="/agency/add-car" element={<AddCar />} />
