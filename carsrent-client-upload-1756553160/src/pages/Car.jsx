@@ -77,6 +77,15 @@ function coerceTiers(tiers) {
   }
 }
 
+function coerceOptions(v) {
+  try {
+    if (!v) return [];
+    if (typeof v === 'string') return JSON.parse(v) || [];
+    return Array.isArray(v) ? v : [];
+  } catch { return []; }
+}
+
+
 function pickDailyRateFromTiers(dailyFallback, tiersRaw, days) {
   const tiers = coerceTiers(tiersRaw);
   if (tiers.length === 0) return Number(dailyFallback);
@@ -133,6 +142,9 @@ export default function Car() {
       monthTotal: perMonth * 30,
     };
   }, [car]);
+
+  const options = useMemo(() => coerceOptions(car?.options), [car]);
+
 
   const waPhone = useMemo(() => {
     if (!car?.agency_phone) return '';
@@ -400,6 +412,30 @@ export default function Car() {
       </div>
     </div>
   </section>
+)}
+
+{options.length > 0 && (
+  <div style={{ width: '100%', marginTop: 16 }}>
+    <div style={{ ...labelStyle, marginBottom: 8 }}>Options:</div>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+      {options.map((opt, i) => (
+        <span
+          key={i}
+          style={{
+            padding: '6px 10px',
+            borderRadius: 999,
+            border: '1px solid rgba(255,255,255,0.25)',
+            background: 'rgba(255,255,255,0.08)',
+            color: '#fff',
+            fontSize: 14,
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {opt}
+        </span>
+      ))}
+    </div>
+  </div>
 )}
 
 
