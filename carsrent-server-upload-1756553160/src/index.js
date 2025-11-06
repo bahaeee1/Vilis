@@ -476,31 +476,33 @@ if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
     return res.status(400).json({ error: 'Invalid price_tiers: ' + e.message });
   }
 
-    const info = db.prepare(`
-    INSERT INTO cars (
-      agency_id, title, daily_price, image_url, year, transmission, seats, doors,
-      fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age, delivery, deposit, price_tiers, created_at
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-  `).run(
-    req.user.id,
-    String(b.title).trim(),
-    price,
-    String(b.image_url).trim(),
-    year,
-    String(b.transmission),
-    seats,
-    doors,
-    String(b.fuel_type),
-    finalChauffeur,
-String(b.category),
-String(b.mileage_limit || 'illimité'),
-String(b.insurance || 'incluse'),
-Number(b.min_age || 21),
-delivery,
-deposit,
-JSON.stringify(tiers),
-now()
-  );
+   const info = db.prepare(`
+  INSERT INTO cars (
+    agency_id, title, daily_price, image_url, year, transmission, seats, doors,
+    fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age,
+    delivery, deposit, price_tiers, created_at
+  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+`).run(
+  req.user.id,
+  String(b.title).trim(),
+  price,
+  String(b.image_url).trim(),
+  year,
+  String(b.transmission),
+  seats,
+  doors,
+  String(b.fuel_type),
+  finalChauffeur,
+  String(b.category),
+  String(b.mileage_limit || 'illimité'),
+  String(b.insurance || 'incluse'),
+  Number(b.min_age || 21),
+  delivery,
+  deposit,
+  JSON.stringify(tiers),
+  now()
+);
+
 
 
   const car = db.prepare('SELECT * FROM cars WHERE id = ?').get(info.lastInsertRowid);
