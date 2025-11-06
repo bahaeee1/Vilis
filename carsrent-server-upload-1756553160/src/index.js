@@ -670,6 +670,92 @@ app.delete('/api/cars/:id', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
+// PATCH: update a car (partial, only own cars)
+app.patch('/api/cars/:id', requireAuth, (req, res) => {
+  const car = db.prepare('SELECT * FROM cars WHERE id = ?').get(req.params.id);
+  if (!car) return res.status(404).json({ error: 'Not found' });
+  if (car.agency_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+
+  const b = req.body || {};
+  const patch = {};
+  const set = [];
+  const params = [];
+
+  function setIfPresent(key, transform = (x) => x) {
+    if (b[key] !== undefined) {
+      patch[key] = transform(b[key]);
+      set.push(`${key} = ?`);
+      params.push(patch[key]);
+    }
+  }
+
+  // basic scalars
+  setIfPresent('title', (v) => String(v).trim());
+  setIfPresent('daily_price', (v) => Number(v));
+  setIfPresent('image_url', (v) => String(v).trim());
+  setIfPresent('year', (v) => Number(v));
+  setIfPresent('transmission', (v) => String(v));
+  setIfPresent('seats', (v) => Number(v));
+  setIfPresent('doors', (v) => Number(v));
+  setIfPresent('fuel_type', (v) => String(v));
+  setIfPresent('category', (v) => String(v));
+  setIfPresent('mileage_limit', (v) => String(v));
+  setIfPresent('insurance', (v) => String(v));
+  setIfPresent('min_age', (v) => Number(v));
+
+  // chauffeur_option strict enum
+  if (b.chauffeur_option !== undefined) {
+    const s = String(b.chauffeur_option || 'no').toLowerCase();
+    const ok = new Set(['yes', 'no', 'on_demand']);
+    const final = ok.has(s) ? s : 'no';
+    set.push(`chauffeur_option = ?`);
+    params.push(final);
+  }
+
+  // delivery, deposit
+  setIfPresent('delivery', (v) => (v == null || String(v).trim() === '' ? null : String(v).trim()));
+  if (b.deposit !== undefined) {
+    const d = b.deposit === '' || b.deposit == null ? null : Number(b.deposit);
+    if (d != null && !(Number.isFinite(d) && d >= 0)) return res.status(400).json({ error: 'Invalid deposit' });
+    set.push(`deposit = ?`);
+    params.push(d);
+  }
+
+  // options (array) & price_tiers (array)
+  if (b.options !== undefined) {
+    let arr = b.options;
+    if (typeof arr === 'string') {
+      try { arr = JSON.parse(arr); } catch { arr = arr.split(','); }
+    }
+    if (!Array.isArray(arr)) arr = [];
+    arr = arr
+      .map((x) => String(x || '').trim())
+      .filter(Boolean)
+      .slice(0, 20);
+    set.push(`options = ?`);
+    params.push(JSON.stringify(arr));
+  }
+
+  if (b.price_tiers !== undefined) {
+    let tiers = [];
+    try { tiers = normTiers(b.price_tiers); } catch (e) {
+      return res.status(400).json({ error: 'Invalid price_tiers: ' + e.message });
+    }
+    set.push(`price_tiers = ?`);
+    params.push(JSON.stringify(tiers));
+  }
+
+  if (set.length === 0) return res.json({ ok: true, car });
+
+  params.push(car.id);
+  const sql = `UPDATE cars SET ${set.join(', ')} WHERE id = ?`;
+  db.prepare(sql).run(params);
+
+  const updated = db.prepare('SELECT * FROM cars WHERE id = ?').get(car.id);
+  res.json({ ok: true, car: updated });
+});
+
+
 app.get('/api/agency/me/cars', requireAuth, (req, res) => {
   const cars = db.prepare('SELECT * FROM cars WHERE agency_id = ? ORDER BY created_at DESC')
                  .all(req.user.id);
