@@ -1,3 +1,4 @@
+// client/src/pages/Bookings.jsx
 import { useEffect, useState } from 'react';
 import { getMyBookings, updateBookingStatus, deleteBooking } from '../api';
 import { useI18n } from '../i18n.jsx';
@@ -71,32 +72,76 @@ export default function Bookings(){
 
       {items.map(b => (
         <div key={b.id} className="card">
-          <div style={{display:'flex', gap:14}}>
-            {b.image_url && (
-              <img src={b.image_url} alt="" style={{width:140,height:100,objectFit:'cover',borderRadius:10}}/>
+          <div style={{
+            display:'flex',
+            gap:16,
+            alignItems:'stretch',
+            flexWrap:'wrap'
+          }}>
+            {/* Car image (private agency view) */}
+            {b.car_image_url && (
+              <img
+                src={b.car_image_url}
+                alt={b.car_title || 'Car'}
+                style={{
+                  width: 180,
+                  height: 110,
+                  objectFit: 'cover',
+                  borderRadius: 12,
+                  flex: '0 0 auto',
+                  boxShadow: '0 6px 18px rgba(0,0,0,.25)'
+                }}
+                loading="lazy"
+              />
             )}
-            <div style={{flex:1}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                <strong>{b.car_title}</strong>
+
+            <div style={{ flex: 1, minWidth: 240 }}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:12}}>
+                <strong style={{fontSize:18}}>{b.car_title || 'Véhicule'}</strong>
                 <StatusPill status={b.status || 'pending'} />
               </div>
-              <div className="muted" style={{marginTop:4}}>
-                {b.start_date ? `${b.start_date} → ${b.end_date || ''} · ` : ''}
-                {b.daily_price ? `${b.daily_price} MAD/day · ` : ''}
-                {t('tel')}: {b.customer_phone}
+
+              {/* Dates, phone, etc. */}
+              <div className="muted" style={{marginTop:6}}>
+                {b.start_date ? `${b.start_date} → ${b.end_date || ''}` : ''}
+                {b.daily_price ? ` · ${b.daily_price} MAD/day` : ''}
+                {` · ${t('tel') || 'Tel'}: ${b.customer_phone || b.phone || '-'}`}
                 {b.customer_email ? ` · ${b.customer_email}` : ''}
               </div>
-              {b.message && <div style={{marginTop:6}}>"{b.message}"</div>}
 
-              <div style={{display:'flex',gap:8,marginTop:10,flexWrap:'wrap'}}>
+              {/* License plate (private) */}
+              {b.car_plate && (
+                <div style={{marginTop:8}}>
+                  <span style={{
+                    display:'inline-block',
+                    padding:'4px 10px',
+                    borderRadius:999,
+                    border:'1px solid rgba(255,255,255,.25)',
+                    background:'rgba(255,255,255,.08)',
+                    fontWeight:700
+                  }}>
+                    Plaque: {b.car_plate}
+                  </span>
+                </div>
+              )}
+
+              {/* Optional message */}
+              {b.message && <div style={{marginTop:8}}>"{b.message}"</div>}
+
+              {/* Actions */}
+              <div style={{display:'flex',gap:8,marginTop:12,flexWrap:'wrap'}}>
                 <button className="btn" disabled={busyId===b.id} onClick={() => doSet(b.id,'approved')}>
                   {t('btn.approve') || 'Approve'}
                 </button>
                 <button className="btn secondary" disabled={busyId===b.id} onClick={() => doSet(b.id,'declined')}>
                   {t('btn.decline') || 'Decline'}
                 </button>
-                <button className="btn secondary" style={{borderColor:'#e35b66',color:'#ffb3ba'}}
-                        disabled={busyId===b.id} onClick={() => doDelete(b.id)}>
+                <button
+                  className="btn secondary"
+                  style={{borderColor:'#e35b66',color:'#ffb3ba'}}
+                  disabled={busyId===b.id}
+                  onClick={() => doDelete(b.id)}
+                >
                   {t('btn.delete') || 'Delete'}
                 </button>
               </div>
