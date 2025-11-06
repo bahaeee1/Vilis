@@ -435,26 +435,30 @@ if (['yes','no','on_demand'].includes(chauffeur)) {
 
 app.get('/api/cars/:id', (req, res) => {
   const car = db.prepare(`
-  SELECT
-    c.id, c.agency_id, c.title, c.daily_price, c.image_url, c.year,
-    c.transmission, c.seats, c.doors, c.fuel_type, c.chauffeur_option,
-    c.category, c.mileage_limit, c.insurance, c.min_age,
-    c.delivery, c.deposit, c.price_tiers, c.created_at,
-    -- license_plate NOT exposed here
-    a.name AS agency_name, a.phone AS agency_phone,
-    a.email AS agency_email, a.location AS agency_location
-  FROM cars c
-  JOIN agencies a ON a.id = c.agency_id
-  WHERE c.id = ?
-`).get(req.params.id);
+    SELECT
+      c.id, c.agency_id, c.title, c.daily_price, c.image_url, c.year,
+      c.transmission, c.seats, c.doors, c.fuel_type, c.chauffeur_option,
+      c.category, c.mileage_limit, c.insurance, c.min_age,
+      c.delivery, c.deposit, c.price_tiers, c.options, c.created_at,
+      -- license_plate NOT exposed here
+      a.name AS agency_name, a.phone AS agency_phone,
+      a.email AS agency_email, a.location AS agency_location
+    FROM cars c
+    JOIN agencies a ON a.id = c.agency_id
+    WHERE c.id = ?
+  `).get(req.params.id);
+
   if (!car) return res.status(404).json({ error: 'Not found' });
+
   try { car.price_tiers = car.price_tiers ? JSON.parse(car.price_tiers) : []; }
   catch { car.price_tiers = []; }
+
   try { car.options = car.options ? JSON.parse(car.options) : []; }
-catch { car.options = []; }
+  catch { car.options = []; }
 
   res.json(car);
 });
+
 
 app.get('/api/agency/:agencyId(\\d+)/cars', (req, res) => {
   const agency = db.prepare('SELECT id, name, email, phone, location FROM agencies WHERE id = ?')
