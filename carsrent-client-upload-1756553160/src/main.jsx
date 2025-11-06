@@ -18,6 +18,7 @@ import Account from './pages/Account.jsx';
 import Terms from './pages/Terms.jsx';
 import Privacy from './pages/Privacy.jsx';
 import MyCars from './pages/MyCars.jsx'; // ✅ new page import
+import EditCar from './pages/EditCar.jsx';
 
 
 function Navbar() {
@@ -135,6 +136,7 @@ function App() {
           <Route path="/agency/login" element={<AgencyLogin />} />
           <Route path="/agency/add-car" element={<AddCar />} />
           <Route path="/agency/bookings" element={<Bookings />} />
+          <Route path="/agency/cars/:id/edit" element={<EditCar />} />
           <Route path="/agency/cars" element={<AgencyCars />} />
           <Route path="/agency/:id/cars" element={<AgencyCatalog />} />
           <Route path="/agency/account" element={<Account />} />
