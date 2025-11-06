@@ -232,10 +232,12 @@ export default function Car() {
   style={{
     display: 'flex',
     flexWrap: 'wrap',
-    gap: '16px',
+    gap: '20px',
     marginTop: '24px',
     alignItems: 'stretch',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',   // ✅ centers horizontally
+    width: '100%',
+    textAlign: 'center',
   }}
 >
   {/* CATEGORY */}
