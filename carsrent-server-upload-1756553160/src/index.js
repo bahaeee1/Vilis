@@ -545,6 +545,123 @@ now()
   res.json({ car });
 });
 
+// ---- Update a car (partial) ----
+app.patch('/api/cars/:id', requireAuth, (req, res) => {
+  const car = db.prepare('SELECT * FROM cars WHERE id = ?').get(req.params.id);
+  if (!car) return res.status(404).json({ error: 'Not found' });
+  if (car.agency_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
+
+  const b = req.body || {};
+
+  // Reuse helpers
+  function safeNum(x) { const n = Number(x); return Number.isFinite(n) ? n : null; }
+  const updates = [];
+  const params  = { id: car.id };
+
+  // Text fields
+  if (b.title != null)         { updates.push('title = @title');               params.title = String(b.title).trim(); }
+  if (b.image_url != null)     { updates.push('image_url = @image_url');       params.image_url = String(b.image_url).trim(); }
+  if (b.transmission != null)  { updates.push('transmission = @transmission'); params.transmission = String(b.transmission); }
+  if (b.fuel_type != null)     { updates.push('fuel_type = @fuel_type');       params.fuel_type = String(b.fuel_type); }
+  if (b.category != null)      { updates.push('category = @category');         params.category = String(b.category); }
+  if (b.mileage_limit != null) { updates.push('mileage_limit = @mileage_limit'); params.mileage_limit = String(b.mileage_limit); }
+  if (b.insurance != null)     { updates.push('insurance = @insurance');       params.insurance = String(b.insurance); }
+  if (b.delivery != null)      { updates.push('delivery = @delivery');         params.delivery = String(b.delivery || '').trim() || null; }
+
+  // Numbers
+  if (b.daily_price != null) {
+    const n = safeNum(b.daily_price);
+    if (!(n > 0)) return res.status(400).json({ error: 'Invalid daily_price' });
+    updates.push('daily_price = @daily_price'); params.daily_price = n;
+  }
+  if (b.year != null) {
+    const n = safeNum(b.year);
+    const maxYear = new Date().getFullYear() + 1;
+    if (!(n >= 1990 && n <= maxYear)) return res.status(400).json({ error: 'Invalid year' });
+    updates.push('year = @year'); params.year = n;
+  }
+  if (b.seats != null) {
+    const n = safeNum(b.seats);
+    if (!(n >= 1 && n <= 9)) return res.status(400).json({ error: 'Invalid seats' });
+    updates.push('seats = @seats'); params.seats = n;
+  }
+  if (b.doors != null) {
+    const n = safeNum(b.doors);
+    if (!(n >= 2 && n <= 6)) return res.status(400).json({ error: 'Invalid doors' });
+    updates.push('doors = @doors'); params.doors = n;
+  }
+  if (b.min_age != null) {
+    const n = safeNum(b.min_age);
+    if (!(n >= 18 && n <= 30)) return res.status(400).json({ error: 'Invalid min_age' });
+    updates.push('min_age = @min_age'); params.min_age = n;
+  }
+
+  // Chauffeur option
+  if (b.chauffeur_option != null) {
+    const s = String(b.chauffeur_option || '').toLowerCase();
+    if (!['yes','no','on_demand'].includes(s)) return res.status(400).json({ error: 'Invalid chauffeur_option' });
+    updates.push('chauffeur_option = @chauffeur_option'); params.chauffeur_option = s;
+  }
+
+  // Deposit
+  if (b.deposit !== undefined) {
+    if (b.deposit === null || b.deposit === '') { updates.push('deposit = NULL'); }
+    else {
+      const n = safeNum(b.deposit);
+      if (!(n >= 0)) return res.status(400).json({ error: 'Invalid deposit' });
+      updates.push('deposit = @deposit'); params.deposit = n;
+    }
+  }
+
+  // Tiers
+  if (b.price_tiers !== undefined) {
+    let tiers = [];
+    try { tiers = normTiers(b.price_tiers); }
+    catch (e) { return res.status(400).json({ error: 'Invalid price_tiers: ' + e.message }); }
+    updates.push('price_tiers = @price_tiers'); params.price_tiers = JSON.stringify(tiers);
+  }
+
+  // Options (array of strings or comma string)
+  function normOptions(input) {
+    if (!input) return [];
+    let arr = input;
+    if (typeof input === 'string') {
+      try { arr = JSON.parse(input); } catch { arr = input.split(','); }
+    }
+    if (!Array.isArray(arr)) return [];
+    const seen = new Set(), out = [];
+    for (const raw of arr) {
+      const s = String(raw || '').trim();
+      if (!s || s.length > 80) continue;
+      const k = s.toLowerCase();
+      if (seen.has(k)) continue;
+      seen.add(k); out.push(s);
+    }
+    return out.slice(0, 20);
+  }
+  if (b.options !== undefined) {
+    const opts = normOptions(b.options);
+    updates.push('options = @options'); params.options = JSON.stringify(opts);
+  }
+
+  if (updates.length === 0) return res.json({ ok: true, unchanged: true });
+
+  const sql = `UPDATE cars SET ${updates.join(', ')} WHERE id = @id`;
+  db.prepare(sql).run(params);
+
+  const updated = db.prepare(`
+    SELECT c.*, a.name AS agency_name, a.phone AS agency_phone, a.email AS agency_email, a.location AS agency_location
+    FROM cars c JOIN agencies a ON a.id = c.agency_id
+    WHERE c.id = ?
+  `).get(car.id);
+
+  // Normalize JSON fields in response
+  try { updated.price_tiers = updated.price_tiers ? JSON.parse(updated.price_tiers) : []; } catch { updated.price_tiers = []; }
+  try { updated.options     = updated.options ? JSON.parse(updated.options) : []; } catch { updated.options = []; }
+
+  res.json({ car: updated });
+});
+
 app.delete('/api/cars/:id', requireAuth, (req, res) => {
   const car = db.prepare('SELECT * FROM cars WHERE id = ?').get(req.params.id);
   if (!car) return res.status(404).json({ error: 'Not found' });
