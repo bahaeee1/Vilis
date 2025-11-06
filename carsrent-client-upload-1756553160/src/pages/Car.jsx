@@ -415,9 +415,16 @@ export default function Car() {
 )}
 
 {options.length > 0 && (
-  <div style={{ width: '100%', marginTop: 16 }}>
+  <div style={{ width: '100%', marginTop: 24, marginBottom: 32 }}>
     <div style={{ ...labelStyle, marginBottom: 8 }}>Options:</div>
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 10,
+        marginBottom: 24, // 👈 adds spacing below options
+      }}
+    >
       {options.map((opt, i) => (
         <span
           key={i}
@@ -428,7 +435,7 @@ export default function Car() {
             background: 'rgba(255,255,255,0.08)',
             color: '#fff',
             fontSize: 14,
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
           }}
         >
           {opt}
@@ -437,6 +444,7 @@ export default function Car() {
     </div>
   </div>
 )}
+
 
 
           {/* Contact quick actions */}
