@@ -135,7 +135,7 @@ const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce 
         doors: Number(doors),
         fuel_type,
         category,
-        chauffeur: chauffeur,
+       chauffeur_option: chauffeur,
         delivery: delivery?.trim() || null,
         deposit: deposit === '' ? null : Number(deposit),
         mileage_limit,
