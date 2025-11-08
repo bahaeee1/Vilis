@@ -467,7 +467,19 @@ export default function Car() {
   </div>
 )}
 
-
+{/* Google Maps button (if available) */}
+{car.maps_url && (
+  <div className="mt-sm">
+    <a
+      className="btn btn-ghost"
+      href={car.maps_url}
+      target="_blank"
+      rel="noreferrer"
+    >
+      Voir l&apos;emplacement sur Google Maps
+    </a>
+  </div>
+)}
 
           {/* Contact quick actions */}
           <div className="mt-md" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
