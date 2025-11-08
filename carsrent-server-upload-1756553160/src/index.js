@@ -137,6 +137,10 @@ catch { db.prepare("ALTER TABLE cars ADD COLUMN options TEXT").run(); }
 try { db.prepare("SELECT license_plate FROM cars LIMIT 1").get(); }
 catch { db.prepare("ALTER TABLE cars ADD COLUMN license_plate TEXT").run(); }
 
+// Add maps_url if missing
+try { db.prepare("SELECT maps_url FROM cars LIMIT 1").get(); }
+catch { db.prepare("ALTER TABLE cars ADD COLUMN maps_url TEXT").run(); }
+
   
 // optional: if the old column exists, migrate values into the new column
 try {
@@ -439,7 +443,7 @@ app.get('/api/cars/:id', (req, res) => {
       c.id, c.agency_id, c.title, c.daily_price, c.image_url, c.year,
       c.transmission, c.seats, c.doors, c.fuel_type, c.chauffeur_option,
       c.category, c.mileage_limit, c.insurance, c.min_age,
-      c.delivery, c.deposit, c.price_tiers, c.options, c.created_at,
+      c.delivery, c.deposit, c.price_tiers, c.options, c.maps_url, c.created_at,
       -- license_plate NOT exposed here
       a.name AS agency_name, a.phone AS agency_phone,
       a.email AS agency_email, a.location AS agency_location
@@ -458,6 +462,7 @@ app.get('/api/cars/:id', (req, res) => {
 
   res.json(car);
 });
+
 
 
 app.get('/api/agency/:agencyId(\\d+)/cars', (req, res) => {
@@ -513,6 +518,7 @@ const validCh = new Set(['yes','no','on_demand']);
 const finalChauffeur = validCh.has(chauffeurOption) ? chauffeurOption : 'no';
   const delivery = (b.delivery ?? null) ? String(b.delivery).trim() : null;
   const licensePlate = (b.license_plate ?? '').trim() || null; // optional
+    const mapsUrl = (b.maps_url ?? '').trim() || null; // optional Google Maps link
   const options = normOptions(b.options); // optional
 const deposit  = b.deposit === '' || b.deposit == null ? null : Number(b.deposit);
 if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
@@ -530,34 +536,35 @@ if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
     return res.status(400).json({ error: 'Invalid price_tiers: ' + e.message });
   }
 
-  const info = db.prepare(`
-  INSERT INTO cars (
-    agency_id, title, daily_price, image_url, year, transmission, seats, doors,
-    fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age,
-    delivery, deposit, license_plate, options, price_tiers, created_at
-  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-`).run(
-  req.user.id,
-  String(b.title).trim(),
-  price,
-  String(b.image_url).trim(),
-  year,
-  String(b.transmission),
-  seats,
-  doors,
-  String(b.fuel_type),
-  finalChauffeur,
-  String(b.category),
-  String(b.mileage_limit || 'illimité'),
-  String(b.insurance || 'incluse'),
-  Number(b.min_age || 21),
-  delivery,
-  deposit,
-  licensePlate,
-  JSON.stringify(options),
-  JSON.stringify(tiers),
-  now()
-);
+    const info = db.prepare(`
+    INSERT INTO cars (
+      agency_id, title, daily_price, image_url, year, transmission, seats, doors,
+      fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age,
+      delivery, deposit, license_plate, maps_url, options, price_tiers, created_at
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  `).run(
+    req.user.id,
+    String(b.title).trim(),
+    price,
+    String(b.image_url).trim(),
+    year,
+    String(b.transmission),
+    seats,
+    doors,
+    String(b.fuel_type),
+    finalChauffeur,
+    String(b.category),
+    String(b.mileage_limit || 'illimité'),
+    String(b.insurance || 'incluse'),
+    Number(b.min_age || 21),
+    delivery,
+    deposit,
+    licensePlate,
+    mapsUrl,
+    JSON.stringify(options),
+    JSON.stringify(tiers),
+    now()
+  );
 
 
 
@@ -720,6 +727,9 @@ app.patch('/api/cars/:id', requireAuth, (req, res) => {
   setIfPresent('fuel_type', (v) => String(v));
   setIfPresent('category', (v) => String(v));
   setIfPresent('mileage_limit', (v) => String(v));
+    setIfPresent('maps_url', (v) =>
+    v == null || String(v).trim() === '' ? null : String(v).trim()
+  );
   setIfPresent('insurance', (v) => String(v));
   setIfPresent('min_age', (v) => Number(v));
 
