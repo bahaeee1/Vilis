@@ -541,7 +541,7 @@ if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
     agency_id, title, daily_price, image_url, year, transmission, seats, doors,
     fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age,
     delivery, deposit, license_plate, maps_url, options, price_tiers, created_at
-  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 `).run(
   req.user.id,
   String(b.title).trim(),
@@ -560,7 +560,7 @@ if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
   delivery,
   deposit,
   licensePlate,
-  mapsUrl, // ✅ added this between licensePlate and options
+  mapsUrl,
   JSON.stringify(options),
   JSON.stringify(tiers),
   now()
