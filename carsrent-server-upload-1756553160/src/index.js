@@ -537,34 +537,35 @@ if (deposit != null && !(Number.isFinite(deposit) && deposit >= 0)) {
   }
 
     const info = db.prepare(`
-    INSERT INTO cars (
-      agency_id, title, daily_price, image_url, year, transmission, seats, doors,
-      fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age,
-      delivery, deposit, license_plate, maps_url, options, price_tiers, created_at
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-  `).run(
-    req.user.id,
-    String(b.title).trim(),
-    price,
-    String(b.image_url).trim(),
-    year,
-    String(b.transmission),
-    seats,
-    doors,
-    String(b.fuel_type),
-    finalChauffeur,
-    String(b.category),
-    String(b.mileage_limit || 'illimité'),
-    String(b.insurance || 'incluse'),
-    Number(b.min_age || 21),
-    delivery,
-    deposit,
-    licensePlate,
-    mapsUrl,
-    JSON.stringify(options),
-    JSON.stringify(tiers),
-    now()
-  );
+  INSERT INTO cars (
+    agency_id, title, daily_price, image_url, year, transmission, seats, doors,
+    fuel_type, chauffeur_option, category, mileage_limit, insurance, min_age,
+    delivery, deposit, license_plate, maps_url, options, price_tiers, created_at
+  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+`).run(
+  req.user.id,
+  String(b.title).trim(),
+  price,
+  String(b.image_url).trim(),
+  year,
+  String(b.transmission),
+  seats,
+  doors,
+  String(b.fuel_type),
+  finalChauffeur,
+  String(b.category),
+  String(b.mileage_limit || 'illimité'),
+  String(b.insurance || 'incluse'),
+  Number(b.min_age || 21),
+  delivery,
+  deposit,
+  licensePlate,
+  mapsUrl, // ✅ added this between licensePlate and options
+  JSON.stringify(options),
+  JSON.stringify(tiers),
+  now()
+);
+
 
 
 
