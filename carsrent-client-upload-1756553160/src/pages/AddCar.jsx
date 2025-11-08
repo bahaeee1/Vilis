@@ -21,6 +21,7 @@ export default function AddCar() {
   const [fuel_type, setFuel] = useState(FUEL[0]);
   const [category, setCategory] = useState('suv');
   const [delivery, setDelivery] = useState('');   // e.g., "Aéroport, Hôtel, Sur demande"
+    const [maps_url, setMapsUrl] = useState('');    // Google Maps link (optional)
 const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce later
   const [license_plate, setLicensePlate] = useState('');
   const [mileage_limit, setMileageLimit] = useState('illimité');
@@ -135,9 +136,8 @@ const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce 
     .map(s => s.trim())
     .filter(Boolean);
       
-      const payload = {
+            const payload = {
         title: title.trim(),
-        license_plate,
         daily_price: Number(daily_price),
         image_url: image_url.trim(),
         year: Number(year),
@@ -146,15 +146,17 @@ const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce 
         doors: Number(doors),
         fuel_type,
         category,
-       chauffeur_option: chauffeur,
+        chauffeur_option: chauffeur,
         delivery: delivery?.trim() || null,
+        maps_url: maps_url.trim() || null,     // 👈 NEW
         deposit: deposit === '' ? null : Number(deposit),
         mileage_limit,
-        insurance,      // <-- add
-        min_age,        // <-- add
-        options, 
-        price_tiers: tiers // server accepts array or JSON string
+        insurance,
+        min_age,
+        options,
+        price_tiers: tiers
       };
+
       await addCar(payload);
       setMsg('Saved!');
       // reset
@@ -162,6 +164,7 @@ const [deposit, setDeposit]   = useState('');   // numeric string; we'll coerce 
       setTrans('manual'); setSeats(''); setDoors('');
       setFuel(FUEL[0]); setCategory('suv');setDelivery('');
 setDeposit('');
+setMapsUrl('');
 setOptionsText('');
 setChauffeur('no');
       setTiers([]);
@@ -318,6 +321,22 @@ setChauffeur('no');
     onChange={(e) => setDelivery(e.target.value)}
   />
 </div>
+
+{/* Google Maps link (optional) */}
+          <div className="form-row">
+            <label>Google Maps (lien)</label>
+            <input
+              className="input"
+              type="url"
+              placeholder="Collez ici le lien de Google Maps"
+              value={maps_url}
+              onChange={(e) => setMapsUrl(e.target.value)}
+            />
+            <div className="muted mt-xxs">
+              Dans Google Maps → Partager → Copier le lien, puis collez-le ici.
+            </div>
+          </div>
+          
           <div className="form-row">
   <label>Dépôt (MAD)</label>
   <input
