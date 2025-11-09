@@ -467,19 +467,30 @@ export default function Car() {
   </div>
 )}
 
-{/* Google Maps button (if available) */}
 {car.maps_url && (
-  <div className="mt-sm">
-    <a
-      className="btn btn-ghost"
-      href={car.maps_url}
-      target="_blank"
-      rel="noreferrer"
+  <div style={{ width: '100%', marginTop: 24, marginBottom: 32 }}>
+    <div style={{ ...labelStyle, marginBottom: 8 }}>Localisation:</div>
+    <div
+      style={{
+        borderRadius: 16,
+        overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.2)',
+      }}
     >
-      Voir l&apos;emplacement sur Google Maps
-    </a>
+      <iframe
+        title={`Localisation de ${car.title}`}
+        src={`https://www.google.com/maps?q=${encodeURIComponent(
+          car.maps_url
+        )}&output=embed`}
+        style={{ width: '100%', height: 320, border: 0 }}
+        loading="lazy"
+        allowFullScreen
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+    </div>
   </div>
 )}
+
 
           {/* Contact quick actions */}
           <div className="mt-md" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
