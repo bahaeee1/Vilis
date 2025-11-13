@@ -35,7 +35,10 @@ function Navbar() {
   return (
     <header className="topnav">
       <div className="wrap">
-        <div className="brand">Vilis</div>
+        <NavLink to="/" className="brand">
+  Vilis
+</NavLink>
+
 
         <nav className="nav-tabs">
           <NavLink end to="/" className={({ isActive }) => isActive ? 'tab active' : 'tab'}>
