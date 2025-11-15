@@ -4,8 +4,10 @@ import { useParams } from 'react-router-dom';
 import { getCar } from '../api';
 
 // ---- Reusable styles ----
+// ---- Reusable styles ----
 const infoBoxStyle = {
-  width: "200px",
+  width: "100%",
+  maxWidth: "220px",             // looks good on desktop
   height: "120px",
   borderRadius: "16px",
   background: "rgba(255, 255, 255, 0.08)",
@@ -15,11 +17,11 @@ const infoBoxStyle = {
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  color: "#ffffff",
-  textAlign: "center",
-  boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+  padding: "12px",
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+  boxSizing: "border-box",
 };
+
 
 const labelStyle = {
   fontSize: "16px",
