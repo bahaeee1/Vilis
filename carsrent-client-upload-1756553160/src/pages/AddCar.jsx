@@ -321,11 +321,13 @@ setChauffeur('no');
     value={delivery}
     onChange={(e) => setDelivery(e.target.value)}
   >
-    <option value="none">Pas de livraison</option>
+    <option value="">Sélectionner…</option>
     <option value="airport">Aéroport</option>
+    <option value="none">Pas de livraison</option>
     <option value="custom">Personnalisée</option>
   </select>
 </div>
+
 
 
 
