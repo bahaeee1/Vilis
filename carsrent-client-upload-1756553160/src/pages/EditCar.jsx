@@ -240,31 +240,44 @@ export default function EditCar() {
           </div>
 
           <div className="grid grid-3 gap-sm mt-sm">
-            <div>
-              <label className="label">Chauffeur</label>
-              <select className="input" value={chauffeur_option} onChange={(e) => setChauffeur(e.target.value)}>
-                <option value="no">Non</option>
-                <option value="yes">Inclus</option>
-                <option value="on_demand">Sur demande</option>
-              </select>
-            </div>
-            <div>
-  <label className="label">Livraison</label>
-  <select
-    className="input"
-    value={delivery}
-    onChange={(e) => setDelivery(e.target.value)}
-  >
-    <option value="none">Pas de livraison</option>
-    <option value="airport">Aéroport</option>
-    <option value="custom">Personnalisée</option>
-  </select>
+  <div>
+    <label className="label">Chauffeur</label>
+    <select
+      className="input"
+      value={chauffeur_option}
+      onChange={(e) => setChauffeur(e.target.value)}
+    >
+      <option value="no">Non</option>
+      <option value="yes">Inclus</option>
+      <option value="on_demand">Sur demande</option>
+    </select>
+  </div>
+
+  <div>
+    <label className="label">Livraison</label>
+    <select
+      className="input"
+      value={delivery}
+      onChange={(e) => setDelivery(e.target.value)}
+    >
+      <option value="none">Pas de livraison</option>
+      <option value="airport">Aéroport</option>
+      <option value="custom">Personnalisée</option>
+    </select>
+  </div>
+
+  <div>
+    <label className="label">Dépôt (MAD)</label>
+    <input
+      className="input"
+      type="number"
+      min={0}
+      value={deposit}
+      onChange={(e) => setDeposit(e.target.value)}
+    />
+  </div>
 </div>
 
-              <label className="label">Dépôt (MAD)</label>
-              <input className="input" type="number" min={0} value={deposit} onChange={(e) => setDeposit(e.target.value)} />
-            </div>
-          </div>
 
           <div className="mt-sm">
             <label className="label">Options (séparées par des virgules)</label>
