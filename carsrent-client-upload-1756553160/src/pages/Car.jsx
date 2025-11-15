@@ -315,14 +315,17 @@ export default function Car() {
   </div>
 
   {/* LIVRAISON */}
-  {car?.delivery && String(car.delivery).trim() && (
-    <div style={infoBoxStyle}>
-      <div style={labelStyle}>Livraison:</div>
-      <div style={{ ...valueStyle, textTransform: 'none' }}>
-        {String(car.delivery).trim()}
-      </div>
+  {car.delivery && car.delivery !== "none" && (
+  <div style={infoBoxStyle}>
+    <div style={labelStyle}>Livraison:</div>
+    <div style={valueStyle}>
+      {car.delivery === "airport" ? "Aéroport" :
+       car.delivery === "custom" ? "Personnalisée" :
+       "Pas de livraison"}
     </div>
-  )}
+  </div>
+)}
+
 
   {/* DÉPÔT DE GARANTIE */}
   {car?.deposit != null && (
