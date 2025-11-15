@@ -249,10 +249,18 @@ export default function EditCar() {
               </select>
             </div>
             <div>
-              <label className="label">Livraison</label>
-              <input className="input" value={delivery} onChange={(e) => setDelivery(e.target.value)} placeholder="Aéroport / Hôtel / Sur demande" />
-            </div>
-            <div>
+  <label className="label">Livraison</label>
+  <select
+    className="input"
+    value={delivery}
+    onChange={(e) => setDelivery(e.target.value)}
+  >
+    <option value="none">Pas de livraison</option>
+    <option value="airport">Aéroport</option>
+    <option value="custom">Personnalisée</option>
+  </select>
+</div>
+
               <label className="label">Dépôt (MAD)</label>
               <input className="input" type="number" min={0} value={deposit} onChange={(e) => setDeposit(e.target.value)} />
             </div>
