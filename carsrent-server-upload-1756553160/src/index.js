@@ -394,6 +394,7 @@ app.get('/api/cars', (req, res) => {
   const minPrice = req.query.minPrice ?? req.query.min_price;
   const maxPrice = req.query.maxPrice ?? req.query.max_price;
   const chauffeur = (req.query.chauffeur || '').toLowerCase();
+  const delivery = (req.query.delivery || '').trim().toLowerCase();
 
 
   const where = [];
@@ -415,6 +416,11 @@ if (['yes','no','on_demand'].includes(chauffeur)) {
   where.push('c.chauffeur_option = @ch');
   params.ch = chauffeur;
 }
+  if (delivery && delivery !== 'any') {
+    where.push('LOWER(c.delivery) = @dlv');
+    params.dlv = delivery;
+  }
+
 
   const sql = `
   SELECT
