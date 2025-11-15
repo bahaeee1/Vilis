@@ -314,7 +314,8 @@ setChauffeur('no');
     <option value="on_demand">On demand</option>
   </select>
 </div>
-          <div className="form-row">
+          {/* Livraison */}
+<div className="form-row">
   <label>Livraison</label>
   <select
     className="input"
@@ -346,14 +347,15 @@ setChauffeur('no');
             </div>
           </div>
           
-          <div className="form-row">
+          {/* Dépôt */}
+<div className="form-row">
   <label>Dépôt (MAD)</label>
   <input
     className="input"
     type="number"
-    min={0}
     value={deposit}
     onChange={(e) => setDeposit(e.target.value)}
+    placeholder="ex: 2000"
   />
 </div>
 
