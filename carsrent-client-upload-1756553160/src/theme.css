@@ -280,3 +280,85 @@ html, body, #root {
 main, .page, .container-root, .router-outlet {
   flex: 1 0 auto;
 }
+
+/* === Layout helpers for desktop & mobile === */
+
+/* Generic grid helpers used in Search filters */
+.grid {
+  display: grid;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gap-sm {
+  gap: 12px;
+}
+
+/* Cards grid used on Search page */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+/* Make the search result cards look good as tiles */
+.car-card {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0f1520;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.car-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* === Mobile tweaks === */
+@media (max-width: 768px) {
+  /* Give content some breathing room on phones */
+  .container {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* Cards: slightly tighter padding on small screens */
+  .card {
+    padding: 14px;
+  }
+
+  /* Filters: stack all inputs nicely */
+  .filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filters .grid,
+  .grid-3,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  /* Results: single column on phones */
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Navbar: more compact on mobile */
+  .topnav .wrap {
+    grid-template-columns: 1fr auto;
+    row-gap: 8px;
+  }
+
+  .brand {
+    font-size: 18px;
+  }
+}
