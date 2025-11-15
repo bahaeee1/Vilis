@@ -6,6 +6,8 @@ import { useI18n } from '../i18n';
 const CATEGORIES = ['Luxe','suv','Utilitaire','van','Economique'];
 const FUEL = ['diesel','petrol','hybrid','electric'];
 const THIS_YEAR = new Date().getFullYear();
+const [delivery, setDelivery] = useState("none");
+
 
 export default function AddCar() {
   const { t } = useI18n();
@@ -314,13 +316,18 @@ setChauffeur('no');
 </div>
           <div className="form-row">
   <label>Livraison</label>
-  <input
+  <select
     className="input"
-    placeholder="ex: Aéroport, Hôtel, Sur demande..."
     value={delivery}
     onChange={(e) => setDelivery(e.target.value)}
-  />
+  >
+    <option value="none">Pas de livraison</option>
+    <option value="airport">Aéroport</option>
+    <option value="custom">Personnalisée</option>
+  </select>
 </div>
+
+
 
 {/* Google Maps link (optional) */}
           <div className="form-row">
