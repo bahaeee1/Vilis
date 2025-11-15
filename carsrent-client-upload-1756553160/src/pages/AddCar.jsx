@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { addCar } from '../api';
 import { useI18n } from '../i18n';
 
-const CATEGORIES = ['sedan','suv','hatchback','pickup','van','convertible','coupe','wagon','crossover'];
+const CATEGORIES = ['Luxe','suv','Utilitaire','van','Economique'];
 const FUEL = ['diesel','petrol','hybrid','electric'];
 const THIS_YEAR = new Date().getFullYear();
 
@@ -382,7 +382,7 @@ setChauffeur('no');
     value={insurance}
     onChange={(e) => setInsurance(e.target.value)}
   >
-    <option value="incluse">Incluse</option>
+    <option value="extra">Extra</option>
     <option value="tous risques">Tous risques</option>
     <option value="de base">De base</option>
   </select>
