@@ -1,7 +1,7 @@
 // client/src/pages/Search.jsx
 import React, { useEffect, useState } from 'react';
 import { searchCars } from '../api';
-import { useI18n } from '../i18n';
+import { useI18n } from '../i18n.jsx';
 import { Link } from 'react-router-dom';
 
 // Cities to filter by (first option means "no location filter")
@@ -13,16 +13,19 @@ const CITIES = [
 ];
 
 // Categories (first option means "no category filter")
-const CATEGORIES = ['Any','Luxe','SUV','Économique','Utilitaire','van'];
+const CATEGORIES = [
+  'Any',
+  'sedan','suv','hatchback','pickup','van',
+  'convertible','coupe','wagon','crossover'
+];
 
 function InputWithSuffix({ value, onChange, placeholder, suffix = 'MAD' }) {
   return (
     <div className="input-suffix">
       <input
         className="input"
-        type="number"
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={onChange}
         placeholder={placeholder}
       />
       <span className="suffix">{suffix}</span>
@@ -30,175 +33,199 @@ function InputWithSuffix({ value, onChange, placeholder, suffix = 'MAD' }) {
   );
 }
 
+// format numbers like 35 000
+const fmtMAD = (n) =>
+  new Intl.NumberFormat('fr-MA').format(Math.round(Number(n) || 0));
+
 export default function Search() {
   const { t } = useI18n();
 
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
+
   // Filters
-  const [location, setLocation]   = useState('Anywhere');
-  const [minPrice, setMinPrice]   = useState('');
-  const [maxPrice, setMaxPrice]   = useState('');
-  const [category, setCategory]   = useState('Any');
-  const [chauffeur, setChauffeur] = useState('Any'); // Any | Included | Not included
-  const [delivery, setDelivery] = useState('');
+  const [location, setLocation] = useState('Anywhere');
+  const [category, setCategory] = useState('Any');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [chauffeur, setChauffeur] = useState('any');
+  const [delivery, setDelivery] = useState('any'); // 👈 NEW livraison filter
 
-
-
-  // Results
-  const [cars, setCars]           = useState([]);
-  const [loading, setLoading]     = useState(false);
-
-  async function run() {
+  const load = async () => {
+    setErr('');
     setLoading(true);
     try {
-      // Build params ONLY with set filters (avoid category=null, etc.)
-      const params = {};
-      if (location && location !== 'Anywhere') params.location = location;
-      if (minPrice !== '') params.minPrice = Number(minPrice);
-      if (maxPrice !== '') params.maxPrice = Number(maxPrice);
-      if (category && category !== 'Any') params.category = category;
-      if (['yes','no','on_demand'].includes(chauffeur))
-  params.chauffeur = chauffeur;
-
-
-      const res = await searchCars(params);
-      setCars(res || []); // server returns array
+      const params = {
+        location: location === 'Anywhere' ? '' : location,
+        category: category === 'Any' ? '' : category,
+        minPrice: minPrice || '',
+        maxPrice: maxPrice || '',
+        chauffeur: chauffeur === 'any' ? '' : chauffeur,
+        // 👇 NEW: send delivery to backend
+        delivery: delivery === 'any' ? '' : delivery,
+      };
+      const data = await searchCars(params);
+      setCars(data || []);
     } catch (e) {
-      console.error('Search error:', e);
-      setCars([]);
+      console.error(e);
+      setErr(e?.error || e?.message || 'Error while loading cars');
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  useEffect(() => { run(); }, []); // initial load
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    load();
+  };
 
   return (
-    <div className="container" style={{ paddingBottom: '120px' }}>
+    <div className="container">
+      {/* Filters card */}
       <div className="card">
-        <h1 className="h2">{t('search.title')}</h1>
+        <h1 className="h2">{t('nav.search') || 'Search cars'}</h1>
+        <form className="filters" onSubmit={onSubmit}>
+          {/* Row 1: City + Category */}
+          <div className="grid grid-3 gap-sm">
+            <div>
+              <label className="label">City</label>
+              <select
+                className="input"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              >
+                {CITIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
 
-        {/* Filters */}
-        <div className="grid grid-5 gap-sm mt-md">
-          <div>
-            <label className="label">{t('filter.location')}</label>
-            <select className="input" value={location} onChange={e => setLocation(e.target.value)}>
-              {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+            <div>
+              <label className="label">Category</label>
+              <select
+                className="input"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="label">Chauffeur</label>
+              <select
+                className="input"
+                value={chauffeur}
+                onChange={(e) => setChauffeur(e.target.value)}
+              >
+                <option value="any">Any</option>
+                <option value="yes">Avec chauffeur</option>
+                <option value="no">Sans chauffeur</option>
+                <option value="on_demand">Sur demande</option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label className="label">{t('filter.min_per_day')}</label>
-            <InputWithSuffix
-              value={minPrice}
-              onChange={setMinPrice}
-              placeholder="0"
-              suffix="MAD"
-            />
+          {/* Row 2: Price + Livraison */}
+          <div className="grid grid-3 gap-sm" style={{ marginTop: 12 }}>
+            <div>
+              <label className="label">Min price / day</label>
+              <InputWithSuffix
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                placeholder="ex: 200"
+              />
+            </div>
+
+            <div>
+              <label className="label">Max price / day</label>
+              <InputWithSuffix
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                placeholder="ex: 1500"
+              />
+            </div>
+
+            <div>
+              <label className="label">Livraison</label>
+              <select
+                className="input"
+                value={delivery}
+                onChange={(e) => setDelivery(e.target.value)}
+              >
+                <option value="any">Any</option>
+                <option value="airport">Aéroport</option>
+                <option value="none">Pas de livraison</option>
+                <option value="custom">Personnalisée</option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label className="label">{t('filter.max_per_day')}</label>
-            <InputWithSuffix
-              value={maxPrice}
-              onChange={setMaxPrice}
-              placeholder="1000"
-              suffix="MAD"
-            />
+          <div style={{ marginTop: 12, textAlign: 'right' }}>
+            <button type="submit" className="btn btn-primary">
+              {t('ui.search') || 'Search'}
+            </button>
           </div>
+        </form>
 
-          <div>
-            <label className="label">{t('filter.category')}</label>
-            <select className="input" value={category} onChange={e => setCategory(e.target.value)}>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-        </div>
-
-        <div>
-  <label className="label">Livraison</label>
-  <select
-    className="input"
-    value={delivery}
-    onChange={(e) => setDelivery(e.target.value)}
-  >
-    <option value="">Any</option>
-    <option value="airport">Aéroport</option>
-    <option value="none">Pas de livraison</option>
-    <option value="custom">Personnalisée</option>
-  </select>
-</div>
-
-
-        <div>
-  <label className="label">Chauffeur</label>
- <select value={chauffeur} onChange={e => setChauffeur(e.target.value)}>
-  <option value="">Any</option>
-  <option value="yes">Included</option>
-  <option value="no">Not included</option>
-  <option value="on_demand">On demand</option>
-</select>
-
-</div>
-
-
-        <button className="btn btn-primary mt-md" onClick={run}>
-          {t('btn.search')}
-        </button>
+        {err && <div className="error" style={{ marginTop: 10 }}>{String(err)}</div>}
       </div>
 
       {/* Results */}
-     <div
-  className="car-grid mt-lg"
-  style={{
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '1.5rem',
-    justifyItems: 'center',     // center items in each grid cell
-    alignItems: 'start',        // prevent row stretching
-    marginBottom: '160px',      // guaranteed space above footer
-  }}
->
+      {loading && (
+        <div className="card" style={{ marginTop: 16 }}>
+          Loading…
+        </div>
+      )}
 
+      {!loading && cars.length === 0 && !err && (
+        <div className="card" style={{ marginTop: 16 }}>
+          No cars found with these filters.
+        </div>
+      )}
 
-
-        {loading && <div className="card">Loading…</div>}
-        {!loading && cars.length === 0 && <div className="card">{t('misc.no_cars')}</div>}
-
-        {!loading && cars.map(c => (
-          <div className="car" key={c.id}>
-            {c.image_url && <img src={c.image_url} alt={c.title} />}
-
-            <div className="body">
-              <h3 className="h3">{c.title}</h3>
-              <div className="muted">
-                {c.daily_price} MAD {t('car.price_per_day')}
+      <div className="cards-grid" style={{ marginTop: 16 }}>
+        {cars.map((car) => (
+          <Link
+            key={car.id}
+            to={`/car/${car.id}`}
+            className="card car-card"
+            style={{ textDecoration: 'none' }}
+          >
+            {car.image_url && (
+              <img
+                src={car.image_url}
+                alt={car.title}
+                style={{
+                  width: '100%',
+                  aspectRatio: '16/9',
+                  objectFit: 'cover',
+                  borderRadius: '12px',
+                  marginBottom: '8px',
+                }}
+                loading="lazy"
+              />
+            )}
+            <div>
+              <h2 className="h4" style={{ margin: '4px 0' }}>
+                {car.title}
+              </h2>
+              <div className="muted" style={{ marginBottom: 4 }}>
+                {fmtMAD(car.daily_price)} MAD / jour · {car.category}
               </div>
-             <div className="muted mt-xxs">
-  {c.agency_name ? <strong>{c.agency_name}</strong> : (c.location || '—')}
-  {c.category ? ` — ${c.category}` : ''}
-  {c.transmission ? ` — ${c.transmission}` : ''}
-  {c.fuel_type ? ` — ${c.fuel_type}` : ''}
-</div>
-
-              {(c.agency_cities || c.agency_location || c.location) && (
-            <div className="muted" style={{ marginTop: 4 }}>
-    {/* prefer the multi-city field if present, else fall back */}
-    {(c.agency_cities && c.agency_cities
-      .split(',')
-      .map(s => s.trim())
-      .filter(Boolean)
-      .join(', '))
-     || c.agency_location
-     || c.location}
-  </div>
-)}
-
-
-              <Link className="btn btn-ghost mt-sm" to={`/car/${c.id}`}>
-                {t('btn.view')}
-              </Link>
+              <div className="muted">
+                {car.agency_location || '—'} · {car.fuel_type}, {car.transmission}
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
