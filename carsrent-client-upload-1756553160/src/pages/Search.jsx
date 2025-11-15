@@ -13,7 +13,7 @@ const CITIES = [
 ];
 
 // Categories (first option means "no category filter")
-const CATEGORIES = ['Any','sedan','suv','hatchback','pickup','van','convertible','coupe','wagon','crossover'];
+const CATEGORIES = ['Any','Luxe','SUV','Économique','Utilitaire','van'];
 
 function InputWithSuffix({ value, onChange, placeholder, suffix = 'MAD' }) {
   return (
@@ -39,6 +39,8 @@ export default function Search() {
   const [maxPrice, setMaxPrice]   = useState('');
   const [category, setCategory]   = useState('Any');
   const [chauffeur, setChauffeur] = useState('Any'); // Any | Included | Not included
+  const [delivery, setDelivery] = useState('');
+
 
 
   // Results
@@ -111,6 +113,21 @@ export default function Search() {
             </select>
           </div>
         </div>
+
+        <div>
+  <label className="label">Livraison</label>
+  <select
+    className="input"
+    value={delivery}
+    onChange={(e) => setDelivery(e.target.value)}
+  >
+    <option value="">Any</option>
+    <option value="airport">Aéroport</option>
+    <option value="none">Pas de livraison</option>
+    <option value="custom">Personnalisée</option>
+  </select>
+</div>
+
 
         <div>
   <label className="label">Chauffeur</label>
