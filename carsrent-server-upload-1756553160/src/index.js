@@ -449,14 +449,16 @@ app.get('/api/cars/:id', (req, res) => {
       c.id, c.agency_id, c.title, c.daily_price, c.image_url, c.year,
       c.transmission, c.seats, c.doors, c.fuel_type, c.chauffeur_option,
       c.category, c.mileage_limit, c.insurance, c.min_age,
-      c.delivery, c.deposit, c.price_tiers, c.options, c.maps_url, c.created_at,
-      -- license_plate NOT exposed here
+      c.delivery, c.deposit, c.price_tiers, c.options, c.maps_url,
+      c.license_plate,             -- 👈 add this
+      c.created_at,
       a.name AS agency_name, a.phone AS agency_phone,
       a.email AS agency_email, a.location AS agency_location
     FROM cars c
     JOIN agencies a ON a.id = c.agency_id
     WHERE c.id = ?
   `).get(req.params.id);
+
 
   if (!car) return res.status(404).json({ error: 'Not found' });
 
@@ -601,6 +603,10 @@ app.patch('/api/cars/:id', requireAuth, (req, res) => {
   if (b.mileage_limit != null) { updates.push('mileage_limit = @mileage_limit'); params.mileage_limit = String(b.mileage_limit); }
   if (b.insurance != null)     { updates.push('insurance = @insurance');       params.insurance = String(b.insurance); }
   if (b.delivery != null)      { updates.push('delivery = @delivery');         params.delivery = String(b.delivery || '').trim() || null; }
+if (b.license_plate != null) {
+  updates.push('license_plate = @license_plate');
+  params.license_plate = String(b.license_plate).trim();
+}
 
   // Numbers
   if (b.daily_price != null) {
@@ -739,6 +745,7 @@ app.patch('/api/cars/:id', requireAuth, (req, res) => {
   );
   setIfPresent('insurance', (v) => String(v));
   setIfPresent('min_age', (v) => Number(v));
+  setIfPresent('license_plate', (v) => String(v).trim());
 
   // chauffeur_option strict enum
   if (b.chauffeur_option !== undefined) {
