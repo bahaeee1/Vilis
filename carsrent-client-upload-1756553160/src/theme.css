@@ -478,4 +478,16 @@ footer,
   .brand{
     font-size: 18px;
   }
+
+  .spec-card{
+    width: calc(50% - 8px) !important;  /* 2 columns */
+    min-height: 70px !important;        /* shorter than 120px */
+    padding: 10px 12px !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+  }
+
 }
