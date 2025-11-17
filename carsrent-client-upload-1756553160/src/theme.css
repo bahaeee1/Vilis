@@ -15,76 +15,245 @@
   --wrap: 1100px;
 }
 
-/* base */
+/* ========== BASE ========== */
 *{ box-sizing:border-box }
-html,body,#root{ height:100% }
+
+html,body,#root{
+  height:100%;
+  margin:0;
+  padding:0;
+}
+
 body{
   margin:0;
-  background: radial-gradient(1200px 600px at 70% -10%, rgba(143,97,255,.08), transparent) ,
-             radial-gradient(900px 600px at 0% 60%, rgba(111,125,255,.07), transparent) ,
-             var(--bg);
+  background:
+    radial-gradient(1200px 600px at 70% -10%, rgba(143,97,255,.08), transparent),
+    radial-gradient(900px 600px at 0% 60%, rgba(111,125,255,.07), transparent),
+    var(--bg);
   color: var(--text);
   font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
+  overflow-x:hidden;
 }
-a{ color: var(--text); text-decoration: none }
-img{ max-width: 100%; display: block }
 
-/* layout */
-main{ max-width: var(--wrap); margin: 26px auto 40px; padding: 0 20px; }
-.site-footer{ max-width: var(--wrap); margin: 40px auto 60px; padding: 0 20px; color: var(--muted); display:flex; gap:14px }
+a{
+  color: var(--text);
+  text-decoration: none;
+}
+
+img{
+  max-width: 100%;
+  display: block;
+}
+
+/* ========== LAYOUT ========== */
+main{
+  max-width: var(--wrap);
+  margin: 26px auto 40px;
+  padding: 0 20px;
+}
+
+.container{
+  max-width: var(--wrap);
+  margin: 0 auto;
+}
+
+.site-footer{
+  max-width: var(--wrap);
+  margin: 40px auto 60px;
+  padding: 0 20px;
+  color: var(--muted);
+  display:flex;
+  gap:14px;
+}
 .site-footer a{ color: var(--muted) }
 
-/* header */
-.topnav{ position: sticky; top:0; z-index: 50; backdrop-filter: blur(8px);
+/* Root flex layout so footer sits at bottom */
+#root{
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main, .page, .container-root, .router-outlet{
+  flex: 1 0 auto;
+}
+
+/* ========== HEADER ========== */
+.topnav{
+  position: sticky;
+  top:0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
   background: linear-gradient(180deg, rgba(12,16,23,.9), rgba(12,16,23,.75));
   border-bottom: 1px solid rgba(255,255,255,.06);
 }
-.topnav .wrap{ max-width: var(--wrap); margin: 0 auto; padding: 14px 20px;
-  display: grid; grid-template-columns: 140px 1fr 100px; gap: 12px; align-items: center; }
-.brand{ font-weight: 800; font-size: 22px; letter-spacing: .5px; color: #cfd6ff; }
-.nav-tabs{ display:flex; align-items:center; gap:6px; overflow-x:auto; scrollbar-width:none }
+
+.topnav .wrap{
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: grid;
+  grid-template-columns: 140px 1fr 100px;
+  gap: 12px;
+  align-items: center;
+}
+
+.brand{
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: .5px;
+  color: #cfd6ff;
+}
+
+.nav-tabs{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
 .nav-tabs::-webkit-scrollbar{ display:none }
-.tab{ display:inline-flex; align-items:center; height:36px; padding:0 12px; border-radius:999px; background:transparent;
-  color:var(--text); border:1px solid transparent; transition: background .15s ease, border-color .15s ease, color .15s ease; cursor:pointer; font-weight:600; opacity:.92 }
-.tab:hover{ background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.08) }
-.tab.active{ background: linear-gradient(135deg, rgba(111,125,255,.18), rgba(139,92,246,.18));
-  border-color: var(--ring); box-shadow: 0 0 0 3px rgba(111,125,255,.12) inset; }
+
+.tab{
+  display:inline-flex;
+  align-items:center;
+  height:36px;
+  padding:0 12px;
+  border-radius:999px;
+  background:transparent;
+  color:var(--text);
+  border:1px solid transparent;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+  cursor:pointer;
+  font-weight:600;
+  opacity:.92;
+}
+.tab:hover{
+  background: rgba(255,255,255,.05);
+  border-color: rgba(255,255,255,.08);
+}
+.tab.active{
+  background: linear-gradient(135deg, rgba(111,125,255,.18), rgba(139,92,246,.18));
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px rgba(111,125,255,.12) inset;
+}
 .tab.ghost{ color: var(--muted); border-color: rgba(255,255,255,.06) }
 .tab.ghost:hover{ color:#fff; border-color: rgba(255,255,255,.12) }
-.nav-right{ display:flex; justify-content:flex-end; align-items:center }
-.lang{ height:34px; border-radius:10px; background: var(--panel-2); color:var(--text);
-  border:1px solid rgba(255,255,255,.08); padding:0 10px; outline:none }
+
+.nav-right{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+}
+
+.lang{
+  height:34px;
+  border-radius:10px;
+  background: var(--panel-2);
+  color:var(--text);
+  border:1px solid rgba(255,255,255,.08);
+  padding:0 10px;
+  outline:none;
+}
 .lang.small{ width:82px }
 
-/* cards / inputs */
-.card{ background: linear-gradient(180deg, var(--panel), var(--panel-2)); border:1px solid rgba(255,255,255,.06);
-  box-shadow: var(--shadow); border-radius: var(--radius); padding: 18px; margin-bottom: 18px }
+/* ========== CARDS / INPUTS ========== */
+.card{
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
 h1,h2,h3{ margin: 8px 0 10px }
 .muted{ color: var(--muted) }
-.btn{ background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff; border:none; padding:10px 14px;
-  border-radius:12px; cursor:pointer; font-weight:700; box-shadow: 0 6px 18px rgba(111,125,255,.25) }
-.btn.secondary{ background: rgba(255,255,255,.06); color:#fff; border:1px solid rgba(255,255,255,.12) }
-.btn:disabled{ opacity:.6; cursor:not-allowed }
-label{ display:block; margin: 6px 0 6px; color: var(--muted) }
-input, select, textarea{
-  width: 100%; height: 40px; padding: 10px 12px; border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.08); background: #0f1520; color: var(--text); outline: none;
+
+.btn{
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color:#fff;
+  border:none;
+  padding:10px 14px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:700;
+  box-shadow: 0 6px 18px rgba(111,125,255,.25);
 }
-textarea{ height:100px; resize: vertical }
-.row{ display:flex; flex-wrap:wrap; gap:12px }
+.btn.secondary{
+  background: rgba(255,255,255,.06);
+  color:#fff;
+  border:1px solid rgba(255,255,255,.12);
+}
+.btn:disabled{ opacity:.6; cursor:not-allowed }
+
+label{
+  display:block;
+  margin: 6px 0 6px;
+  color: var(--muted);
+}
+
+input, select, textarea{
+  width: 100%;
+  height: 40px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #0f1520;
+  color: var(--text);
+  outline: none;
+}
+
+textarea{
+  height:100px;
+  resize: vertical;
+}
+
+.row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+}
 .col-12{ flex: 0 0 100% }
 .col-6{ flex: 0 0 calc(50% - 6px) }
 
-.error{ color:#ff9aa2; background: rgba(255,154,162,.08); border:1px solid rgba(255,154,162,.25); padding:10px 12px; border-radius:10px }
+.error{
+  color:#ff9aa2;
+  background: rgba(255,154,162,.08);
+  border:1px solid rgba(255,154,162,.25);
+  padding:10px 12px;
+  border-radius:10px;
+}
 
-/* responsive card grid (fix skinny cards) */
+/* ========== CAR LIST GRID ========== */
+/* classic BookCars grid */
 .cards{
   display:grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
 }
 
-/* Car result card — consistent 16:9 images */
+/* more generic grid used in Search (optional) */
+.cards-grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+/* result card wrapper */
+.car-card{
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0f1520;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.car-card:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* Car card content */
 .car{
   background:#0f1520;
   border:1px solid rgba(255,255,255,.08);
@@ -97,76 +266,84 @@ textarea{ height:100px; resize: vertical }
 .car img{
   display:block;
   width:100%;
-  aspect-ratio: 16 / 9;       /* keeps a nice widescreen shape */
-  object-fit: cover;           /* fills the box, crops edges */
-  object-position: center 55%; /* bias crop slightly lower so the car is centered */
-  background:#0d1220;          /* visible if PNG has transparency or letterboxing */
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: center 55%;
+  background:#0d1220;
 }
 
-/* If we prefer NO crop for some images (e.g., PNGs with transparent edges) */
+/* show full PNG without cropping if you use car--contain */
 .car--contain img{
-  object-fit: contain;         /* show the whole car without cropping */
-  padding: 8px;                /* small padding so it doesn’t touch edges */
-  background: #0d1220;         /* backdrop behind transparent areas */
+  object-fit: contain;
+  padding: 8px;
+  background: #0d1220;
 }
 
-.car .body{ padding:12px; }
-
-
-@media (max-width: 860px){
-  .topnav .wrap{ grid-template-columns: 100px 1fr 70px }
-  .brand{ font-size: 18px }
-  main{ margin-top: 18px }
-  .col-6{ flex: 0 0 100% }
+.car .body{
+  padding:12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-/* Car page helpers to avoid overlap */
-.contact-row {
+/* ========== CAR PAGE HELPERS ========== */
+.contact-row{
   display: flex;
   align-items: center;
   gap: .5rem;
   flex-wrap: wrap;
 }
 
-/* Make sure the metadata lines have a little space */
+/* spacing for metadata lines */
 .car-meta p,
-.car-detail p {
+.car-detail p{
   margin: 0 0 8px 0;
 }
 
-/* Push the buttons down and prevent overlap */
-.car-actions {
+/* Buttons row under contact lines */
+.car-actions{
   display: flex;
-  gap: 12px;
   flex-wrap: wrap;
-  margin-top: 14px;   /* <- the nudge */
+  gap: 12px;
+  margin-top: 16px;
+  clear: both;
+  width: 100%;
+  position: static;
 }
 
-
-.wrap-line {
+.wrap-line{
   display: flex;
   gap: .5rem;
   flex-wrap: wrap;
 }
+.wrap-line .dot{ opacity: .6; }
 
-.wrap-line .dot { opacity: .6; }
-
-.btn-sm {
+.btn-sm{
   font-size: .85rem;
   padding: .35rem .6rem;
   border-radius: 10px;
 }
 
-.mt-xxs { margin-top: .25rem; }
+.mt-xxs{ margin-top: .25rem; }
 
-.spec-list { margin: .25rem 0 0; padding-left: 1.1rem; }
-.spec-list li { margin: .15rem 0; }
+.spec-list{
+  margin: .25rem 0 0;
+  padding-left: 1.1rem;
+}
+.spec-list li{ margin: .15rem 0; }
 
-.car-hero { width: 100%; height: auto; border-radius: 12px; display: block; }
+.car-hero{
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  display: block;
+}
 
-/* suffix inside numeric inputs (for currency) */
-.input-suffix { position: relative; }
-.input-suffix .suffix {
+/* suffix inside numeric inputs (MAD, etc.) */
+.input-suffix{
+  position: relative;
+}
+.input-suffix .suffix{
   position: absolute;
   right: 12px;
   top: 50%;
@@ -175,85 +352,57 @@ textarea{ height:100px; resize: vertical }
   font-size: 0.9rem;
   pointer-events: none;
 }
-.input-suffix > .input { padding-right: 56px; }
+.input-suffix > .input{
+  padding-right: 56px;
+}
 
-/* --- Fix overlap under Tel/Agency on car page --- */
-
-.contact-line {
+/* separate contact line below car card */
+.contact-line{
   display: block;
   margin: 0 0 10px 0;
 }
 
-/* Force buttons to a new row and add spacing */
-.car-actions {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  gap: 12px !important;
-
-  margin-top: 16px !important;
-  clear: both !important;      /* breaks out of any floats */
-  width: 100% !important;      /* occupies full row */
-  position: static !important; /* cancels any offsetting */
-}
-
-/* Make sure buttons themselves don’t shift position */
-.car-actions .btn {
-  position: static !important;
-  white-space: nowrap;
-}
-
-/* Ensure body stacks items vertically with spacing */
-.car .body {
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;                 /* space between rows */
-}
-
-/* Group for price + city/category lines */
-.car .body .meta {
+/* group for price + city/category lines */
+.car .body .meta{
   display: grid;
   gap: 4px;
   line-height: 1.35;
 }
 
-/* Dedicated row for the button */
-.car .body .actions {
+/* dedicated row for actions */
+.car .body .actions{
   margin-top: 4px;
 }
-
-/* Make sure buttons aren’t absolutely positioned by old rules */
-.car .body .actions .btn {
+.car .body .actions .btn{
   position: static;
   align-self: flex-start;
 }
 
-
-.divider {
+/* Divider + footer contact block */
+.divider{
   border: 0;
   border-top: 1px solid rgba(255,255,255,.08);
   margin: 18px 0;
 }
 
-.footer-contact {
+.footer-contact{
   display: grid;
   gap: 6px;
   color: var(--text);
 }
-.footer-contact .link { color: #cfd6ff; text-decoration: underline; }
+.footer-contact .link{
+  color: #cfd6ff;
+  text-decoration: underline;
+}
 
-
-/* === Footer: subtle purple, FULL WIDTH (full-bleed) === */
-footer, .footer {
+/* ========== FOOTER ========== */
+/* full-width subtle purple footer at bottom */
+footer,
+.footer{
   position: relative;
-  display: block;
-
-/* === Footer: subtle purple, full width, not fixed === */
-footer, .footer {
-  position: relative;           /* NOT fixed */
   width: 100%;
   max-width: none;
-  margin-top: auto;             /* flex pushes it to the bottom */
+  margin-top: auto;
   background: linear-gradient(180deg, #141024 0%, #2f2755 100%);
   color: #ddd;
   padding: 1rem 2rem;
@@ -261,104 +410,72 @@ footer, .footer {
   box-shadow: 0 -1px 4px rgba(0,0,0,0.4) inset;
 }
 
-/* === App layout: footer at the bottom without overlay === */
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background: #0b0f14;         /* solid dark page */
-  overflow-x: hidden;
-}
-
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Whatever contains your pages (main/outlet) should grow to push footer down */
-main, .page, .container-root, .router-outlet {
-  flex: 1 0 auto;
-}
-
-/* === Layout helpers for desktop & mobile === */
-
-/* Generic grid helpers used in Search filters */
-.grid {
+/* ========== GENERIC GRID HELPERS (Search filters) ========== */
+.grid{
   display: grid;
 }
-
-.grid-2 {
+.grid-2{
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-
-.grid-3 {
+.grid-3{
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-
-.gap-sm {
+.gap-sm{
   gap: 12px;
 }
 
-/* Cards grid used on Search page */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+/* ========== RESPONSIVE ========== */
+@media (max-width: 860px){
+  .topnav .wrap{
+    grid-template-columns: 100px 1fr 70px;
+  }
+  .brand{ font-size: 18px }
+  main{ margin-top: 18px }
+  .col-6{ flex: 0 0 100% }
 }
 
-/* Make the search result cards look good as tiles */
-.car-card {
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: #0f1520;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
+@media (max-width: 768px){
+  /* narrower padding on small screens */
+  main{
+    margin: 18px auto 32px;
+    padding: 0 14px;
+  }
 
-.car-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-}
-
-/* === Mobile tweaks === */
-@media (max-width: 768px) {
-  /* Give content some breathing room on phones */
-  .container {
+  .container{
     padding-left: 12px;
     padding-right: 12px;
   }
 
-  /* Cards: slightly tighter padding on small screens */
-  .card {
+  /* cards more compact */
+  .card{
     padding: 14px;
   }
 
-  /* Filters: stack all inputs nicely */
-  .filters {
+  /* filters: stack nicely */
+  .filters{
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
 
   .filters .grid,
-  .grid-3,
-  .grid-2 {
+  .grid-2,
+  .grid-3{
     grid-template-columns: 1fr;
   }
 
-  /* Results: single column on phones */
-  .cards-grid {
+  /* results: single column */
+  .cards-grid{
     grid-template-columns: 1fr;
   }
 
-  /* Navbar: more compact on mobile */
-  .topnav .wrap {
+  /* navbar: compact */
+  .topnav .wrap{
     grid-template-columns: 1fr auto;
     row-gap: 8px;
   }
 
-  .brand {
+  .brand{
     font-size: 18px;
   }
 }
