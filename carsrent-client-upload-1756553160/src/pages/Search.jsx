@@ -171,8 +171,9 @@ export default function Search() {
 
           <div style={{ marginTop: 12, textAlign: 'right' }}>
             <button type="submit" className="btn btn-primary">
-              {t('ui.search') || 'Search'}
-            </button>
+  {t('btn.search')}
+</button>
+
           </div>
         </form>
 
