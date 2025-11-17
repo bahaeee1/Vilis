@@ -5,37 +5,37 @@ import { getCar } from '../api';
 
 // ---- Reusable styles ----
 // ---- Reusable styles ----
+// ---- Reusable styles ----
 const infoBoxStyle = {
   width: "100%",
-  maxWidth: "220px",             // looks good on desktop
-  height: "120px",
+  maxWidth: "210px",                      // smaller on desktop too
+  minHeight: "72px",                      // much shorter
   borderRadius: "16px",
   background: "rgba(255, 255, 255, 0.08)",
   backdropFilter: "blur(8px)",
   border: "1px solid rgba(255, 255, 255, 0.2)",
   display: "flex",
   flexDirection: "column",
-  alignItems: "center",
+  alignItems: "flex-start",               // text starts at left
   justifyContent: "center",
-  padding: "12px",
-  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+  padding: "10px 12px",
+  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.18)",
   boxSizing: "border-box",
 };
 
 
+
 const labelStyle = {
-  fontSize: "16px",
-  fontWeight: "700",
-  marginBottom: "6px",
-  color: "#ffffff",
+  fontSize: "13px",
+  color: "#9ca3af",
+  marginBottom: "2px",
 };
 
 const valueStyle = {
-  fontSize: "20px",
-  fontWeight: "800",
-  color: "#60a5fa",
-  textTransform: "capitalize",
+  fontSize: "16px",
+  fontWeight: "600",
 };
+
 
 function pickChauffeurValue(car) {
   const candidates = [
@@ -255,7 +255,7 @@ export default function Car() {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '20px',
-    marginTop: '24px',
+    marginTop: '16px',
     alignItems: 'stretch',
     justifyContent: 'center',   // ✅ centers horizontally
     width: '100%',
