@@ -6,22 +6,23 @@ import { getCar } from '../api';
 // ---- Reusable styles ----
 // ---- Reusable styles ----
 // ---- Reusable styles ----
+// ---- Reusable styles ----
 const infoBoxStyle = {
-  width: "100%",
-  maxWidth: "210px",                      // smaller on desktop too
-  minHeight: "72px",                      // much shorter
+  width: "200px",
+  height: "120px",
   borderRadius: "16px",
   background: "rgba(255, 255, 255, 0.08)",
   backdropFilter: "blur(8px)",
   border: "1px solid rgba(255, 255, 255, 0.2)",
   display: "flex",
   flexDirection: "column",
-  alignItems: "flex-start",               // text starts at left
+  alignItems: "center",
   justifyContent: "center",
-  padding: "10px 12px",
-  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.18)",
+  padding: "12px",
+  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
   boxSizing: "border-box",
 };
+
 
 
 
@@ -252,93 +253,94 @@ export default function Car() {
 {/* INFO BOXES */}
 <div
   style={{
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '20px',
-    marginTop: '16px',
-    alignItems: 'stretch',
-    justifyContent: 'center',   // ✅ centers horizontally
-    width: '100%',
-    textAlign: 'center',
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "20px",
+    marginTop: "16px",
+    alignItems: "stretch",
+    justifyContent: "center",
+    width: "100%",
   }}
 >
   {/* CATEGORY */}
-{car?.category && (
-  <div className="spec-card" style={infoBoxStyle}>
-    <div style={labelStyle}>Category:</div>
-    <div style={valueStyle}>{car.category}</div>
-  </div>
-)}
+  {car?.category && (
+    <div className="spec-card" style={infoBoxStyle}>
+      <div style={labelStyle}>Category:</div>
+      <div style={valueStyle}>{car.category}</div>
+    </div>
+  )}
 
-/* TRANSMISSION */
-{car?.transmission && (
-  <div className="spec-card" style={infoBoxStyle}>
-    <div style={labelStyle}>Transmission:</div>
-    <div style={valueStyle}>{car.transmission}</div>
-  </div>
-)}
+  {/* TRANSMISSION */}
+  {car?.transmission && (
+    <div className="spec-card" style={infoBoxStyle}>
+      <div style={labelStyle}>Transmission:</div>
+      <div style={valueStyle}>{car.transmission}</div>
+    </div>
+  )}
 
-/* KILOMÉTRAGE */
-{car?.mileage_limit && (
-  <div className="spec-card" style={infoBoxStyle}>
-    <div style={labelStyle}>Kilométrage:</div>
-    <div style={valueStyle}>{car.mileage_limit}</div>
-  </div>
-)}
+  {/* KILOMÉTRAGE */}
+  {car?.mileage_limit && (
+    <div className="spec-card" style={infoBoxStyle}>
+      <div style={labelStyle}>Kilométrage:</div>
+      <div style={valueStyle}>{car.mileage_limit}</div>
+    </div>
+  )}
 
-/* ASSURANCE */
-{car?.insurance && (
-  <div className="spec-card" style={infoBoxStyle}>
-    <div style={labelStyle}>Assurance:</div>
-    <div style={{ ...valueStyle, textTransform: 'none' }}>{car.insurance}</div>
-  </div>
-)}
+  {/* ASSURANCE */}
+  {car?.insurance && (
+    <div className="spec-card" style={infoBoxStyle}>
+      <div style={labelStyle}>Assurance:</div>
+      <div style={{ ...valueStyle, textTransform: "none" }}>{car.insurance}</div>
+    </div>
+  )}
 
-/* ÂGE MINIMUM */
-{car?.min_age != null && (
-  <div className="spec-card" style={infoBoxStyle}>
-    <div style={labelStyle}>Âge minimum:</div>
-    <div style={valueStyle}>{car.min_age} ans</div>
-  </div>
-)}
+  {/* ÂGE MINIMUM */}
+  {car?.min_age != null && (
+    <div className="spec-card" style={infoBoxStyle}>
+      <div style={labelStyle}>Âge minimum:</div>
+      <div style={valueStyle}>{car.min_age} ans</div>
+    </div>
+  )}
 
-/* CARBURANT */
-{car?.fuel_type && (
-  <div className="spec-card" style={infoBoxStyle}>
-    <div style={labelStyle}>Carburant:</div>
-    <div style={valueStyle}>{car.fuel_type}</div>
-  </div>
-)}
+  {/* CARBURANT */}
+  {car?.fuel_type && (
+    <div className="spec-card" style={infoBoxStyle}>
+      <div style={labelStyle}>Carburant:</div>
+      <div style={valueStyle}>{car.fuel_type}</div>
+    </div>
+  )}
 
-/* CHAUFFEUR */
-<div className="spec-card" style={infoBoxStyle}>
-  <div style={labelStyle}>Chauffeur:</div>
-  <div style={valueStyle}>{formatChauffeurLabel(pickChauffeurValue(car))}</div>
-</div>
-
-/* LIVRAISON */
-{car.delivery && (
+  {/* CHAUFFEUR */}
   <div className="spec-card" style={infoBoxStyle}>
-    <div style={labelStyle}>Livraison:</div>
+    <div style={labelStyle}>Chauffeur:</div>
     <div style={valueStyle}>
-      {car.delivery === "airport"
-        ? "Aéroport"
-        : car.delivery === "custom"
-        ? "Personnalisée"
-        : "Pas de livraison"}
+      {formatChauffeurLabel(pickChauffeurValue(car))}
     </div>
   </div>
-)}
 
-/* DÉPÔT DE GARANTIE */
-{car?.deposit != null && (
-  <div className="spec-card" style={infoBoxStyle}>
-    <div style={labelStyle}>Dépôt:</div>
-    <div style={valueStyle}>{fmtMAD(car.deposit)} MAD</div>
-  </div>
-)}
+  {/* LIVRAISON */}
+  {car.delivery && (
+    <div className="spec-card" style={infoBoxStyle}>
+      <div style={labelStyle}>Livraison:</div>
+      <div style={valueStyle}>
+        {car.delivery === "airport"
+          ? "Aéroport"
+          : car.delivery === "custom"
+          ? "Personnalisée"
+          : "Pas de livraison"}
+      </div>
+    </div>
+  )}
 
+  {/* DÉPÔT DE GARANTIE */}
+  {car?.deposit != null && (
+    <div className="spec-card" style={infoBoxStyle}>
+      <div style={labelStyle}>Dépôt:</div>
+      <div style={valueStyle}>{fmtMAD(car.deposit)} MAD</div>
+    </div>
+  )}
 </div>
+
 
 
 
