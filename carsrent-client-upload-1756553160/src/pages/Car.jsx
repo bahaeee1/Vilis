@@ -168,6 +168,23 @@ export default function Car() {
 
   const options = useMemo(() => coerceOptions(car?.options), [car]);
 
+    useEffect(() => {
+    if (!car) return;
+
+    const city = car.agency_location || "Maroc";
+    document.title = `${car.title} – Location voiture ${city} | Vilis`;
+
+    // optional: update meta description too
+    const desc = document.querySelector('meta[name="description"]');
+    if (desc) {
+      desc.setAttribute(
+        "content",
+        `Réservez ${car.title} auprès de ${car.agency_name} à ${city} via Vilis. Kilométrage: ${car.mileage_limit || "—"}, dépôt: ${car.deposit ? fmtMAD(car.deposit) + " MAD" : "aucun"}.`
+      );
+    }
+  }, [car]);
+
+
 
   const waPhone = useMemo(() => {
     if (!car?.agency_phone) return '';
