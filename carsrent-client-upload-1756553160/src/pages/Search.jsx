@@ -15,8 +15,8 @@ const CITIES = [
 // Categories (first option means "no category filter")
 const CATEGORIES = [
   'Any',
-  'sedan','suv','hatchback','pickup','van',
-  'convertible','coupe','wagon','crossover'
+  'Luxe','suv','Utilitaire','van',
+  'Economique'
 ];
 
 function InputWithSuffix({ value, onChange, placeholder, suffix = 'MAD' }) {
