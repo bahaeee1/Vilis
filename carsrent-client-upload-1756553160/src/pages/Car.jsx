@@ -220,6 +220,22 @@ export default function Car() {
         price: data.price?.total ?? data.booking?.price_total,
         days: data.days,
       });
+            // Google Analytics event
+      try {
+        const estPrice = data.price?.total ?? data.booking?.price_total;
+        if (window.gtag) {
+          window.gtag("event", "booking_submitted", {
+            car_id: car.id,
+            car_title: car.title,
+            city: car.agency_location || "unknown",
+            days: data.days ?? null,
+            price_estimate: estPrice ?? null,
+          });
+        }
+      } catch (e) {
+        // fail silently – analytics should never break the app
+      }
+
       // keep the form values so the user can message via WhatsApp with same dates
     } catch (err) {
       setResult({ error: err?.error || err?.message || 'Erreur' });
